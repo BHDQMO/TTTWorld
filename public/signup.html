@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+
+  <title>Sign Up</title>
+  <style>
+    .container {
+      flex-grow: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Sign Up</h1>
+  <form id="signUpForm" name="signUpForm">
+    <div class="mb-3 form_group">
+      <label for="email" class="form-label">Email address</label>
+      <input type="email" class="form-control" name="email" aria-describedby="emailHelp">
+      <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+    <div class="mb-3 form_group">
+      <label for="password" class="form-label">Password</label>
+      <input type="password" class="form-control" name="password">
+    </div>
+    <div class="mb-3 form_group">
+      <label for="name" class="form-label">Name</label>
+      <input type="name" class="form-control" name="name" aria-describedby="emailHelp">
+    </div>
+    <div class="mb-3">
+      <div class="row">
+        <div class="col-6 form_group">
+          <label for="native" class="form-label">Native</label>
+          <select class="form-select" aria-label="Default select example" name="native">
+            <option selected>Open this select menu</option>
+            <option value="English">English</option>
+            <option value="Korean">한국어</option>
+            <option value="Chinese">中文</option>
+            <option value="Japanese">日本語</option>
+          </select>
+        </div>
+        <div class="col-6  form_group">
+          <label for="learning" class="form-label">Learning</label>
+          <select class="form-select" aria-label="Default select example" name="learning">
+            <option selected>Open this select menu</option>
+            <option value="English">English</option>
+            <option value="Korean">한국어</option>
+            <option value="Chinese">中文</option>
+            <option value="Japanese">日本語</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3  form_group">
+      <label for="introduction" class="form-label">Introduction</label>
+      <div class="input-group">
+        <textarea class="form-control" aria-label="With textarea" name="introduction"></textarea>
+      </div>
+    </div>
+
+    <div class="mb-3  form_group">
+      <label for="location" class="form-label">Address</label>
+      <div class="input-group">
+        <input type="name" class="form-control" name="location">
+      </div>
+    </div>
+
+    <div class="mb-3  form_group">
+      <label for="birthday" class="form-label">Birthday</label>
+      <div class="input-group">
+        <input type="date" name="birthday">
+      </div>
+    </div>
+
+    <div class="mb-3 px-3">
+      <div class="row">
+        <div class="col-2 form-check  form_group">
+          <input class="form-check-input" type="radio" name="gender" value='Male' checked>
+          <label class="form-check-label" for="flexRadioDefault1">
+            Male
+          </label>
+        </div>
+        <div class="col-2 form-check  form_group">
+          <input class="form-check-input" type="radio" name="gender" value="Female">
+          <label class="form-check-label" for="flexRadioDefault2">
+            Female
+          </label>
+        </div>
+        <div class="col-2 form-check form_group">
+          <input class="form-check-input" type="radio" name="gender" value="Other">
+          <label class="form-check-label" for="flexRadioDefault3">
+            Other
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3 form_group">
+      <label for="formFile" class="form-label">Profile</label>
+      <input class="form-control" type="file" id="formFile" name="picture">
+    </div>
+    <input type="submit" class="btn btn-primary">
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8"
+    crossorigin="anonymous"></script>
+  <script src="./src/signup.js"></script>
+</body>
+
+</html>
