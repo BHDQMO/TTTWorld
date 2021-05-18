@@ -18,26 +18,6 @@ const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server)
 
-app.get('/getWebcam', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/getWebcam.html'))
-})
-
-app.get('/demoP2P', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/demoP2P.html'))
-})
-
-app.get('/demoSynthesis', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/demoSynthesis.html'))
-})
-
-app.get('/demoWebSpeechText', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/demoWebSpeechText.html'))
-})
-
-app.get('/demoMediaRecorder', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/demoMediaRecorder.html'))
-})
-
 app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/signup.html'))
 })
@@ -61,10 +41,6 @@ app.post('/demoGoogleTranslate', async (req, res) => {
   console.log(req.body)
   const translateResult = await Google.translateText(text, target)
   res.send({ data: translateResult })
-
-  // // test
-  // data = 'test'
-  // res.send({ data })
 })
 
 app.post('/demoGoogleSpeechToTest', async (req, res) => {
@@ -135,7 +111,8 @@ app.post('/demoGoogleSpeechToTest', async (req, res) => {
 
 })
 
-app.use('',
+// Api Main Route
+app.use('/',
   [
     require('./server/routes/user_route'),
     require('./server/routes/chat_route'),
@@ -157,9 +134,7 @@ app.use(function (err, req, res, next) {
 const onConnection = (socket) => {
   // Listening for joining a room (joinRoom event)
   socket.on("joinRoom", events.joinRoom(socket));
-  socket.on("disconnect", () =>
-    events.leaveRoom(socket)({ room: "general" })
-  );
+  socket.on("disconnect", () => events.leaveRoom(socket)({ room: "general" }));
 
   // for peer to peer communicate
   socket.on("offer", (offer) => events.offer(socket)({ room: "general", offer }));
