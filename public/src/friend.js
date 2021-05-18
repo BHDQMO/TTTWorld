@@ -1,4 +1,3 @@
-/* eslint-disable space-before-function-paren */
 let socket = io()
 let peer
 let cacheStream
@@ -432,7 +431,7 @@ async function translateAudio(element) {
 
 // speechSynthesis
 function speakMsg(element) {
-  const msgContent = element.parentNode.firstChild.textContent
+  const msgContent = element.parentNode.firstChild.textContent.split(':')[1]
   const targetLang = 'en-US' //need change follow the Lang of this msg
 
   var synth = window.speechSynthesis
@@ -443,18 +442,33 @@ function speakMsg(element) {
 
 // translate text
 function translateMsg(element) {
-  const text = element.parentNode.firstChild.textContent
+  const text = element.parentNode.firstChild.textContent.split(':')[1]
   const target = 'zh-TW' //need change follow the user's native
-
+  const data = {
+    text, target
+  }
   console.log(text)
   console.log(target)
 
+  // let xhr = new XMLHttpRequest();
+  // xhr.open('POST', '/demoGoogleTranslate');
+  // xhr.onreadystatechange = function () {
+  //   if (xhr.readyState === 4) {
+  //     console.log(xhr.responseText)
+  //     const translateResult = document.createElement('span')
+  //     translateResult.textContent = res.data
+  //     ltranslateResult = element.parentNode.insertBefore(translateResult, element.parentNode.childNodes[1])
+  //   }
+  // };
+  // xhr.setRequestHeader('content-type', 'application/JSON')
+  // xhr.send(JSON.stringify(data));
+
   fetch(`/demoGoogleTranslate`, {
     method: "POST",
-    // headers: {
-    //   'Content-Type': 'text/x-www-form-urlencoded'
-    // },
-    body: { text, target }
+    headers: {
+      'Content-Type': 'application/JSON'
+    },
+    body: JSON.stringify(data)
 
   }).then(res => res.json())
     .then(res => {
@@ -462,4 +476,86 @@ function translateMsg(element) {
       translateResult.textContent = res.data
       ltranslateResult = element.parentNode.insertBefore(translateResult, element.parentNode.childNodes[1])
     })
+}
+
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+var recognition = new SpeechRecognition();
+recognition.lang = 'zh-TW'; //en-US
+recognition.maxAlternatives = 1;
+recognition.continuous = true;
+
+function startExchange() {
+
+  recognition.start();
+  recognition.onresult = function (event) {
+    resultList = event.results
+    lastIndex = resultList.length - 1
+    lastResult = resultList[lastIndex][0]
+    console.log(event.results)
+    console.log('Confidence: ' + lastResult.confidence + '\n' + lastResult.transcript.toLowerCase());
+
+    if (lastResult.confidence > 0.925) {
+      console.log('over the threshold')
+      const warn = document.getElementById("warn")
+      warn.textContent = 'Please use English'
+      window.setTimeout(() => {
+        const warn = document.getElementById("warn")
+        warn.textContent = ''
+      }, 2 * 1000)
+    }
+  }
+
+
+  recognition.onspeechend = function () {
+    // recognition.start();
+  }
+
+  recognition.onerror = function (event) {
+    testBtn.textContent = 'Start new test';
+    diagnosticPara.textContent = 'Error occurred in recognition: ' + event.error;
+  }
+
+  recognition.onaudiostart = function (event) {
+    //Fired when the user agent has started to capture audio.
+    console.log('SpeechRecognition.onaudiostart');
+  }
+
+  recognition.onaudioend = function (event) {
+    //Fired when the user agent has finished capturing audio.
+    console.log('SpeechRecognition.onaudioend');
+  }
+
+  recognition.onend = function (event) {
+    //Fired when the speech recognition service has disconnected.
+    console.log('SpeechRecognition.onend');
+  }
+
+  recognition.onnomatch = function (event) {
+    //Fired when the speech recognition service returns a final result with no significant recognition. This may involve some degree of recognition, which doesn't meet or exceed the confidence threshold.
+    console.log('SpeechRecognition.onnomatch');
+  }
+
+  recognition.onsoundstart = function (event) {
+    //Fired when any sound — recognisable speech or not — has been detected.
+    console.log('SpeechRecognition.onsoundstart');
+  }
+
+  recognition.onsoundend = function (event) {
+    //Fired when any sound — recognisable speech or not — has stopped being detected.
+    console.log('SpeechRecognition.onsoundend');
+  }
+
+  recognition.onspeechstart = function (event) {
+    //Fired when sound that is recognised by the speech recognition service as speech has been detected.
+    console.log('SpeechRecognition.onspeechstart');
+  }
+  recognition.onstart = function (event) {
+    //Fired when the speech recognition service has begun listening to incoming audio with intent to recognize grammars associated with the current SpeechRecognition.
+    console.log('SpeechRecognition.onstart');
+  }
+}
+
+function stopExchange() {
+  recognition.stop();
 }

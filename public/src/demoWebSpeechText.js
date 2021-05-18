@@ -41,35 +41,31 @@ function testSpeech() {
   speechRecognitionList.addFromString(grammar, 1);
   recognition.grammars = speechRecognitionList;
   recognition.lang = 'en-US';
-  recognition.interimResults = false;
+  // recognition.interimResults = true;
   recognition.maxAlternatives = 1;
+  recognition.continuous = true;
 
-  recognition.start(); // 如果可以讓他抓得到file播放的聲音，那就沒問題了
+  recognition.start()
 
   recognition.onresult = function (event) {
-    // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
-    // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
-    // It has a getter so it can be accessed like an array
-    // The first [0] returns the SpeechRecognitionResult at position 0.
-    // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
-    // These also have getters so they can be accessed like arrays.
-    // The second [0] returns the SpeechRecognitionAlternative at position 0.
-    // We then return the transcript property of the SpeechRecognitionAlternative object 
     var speechResult = event.results[0][0].transcript.toLowerCase(); //這一段就是翻譯出來的結果，
-    diagnosticPara.textContent = 'Speech received: ' + speechResult + '.';
-    if (speechResult === phrase) {
-      resultPara.textContent = 'I heard the correct phrase!';
-      resultPara.style.background = 'lime';
-    } else {
-      resultPara.textContent = 'That didn\'t sound right.';
-      resultPara.style.background = 'red';
-    }
+    console.log(event.results[0][0].transcript.toLowerCase())
+    console.log(event.results)
+    event.results = ''
+    // diagnosticPara.textContent = 'Speech received: ' + speechResult + '.';
+    // if (speechResult === phrase) {
+    //   resultPara.textContent = 'I heard the correct phrase!';
+    //   resultPara.style.background = 'lime';
+    // } else {
+    //   resultPara.textContent = 'That didn\'t sound right.';
+    //   resultPara.style.background = 'red';
+    // }
 
     console.log('Confidence: ' + event.results[0][0].confidence);
   }
 
   recognition.onspeechend = function () {
-    recognition.stop();
+    // recognition.stop();
     testBtn.disabled = false;
     testBtn.textContent = 'Start new test';
   }

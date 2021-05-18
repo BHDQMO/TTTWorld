@@ -76,4 +76,7 @@ typings/
 .fusebox/
 
 # custom 
-.ogg
+public/images/
+.eslintrc.json
+done/
+*.ogg

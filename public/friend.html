@@ -14,17 +14,23 @@
       vertical-align: baseline;
     }
 
+    body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
     header {
-      height: 140px;
+      height: 100px;
       width: 100vw;
       padding: 0 30px;
       display: flex;
       align-items: center;
-      position: fixed;
-      top: 0;
-      border-bottom: 40px solid var(--charcoal-grey);
-      z-index: 5;
-      background-color: white;
     }
 
     header>a>img#logo {
@@ -103,18 +109,58 @@
       display: none;
     }
 
-    body {
-      margin: 0;
-      padding-bottom: 3rem;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    main {
+      width: 100vw;
+      display: flex;
+      align-items: stretch;
+      flex-direction: row;
+      justify-content: space-between
     }
 
-    .main {
-      padding: 140px;
+    /* main {
+      padding: 100px 0 0 0;
       display: flex;
       flex-direction: row;
       align-items: stretch;
       text-align: center;
+      justify-content: space-between
+    } */
+
+    .friend-list {
+      width: 30%;
+    }
+
+    .chat-box {
+      width: 70%;
+      text-align: center;
+    }
+
+    #warn {
+      color: red;
+    }
+
+    .videophone {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    #localVideo {
+      width: 50%;
+      height: 50/16*9%;
+    }
+
+    .contral {
+      position: fixed;
+      bottom: 3rem;
+      left: 30%;
+      right: 0;
+      padding: 5px 5px;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: space-between
     }
 
     #form {
@@ -165,16 +211,12 @@
     #messages>li:nth-child(odd) {
       background: #efefef;
     }
-
-    .chat-box {
-      padding: 140px 0 0 30%
-    }
   </style>
 </head>
 
 <body>
   <header>
-    <a href="/"><img src="./images/logo.png" id="logo" /></a>
+    <a href="/explore"><img src="./images/logo.png" id="logo" /></a>
     <h1>Talk To The World</h1>
     <nav class="tags">
       <a href="/friend" class="tag tag-friend">Friend</a>
@@ -186,29 +228,35 @@
           <div class="count">notice</div>
         </div>
       </a>
-      <a id="profile">
+      <a href="/profile" id="profile">
         <div class="icon-profile">profile</div>
       </a>
     </nav>
   </header>
   <main>
-    <div class="friend-list">
-
-    </div>
+    <div class="friend-list"></div>
     <div class="chat-box">
+      <div id="warn"></div>
       <ul id="messages"></ul>
       <div class="videophone">
         <video id="localVideo" autoplay></video>
         <video id="remoteVideo" autoplay></video>
-        <button onclick="connection()">Connection</button>
-        <button onclick="calling()">Call</button>
-        <button onclick="closing()">Hang Up</button>
       </div>
-      <div class="voiceMsg">
-        <button onclick="startAudioRecord()">Record</button>
-        <button onclick="stopAudioRecord()">Stop</button>
+      <div class="contral">
+        <div class="videoContral">
+          <button onclick="startExchange()">Exchange</button>
+          <button onclick="stopExchange()">Time up</button>
+        </div>
+        <div class="videoContral">
+          <button onclick="connection()">Connection</button>
+          <button onclick="calling()">Call</button>
+          <button onclick="closing()">Hang Up</button>
+        </div>
+        <div class="audioContral">
+          <button onclick="startAudioRecord()">Record</button>
+          <button onclick="stopAudioRecord()">Stop</button>
+        </div>
       </div>
-
       <form id="form" action="">
         <input id="input" autocomplete="off" />
         <button>Send</button>
