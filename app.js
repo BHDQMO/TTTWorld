@@ -34,6 +34,10 @@ app.get('/friend', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/friend.html'))
 })
 
+app.get('/explore', (req, res) => {
+  res.sendFile(path.join(__dirname, '/public/explore.html'))
+})
+
 app.post('/demoGoogleTranslate', async (req, res) => {
   text = req.body.text
   target = req.body.target

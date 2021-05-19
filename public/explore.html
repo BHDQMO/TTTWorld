@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Socket.IO chat</title>
+  <link href="./styles/explore.css" rel="stylesheet">
+  <link href="./styles/header.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1 class="web-name">TTT World</h1>
+    <div class="tags">
+      <a href="/friend" class="tag">Friend</a>
+      <a href="/explore" class="tag">Explore</a>
+      <a href="/profile" class="tag">Profile</a>
+      <div class="tag">Notice</div>
+      <sapn class="count-circle">
+        <sapn class="count">0</sapn>
+      </sapn>
+    </div>
+  </header>
+  <main>
+    <div class="people">
+      <h1 class="people-title">People</h1>
+      <div class="container">
+        <table class="list">
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Native</th>
+            <th>Learning</th>
+            <th>Distance</th>
+            <th>Match Rate</th>
+          </tr>
+          <tr>
+            <td>Yaron</td>
+            <td>31</td>
+            <td>Chinese</td>
+            <td>English</td>
+            <td>520</td>
+            <td>100%</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="detail-box">
+      <div class="detail">
+        <img id="picture">
+        <div id="name">Yaon</div>
+        <label>Introduction</label>
+        <div id="introduction">I love coding</div>
+        <label>Interest</label>
+        <div id="Interest">Jogging Cycling</div>
+      </div>
+      <button id="invite">Invite</button>
+    </div>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./src/explore.js"></script>
+</body>
+
+</html>

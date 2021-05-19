@@ -1,0 +1,78 @@
+main {
+  flex-grow: 1;
+  background: rgba(0, 75, 255, 0.5);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between
+}
+
+.people {
+  width: 70%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.people-title {
+  background: white;
+  border-radius: 10px;
+  text-align: center
+}
+
+.container {
+  flex-grow: 1;
+  position: relative;
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+  /* padding: 10px; */
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  overflow-x: auto;
+}
+
+.list {
+  padding: 10px;
+  border: 10px;
+}
+
+.detail-box {
+  padding: 10px 10px 10px 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.detail {
+  flex-grow: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: white;
+  border-radius: 10px;
+  text-align: center
+}
+
+#picture {
+  width: 60%;
+  padding-top: 80%;
+  background: darkgrey;
+  align-self: center;
+}
+
+label {
+  font-weight: bold;
+}
+
+#invite {
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+}

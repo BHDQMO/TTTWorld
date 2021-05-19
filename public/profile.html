@@ -1,150 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
-  <title>Talk To The World</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      border: 0;
-      font-size: 100%;
-      font: inherit;
-      vertical-align: baseline;
-    }
-
-    header {
-      height: 140px;
-      width: 100vw;
-      padding: 0 30px;
-      display: flex;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      border-bottom: 40px solid var(--charcoal-grey);
-      z-index: 5;
-      background-color: white;
-    }
-
-    header>a>img#logo {
-      height: 48px;
-    }
-
-    header>nav.tags {
-      width: 450px;
-      margin-left: 57px;
-      display: flex;
-    }
-
-    header>nav.tags>.tag {
-      letter-spacing: 16px;
-      text-indent: 16px;
-      font-size: 20px;
-      color: #3f3a3a;
-      text-align: center;
-      flex-grow: 1;
-    }
-
-    header>nav.tags>a.tag:hover {
-      color: var(--sepia);
-      cursor: pointer;
-    }
-
-    header>nav.tags>a.tag.tag--active {
-      color: var(--sepia);
-    }
-
-    header>nav.tags>a.tag+a.tag {
-      border-left: 2px solid #3f3a3a;
-    }
-
-    header>nav.icons {
-      width: 130px;
-      margin-left: 42px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    header>nav.icons>a {
-      cursor: pointer;
-    }
-
-    header>nav.icons>a>.icon-notice {
-      position: relative;
-      width: 44px;
-      height: 44px;
-      background-image: url(./images/notice.png)
-    }
-
-    header>nav.icons>a>.icon-notice>.count {
-      position: absolute;
-      text-align: center;
-      background-color: #8b572a;
-      font-weight: bold;
-      border-radius: 50%;
-      color: #ffffff;
-      opacity: 0.8;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
-      bottom: 0;
-      right: 0;
-    }
-
-    header>nav.icons>a>.icon-profile {
-      margin-left: 24px;
-      width: 44px;
-      height: 44px;
-      background-image: url(./images/profile.jpg);
-    }
-
-    header>nav.icons>a>.mobile-text {
-      display: none;
-    }
-
-    .profile {
-      padding: 140px 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      text-align: center;
-    }
-
-    .profile>#member>img {
-      width: 100px;
-      margin: 0 24px;
-    }
-
-    .detail {
-      padding: 0 0 0 40%;
-      text-align: left;
-    }
-  </style>
+  <title>Socket.IO chat</title>
+  <link href="./styles/profile.css" rel="stylesheet">
+  <link href="./styles/header.css" rel="stylesheet">
 </head>
 
 <body>
   <header>
-    <a href="/"><img src="./images/logo.png" id="logo" /></a>
-    <h1>Talk To The World</h1>
-    <nav class="tags">
-      <a href="/friend" class="tag tag-friend">Friend</a>
-      <a href="/explore" class="tag tag-explore">Explore</a>
-    </nav>
-    <nav class="icons">
-      <a>
-        <div class="icon-notice">
-          <div class="count">notice</div>
-        </div>
-      </a>
-      <a id="profile">
-        <div class="icon-profile">profile</div>
-      </a>
-    </nav>
+    <h1>TTT World</h1>
+    <div class="tags">
+      <a href="/friend" class="tag">Friend</a>
+      <a href="/explore" class="tag">Explore</a>
+      <a href="/profile" class="tag">Profile</a>
+      <div class="tag">Notice</div>
+      <sapn class="count-circle">
+        <sapn class="count">0</sapn>
+      </sapn>
+    </div>
   </header>
   <main>
     <div class="profile">
