@@ -10,7 +10,7 @@ signInForm.addEventListener('submit', (e) => {
       alert('signIn completed!');
       const data = JSON.parse(xhr.responseText)
       window.localStorage.setItem('JWT', data.data.token)
-      window.location.assign('/profile')
+      window.location.assign('/profile.html')
     }
   };
   xhr.send(formData);

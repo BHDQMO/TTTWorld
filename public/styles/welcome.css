@@ -1,0 +1,23 @@
+main {
+  flex-grow: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  border: 50px solid rgba(0, 75, 255, 0.5);
+  margin: 15%;
+  text-align: center;
+}
+
+.welcome {
+  font-size: 50px;
+}
+
+.sign {
+  font-size: 20px;
+  height: 2rem;
+  background: lightgray;
+  width: 80px;
+  border-radius: 10px;
+}

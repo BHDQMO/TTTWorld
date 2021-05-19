@@ -20,6 +20,11 @@ const renderProfile = (res) => {
   location.innerHTML = 'location : ' + data.location
 }
 
+function logout() {
+  window.localStorage.removeItem('JWT')
+  window.location = "/thank.html";
+}
+
 fetch('/user/profile', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
