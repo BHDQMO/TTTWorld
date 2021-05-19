@@ -4,26 +4,21 @@
 <head>
   <title>Socket.IO chat</title>
   <link href="./styles/friend.css" rel="stylesheet">
+  <link href="./styles/header.css" rel="stylesheet">
 </head>
 
 <body>
   <header>
-    <a href="/explore"><img src="./images/logo.png" id="logo" /></a>
-    <h1>Talk To The World</h1>
-    <nav class="tags">
-      <a href="/friend" class="tag tag-friend">Friend</a>
-      <a href="/explore" class="tag tag-explore">Explore</a>
-    </nav>
-    <nav class="icons">
-      <a>
-        <div class="icon-notice">
-          <div class="count">notice</div>
-        </div>
-      </a>
-      <a href="/profile" id="profile">
-        <div class="icon-profile">profile</div>
-      </a>
-    </nav>
+    <h1>TTT World</h1>
+    <div class="tags">
+      <a href="/friend" class="tag">Friend</a>
+      <a href="/explore" class="tag">Explore</a>
+      <a href="/profile" class="tag">Profile</a>
+      <div class="tag">Notice</div>
+      <sapn class="count-circle">
+        <sapn class="count">0</sapn>
+      </sapn>
+    </div>
   </header>
   <main>
     <div class="friend">
@@ -31,12 +26,12 @@
       <div class="friend-list">content</div>
     </div>
     <div class="chat-box">
-      <!-- <div id="warn"></div> -->
+      <div id="warn"></div>
       <div id="content">
-        <div id="videophone">
+        <!-- <div id="videophone">
           <video id="localVideo" autoplay></video>
           <video id="remoteVideo" autoplay></video>
-        </div>
+        </div> -->
         <div id="messages"></div>
       </div>
       <div class="chat-box-footer">

@@ -55,12 +55,13 @@ socket.on('chat message', (msg) => {
   speak.textContent = 'Speak'
   speak.setAttribute('onclick', 'speakMsg(this)')
 
+  const messages = document.getElementById('messages')
+
   item.appendChild(msgContent)
   item.appendChild(translate)
   item.appendChild(speak)
   messages.appendChild(item)
 
-  const messages = document.getElementById('messages')
   messages.scrollTop = messages.scrollHeight
 })
 
@@ -371,7 +372,7 @@ function sendSDPBySignaling(event, sdp) {
 }
 
 // text message function
-const messages = document.getElementById('messages')
+
 const form = document.getElementById('form')
 const input = document.getElementById('input')
 
