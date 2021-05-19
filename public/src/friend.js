@@ -43,7 +43,7 @@ function connection() {
 }
 
 socket.on('chat message', (msg) => {
-  const item = document.createElement('li')
+  const item = document.createElement('div')
   const msgContent = document.createElement('sapn')
   msgContent.textContent = msg
 
@@ -60,7 +60,8 @@ socket.on('chat message', (msg) => {
   item.appendChild(speak)
   messages.appendChild(item)
 
-  window.scrollTo(0, document.body.scrollHeight)
+  const messages = document.getElementById('messages')
+  messages.scrollTop = messages.scrollHeight
 })
 
 socket.on('record', (blob) => {
@@ -297,6 +298,8 @@ async function addStreamProcess(constraints) {
     throw new Error(errMsg)
   }
 
+  // const videophone = document.getElementById('videophone')
+  // videophone.removeAttribute = ('hidden')
   const localVideo = document.getElementById('localVideo')
   localVideo.srcObject = cacheStream
 

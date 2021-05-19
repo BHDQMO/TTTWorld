@@ -1,0 +1,230 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+header {
+  height: 100px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header>a>img#logo {
+  height: 48px;
+}
+
+header>nav.tags {
+  width: 450px;
+  margin-left: 57px;
+  display: flex;
+}
+
+header>nav.tags>.tag {
+  letter-spacing: 16px;
+  text-indent: 16px;
+  font-size: 20px;
+  color: #3f3a3a;
+  text-align: center;
+  flex-grow: 1;
+}
+
+header>nav.tags>a.tag:hover {
+  color: var(--sepia);
+  cursor: pointer;
+}
+
+header>nav.tags>a.tag.tag--active {
+  color: var(--sepia);
+}
+
+header>nav.tags>a.tag+a.tag {
+  border-left: 2px solid #3f3a3a;
+}
+
+header>nav.icons {
+  width: 130px;
+  margin-left: 42px;
+  display: flex;
+  justify-content: space-between;
+}
+
+header>nav.icons>a {
+  cursor: pointer;
+}
+
+header>nav.icons>a>.icon-notice {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background-image: url(./images/notice.png)
+}
+
+header>nav.icons>a>.icon-notice>.count {
+  position: absolute;
+  text-align: center;
+  background-color: #8b572a;
+  font-weight: bold;
+  border-radius: 50%;
+  color: #ffffff;
+  opacity: 0.8;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  bottom: 0;
+  right: 0;
+}
+
+header>nav.icons>a>.icon-profile {
+  margin-left: 24px;
+  width: 44px;
+  height: 44px;
+  background-image: url(./images/profile.jpg);
+}
+
+header>nav.icons>a>.mobile-text {
+  display: none;
+}
+
+main {
+  flex-grow: 1;
+  background: rgba(0, 75, 255, 0.5);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between
+}
+
+.friend {
+  width: 30%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.friend-list-title {
+  background: white;
+  border-radius: 10px;
+  text-align: center
+}
+
+.friend-list {
+  flex-grow: 1;
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+  text-align: center
+}
+
+.chat-box {
+  flex-grow: 1;
+  padding: 10px 10px 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+#warn {
+  text-align: center;
+  color: red;
+}
+
+#content {
+  flex-grow: 1;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+}
+
+#messages>div:nth-child(odd) {
+  background: #efefef;
+}
+
+#videophone {
+  /* Safari */
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  align-self: center;
+  width: 50%;
+  background: #efefef;
+  aspect-ratio: 4/3;
+}
+
+#remoteVideo {
+  object-fit: cover;
+  width: 100%;
+}
+
+#localVideo {
+  object-fit: cover;
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 20%;
+}
+
+#messages {
+  flex-grow: 1;
+  max-height: 508.8px;
+  overflow: auto;
+}
+
+.contral {
+  padding: 10px;
+  display: flex;
+  /* align-items: stretch; */
+  justify-content: space-between
+}
+
+#form {
+  background: rgba(0, 75, 255, 0);
+  /* padding: 5px 10px 10px 0px; */
+  display: flex;
+  height: 2rem;
+}
+
+#input {
+  /* border-: none; */
+  padding-left: 1rem;
+  flex-grow: 1;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+#input:focus {
+  outline: none;
+}
+
+#form>button {
+  background: #333;
+  /* border: none; */
+  padding: 0 1rem;
+  /* margin: 0.25rem; */
+  border-radius: 10px;
+  /* outline: none; */
+  color: #fff;
+}
