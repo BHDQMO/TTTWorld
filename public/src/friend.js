@@ -447,7 +447,7 @@ function speakMsg(element) {
 // translate text
 function translateMsg(element) {
   const text = element.parentNode.firstChild.textContent.split(':')[1]
-  const target = 'zh-TW' //need change follow the user's native
+  const target = 'en' //need change follow the user's native zh-TWen-US
   const data = {
     text, target
   }

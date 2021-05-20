@@ -1,7 +1,7 @@
 let signUpForm = document.forms.namedItem('signUpForm');
 signUpForm.addEventListener('submit', (e) => {
-  const formData = new FormData(signUpForm);
   e.preventDefault();
+  const formData = new FormData(signUpForm);
   let xhr = new XMLHttpRequest();
   xhr.open('POST', '/user/signUp');
   xhr.onreadystatechange = function () {
@@ -9,7 +9,7 @@ signUpForm.addEventListener('submit', (e) => {
       alert('signup completed!');
       const data = JSON.parse(xhr.responseText)
       window.localStorage.setItem('JWT', data.data.token)
-      window.location.assign('/profile')
+      window.location.assign('/profile.html')
     }
   };
   xhr.send(formData);

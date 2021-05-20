@@ -10,13 +10,28 @@ const {
   TOKEN_SECRET
 } = process.env
 
-const signUp = async (user) => {
+const signUp = async (user, interests) => {
+  await transaction()
   try {
-    const queryStr = 'INSERT INTO user SET ?'
-    const result = await query(queryStr, user)
-    user.userId = result.insertId
+    const geocode = user.geocode
+    delete user.geocode
+
+    const userQueryStr = 'INSERT INTO user SET ?'
+    const userResult = await query(userQueryStr, user)
+    await query(`UPDATE user SET geocode = ${geocode} WHERE email = '${user.email}'`)
+
+    console.log(interests)
+    interests.map(async (interest) => {
+      const binding = [interest, interest]
+      const interestQueryStr = `INSERT INTO interest (name) SELECT * FROM (SELECT ?) AS temp WHERE NOT EXISTS ( SELECT name FROM interest WHERE name = ?)`
+      await query(interestQueryStr, binding)
+    })
+    await commit()
+    console.log(userResult)
+    user.userId = userResult.insertId
     return user
   } catch (error) {
+    await rollback()
     return {
       error
     }
@@ -72,9 +87,14 @@ const getUserDetail = async (email) => {
   }
 };
 
+const wrapGeocode = async (geocode) => {
+  return
+}
+
 module.exports = {
   isEmailExist,
   signUp,
   nativeSignIn,
   getUserDetail,
+  wrapGeocode
 }

@@ -126,7 +126,7 @@ const onConnection = (socket) => {
   socket.on("icecandidate", (candidate) => events.icecandidate(socket)({ room: "general", candidate }));
 
   socket.on('chat message', (msg) => {
-    io.emit('chat message', `${socket.id} : ` + msg)
+    io.emit('chat message', `${socket.id}:` + msg)
   })
 
   socket.on('record', (blob) => {
