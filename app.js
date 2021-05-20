@@ -18,35 +18,6 @@ const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server)
 
-// app.get('/signup', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/signup.html'))
-// })
-
-// app.get('/signin', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/signin.html'))
-// })
-
-// app.get('/profile', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/profile.html'))
-// })
-
-// app.get('/friend', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/friend.html'))
-// })
-
-// app.get('/explore', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/explore.html'))
-// })
-
-// app.get('/thank', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/thank.html'))
-// })
-
-// app.get('/welcome', (req, res) => {
-//   res.sendFile(path.join(__dirname, '/public/thank.html'))
-// })
-
-
 app.post('/demoGoogleTranslate', async (req, res) => {
   text = req.body.text
   target = req.body.target
