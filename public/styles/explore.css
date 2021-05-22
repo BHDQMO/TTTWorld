@@ -41,8 +41,9 @@ main {
 }
 
 .detail-box {
-  padding: 10px 10px 10px 0;
+  max-width: 30%;
   flex-grow: 1;
+  padding: 10px 10px 10px 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -62,8 +63,6 @@ main {
 
 #picture {
   width: 60%;
-  padding-top: 80%;
-  background: darkgrey;
   align-self: center;
 }
 
@@ -71,7 +70,7 @@ label {
   font-weight: bold;
 }
 
-#invite {
+.invite, .reject {
   margin-top: 10px;
   background: white;
   border-radius: 10px;

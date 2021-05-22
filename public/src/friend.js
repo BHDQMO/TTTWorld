@@ -21,12 +21,12 @@ function connection() {
   // socket = io()
   socket.emit('joinRoom', { username: 'test' })
 
-  socket.on('newUser', (data) => {
+  socket.on('joinRoom', (data) => {
     console.log('Welcome to Socket.IO Chat – ')
     console.log(data)
   })
 
-  socket.on('userLeave', (data) => {
+  socket.on('leaveRoom', (data) => {
     console.log('Someone Leave ~')
     console.log(data)
   })
@@ -42,7 +42,7 @@ function connection() {
   // return socket
 }
 
-socket.on('chat message', (msg) => {
+socket.on('textMessage', (msg) => {
   const item = document.createElement('div')
   const msgContent = document.createElement('sapn')
   msgContent.textContent = msg
@@ -65,7 +65,7 @@ socket.on('chat message', (msg) => {
   messages.scrollTop = messages.scrollHeight
 })
 
-socket.on('record', (blob) => {
+socket.on('audioMessage', (blob) => {
   const newblob = new Blob([blob], { type: 'audio/ogg' })
 
   const item = document.createElement('li')
@@ -379,7 +379,7 @@ const input = document.getElementById('input')
 form.addEventListener('submit', function (e) {
   e.preventDefault()
   if (input.value) {
-    socket.emit('chat message', input.value)
+    socket.emit('textMessage', input.value)
     input.value = ''
   }
 })
@@ -403,7 +403,7 @@ const startAudioRecord = async function () {
 
   mediaRecorder.onstop = function (e) {
     const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
-    socket.emit('record', blob)
+    socket.emit('audioMessage', blob)
     chunks = []
 
     const localVideo = document.getElementById('localVideo')

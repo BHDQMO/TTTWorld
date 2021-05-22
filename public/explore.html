@@ -33,14 +33,17 @@
             <th>Distance</th>
             <th>Match Rate</th>
           </tr>
-          <tr>
-            <td>Yaron</td>
-            <td>31</td>
-            <td>Chinese</td>
-            <td>English</td>
-            <td>520</td>
-            <td>100%</td>
-          </tr>
+          <template class="tableRow">
+            <tr id='userId' onclick="renderUserDetail(this)">
+              <td id='name'>Yaron</td>
+              <td id='age'>31</td>
+              <td id='native'>Chinese</td>
+              <td id='learning'>English</td>
+              <td id='distance'>520</td>
+              <td id='match_rate'>100%</td>
+            </tr>
+          </template>
+
         </table>
       </div>
     </div>
@@ -51,9 +54,12 @@
         <label>Introduction</label>
         <div id="introduction">I love coding</div>
         <label>Interest</label>
-        <div id="Interest">Jogging Cycling</div>
+        <div id="interest">Jogging Cycling</div>
       </div>
-      <button id="invite">Invite</button>
+      <button class="invite" id="" onclick="action(this)">Invite</button>
+      <TEMPLATE class="rejectBtn">
+        <button class="reject" id="" onclick="action(this)">Reject</button>
+      </TEMPLATE>
     </div>
   </main>
   <script src="/socket.io/socket.io.js"></script>
