@@ -74,8 +74,17 @@ const authentication = () => {
   }
 }
 
+const calAge = (date) => {
+  const birthYear = new Date(date)
+  const thisYear = new Date()
+  const age = new Date(thisYear - birthYear).getFullYear() - 1970
+  return age
+
+}
+
 module.exports = {
   upload,
   wrapAsync,
-  authentication
+  authentication,
+  calAge
 }

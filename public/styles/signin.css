@@ -1,3 +1,12 @@
+body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between
+}
+
 header {
   height: 70px;
   padding: 10px 25px 10px 10px;
@@ -13,9 +22,12 @@ header {
 }
 
 main {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  padding: 0 20% 30px;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 15% 20%;
   background: lightskyblue;
 }
 
@@ -23,39 +35,9 @@ main {
   text-align: center;
 }
 
-input[name='name'] {
-  width: 50%;
-}
-
-label[for='gender'] {
-  padding-left: 0px;
-}
-
-.gender {
+form {
   flex-grow: 1;
-  display: flex;
-  justify-content: space-around;
-  padding: 0 10%;
-}
-
-.input-group {
-  justify-content: space-between;
-  flex-wrap: nowrap;
-}
-
-input[type="date"] {
-  border: 1px solid #ced4da;
-  border-radius: .25rem;
-  height: 36px;
-}
-
-#addInterest {
-  background: lightseagreen;
-  cursor: pointer;
-}
-
-.buttons {
-  height: 100px;
+  float: left;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -66,6 +48,6 @@ input[type="date"] {
   align-self: center;
 }
 
-#signin {
+#signup {
   align-self: flex-end;
 }

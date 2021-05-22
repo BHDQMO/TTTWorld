@@ -19,15 +19,12 @@ const signUp = async (user, interests) => {
     const userQueryStr = 'INSERT INTO user SET ?'
     const userResult = await query(userQueryStr, user)
     await query(`UPDATE user SET geocode = ${geocode} WHERE email = '${user.email}'`)
-
-    console.log(interests)
     interests.map(async (interest) => {
       const binding = [interest, interest]
       const interestQueryStr = `INSERT INTO interest (name) SELECT * FROM (SELECT ?) AS temp WHERE NOT EXISTS ( SELECT name FROM interest WHERE name = ?)`
       await query(interestQueryStr, binding)
     })
     await commit()
-    console.log(userResult)
     user.userId = userResult.insertId
     return user
   } catch (error) {

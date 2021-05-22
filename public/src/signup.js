@@ -35,3 +35,8 @@ function addInterest() {
   const insertPoint = document.querySelector('#insert-point')
   interestList.insertBefore(clone, insertPoint)
 }
+
+function signin() {
+  window.location = '/signin.html'
+}
+

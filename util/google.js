@@ -38,7 +38,7 @@ const translateAudio = async (request) => {
 const geocoding = async (address) => {
   if (address) {
     address = address.replace(' ', '+')
-    url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${GOOGLE_API_KEY}`
+    url = encodeURI(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${GOOGLE_API_KEY}`)
     const result = await fetch(url, { method: 'GET' })
       .then(res => res.json())
       .then(res => {

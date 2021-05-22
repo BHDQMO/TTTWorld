@@ -3,6 +3,7 @@ const User = require('../models/user_model')
 const Google = require('../../util/google')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
+var _ = require('lodash');
 const { TOKEN_SECRET, S3_OBJECT_URL } = process.env
 const salt = parseInt(process.env.BCRYPT_SALT);
 
@@ -11,30 +12,31 @@ const signUp = async (req, res) => {
   name = validator.escape(name)
   const { email, password } = req.body
 
-  // if (!name || !email || !password) {
-  //   res.status(400).send({
-  //     error: 'Request Error: name, email and password are required.'
-  //   })
-  //   return
-  // }
+  if (!name || !email || !password) {
+    res.status(400).send({
+      error: 'Request Error: name, email and password are required.'
+    })
+    return
+  }
 
-  // if (!validator.isEmail(email)) {
-  //   res.status(400).send({
-  //     error: 'Request Error: Invalid email format'
-  //   })
-  //   return
-  // }
+  if (!validator.isEmail(email)) {
+    res.status(400).send({
+      error: 'Request Error: Invalid email format'
+    })
+    return
+  }
 
-  // const isEmailEsixt = await User.isEmailExist(email)
-  // if (isEmailEsixt) {
-  //   res.status(400).send({
-  //     error: 'Email Already Exists'
-  //   })
-  //   return
-  // }
+  const isEmailEsixt = await User.isEmailExist(email)
+  if (isEmailEsixt) {
+    res.status(400).send({
+      error: 'Email Already Exists'
+    })
+    return
+  }
 
   let user = req.body
   let interests = await Google.translateText(user.interest, 'en')
+  interests = interests.map(interest => _.startCase(interest))
   user.password = bcrypt.hashSync(user.password, salt)
   user.picture = S3_OBJECT_URL + '/' + user.picture
   user.geocode = `ST_PointFromText('POINT(${await Google.geocoding(user.address)})',3857)`
@@ -45,9 +47,8 @@ const signUp = async (req, res) => {
     email: user.email,
     picture: user.picture
   }, TOKEN_SECRET)
-
   user = await User.signUp(user, interests)
-  console.log(user)
+  // console.log(user)
   res.status(200).send({
     data: {
       token: user.token,
