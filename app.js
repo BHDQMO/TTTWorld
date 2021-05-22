@@ -1,22 +1,29 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 require('dotenv').config()
+
 const path = require('path')
 const fs = require('fs')
-const http = require('http')
-const util = require('util');
-const Google = require('./util/google')
-const events = require("./util/socket_event");
-const port = process.env.PORT
-const express = require('express')
+// const util = require('util');
+
 const cors = require('cors')
+const express = require('express')
 const app = express()
+
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'))
 
+const http = require('http')
 const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server)
+
+const Google = require('./util/google')
+const Socket = require("./util/socket")
+
+const port = process.env.PORT
 
 app.post('/demoGoogleTranslate', async (req, res) => {
   text = req.body.text
@@ -115,26 +122,42 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Internal Server Error')
 })
 
-const onConnection = (socket) => {
+const onConnect = (socket) => {
+
+  // // Listening for joining a room (joinRoom event)
+  // socket.on("joinRoom", Socket.joinRoom(socket));
+  // socket.on("disconnect", () => Socket.leaveRoom(socket)({ room: "general" }));
+
+  // // for peer to peer communicate
+  // socket.on("offer", (offer) => Socket.offer(socket)({ room: "general", offer }));
+  // socket.on("answer", (answer) => Socket.answer(socket)({ room: "general", answer }));
+  // socket.on("icecandidate", (candidate) => Socket.icecandidate(socket)({ room: "general", candidate }));
+
+  // socket.on('chat message', (msg) => {
+  //   io.emit('chat message', `${socket.id}:` + msg)
+  // })
+
+  // socket.on('record', (blob) => {
+  //   io.emit('record', blob)
+  // })
+
+
   // Listening for joining a room (joinRoom event)
-  socket.on("joinRoom", events.joinRoom(socket));
-  socket.on("disconnect", () => events.leaveRoom(socket)({ room: "general" }));
+  socket.on("joinRoom", Socket.joinRoom(socket, io));
+  socket.on("disconnect", Socket.leaveRoom(socket, io));
 
   // for peer to peer communicate
-  socket.on("offer", (offer) => events.offer(socket)({ room: "general", offer }));
-  socket.on("answer", (answer) => events.answer(socket)({ room: "general", answer }));
-  socket.on("icecandidate", (candidate) => events.icecandidate(socket)({ room: "general", candidate }));
+  socket.on("offer", Socket.offer(socket, io));
+  socket.on("answer", Socket.answer(socket, io));
+  socket.on("icecandidate", Socket.icecandidate(socket, io));
 
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', `${socket.id}:` + msg)
-  })
+  socket.on('textMessage', Socket.textMessage(socket, io))
+  socket.on('audioMessage', Socket.audioMessage(socket, io))
 
-  socket.on('record', (blob) => {
-    io.emit('record', blob)
-  })
+  socket.on('invite', Socket.invite(socket, io))
 };
 
-io.on("connection", onConnection);
+io.on("connect", onConnect);
 
 server.listen(port, () => {
   console.log(`listening on ${port}`)
