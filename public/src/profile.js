@@ -22,7 +22,7 @@ const renderProfile = (res) => {
 
 function logout() {
   window.localStorage.removeItem('JWT')
-  window.location = "/thank.html";
+  window.location = "/signin.html";
 }
 
 fetch('/user/profile', {
