@@ -130,12 +130,12 @@ const getUserProfile = async (req, res) => {
   res.status(200).send({
     data: req.user
   });
-  return;
 };
 
 module.exports = {
   signUp,
   signIn,
-  getUserProfile
+  getUserProfile,
+
 }
 

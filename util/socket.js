@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-// const { IoT1ClickDevicesService } = require("aws-sdk");
 const Explore = require('../server/models/explore_model')
+const Chat = require('../server/models/chat_model')
 
 const Room1 = 'general'
 const users = {
@@ -50,8 +48,18 @@ const audioMessage = (socket, io) => (blob) => {
 }
 
 const invite = (socket, io) => async (invite) => {
-  await Explore.makeFriend(invite)
+  await Explore.createInvite(invite)
   socket.emit('invite', invite[1])
+};
+
+const accept = (socket, io) => async (invite) => {
+  await Explore.acceptInvite(invite)
+  const room = await Chat.createRoom(invite)
+  socket.emit('accept', room)
+};
+
+const reject = (socket, io) => async (invite) => {
+  await Explore.rejectInvite(invite)
 };
 
 module.exports = {
@@ -62,7 +70,9 @@ module.exports = {
   icecandidate,
   textMessage,
   audioMessage,
-  invite
+  invite,
+  accept,
+  reject
 }
 
 

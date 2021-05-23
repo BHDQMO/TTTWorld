@@ -155,6 +155,8 @@ const onConnect = (socket) => {
   socket.on('audioMessage', Socket.audioMessage(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))
+  socket.on('accept', Socket.accept(socket, io))
+  socket.on('reject', Socket.reject(socket, io))
 };
 
 io.on("connect", onConnect);

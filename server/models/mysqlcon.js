@@ -19,6 +19,7 @@ const promiseRollback = promisify(mysqlCon.rollback).bind(mysqlCon)
 const promiseEnd = promisify(mysqlCon.end).bind(mysqlCon)
 
 module.exports = {
+  mysql,
   query: promiseQuery,
   transaction: promiseTransaction,
   commit: promiseCommit,

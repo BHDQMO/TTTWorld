@@ -1,6 +1,7 @@
 const { ComputeOptimizer } = require('aws-sdk');
-const { bind } = require('lodash');
+// const { bind } = require('lodash');
 const {
+  mysql,
   query,
   transaction,
   commit,
@@ -49,20 +50,52 @@ async function getFriendStatus(user, userIds) {
   return initation
 
 }
+async function getRooms(user, friendList) {
+  const queryString = `
+  SELECT * FROM 
+  (
+    SELECT user_b AS userId ,id AS roomId FROM room WHERE user_a = ? AND user_b IN (?)
+    UNION
+    SELECT user_a AS userId ,id AS roomId FROM room WHERE user_b = ? AND user_a IN (?)
+  ) AS temp
+  `
+  const binding = [user, friendList, user, friendList]
+  const result = await query(queryString, binding)
+  const roomPair = {}
+  result.map(room => roomPair[room.userId] = room.roomId)
+  return roomPair
+}
 
-async function makeFriend(invite) {
-  queryString = `
-  INSERT INTO friend (sender_id,receiver_id) 
-  SELECT * FROM (SELECT ?) AS temp 
+async function createInvite(invite) {
+  console.log(invite)
+  queryString = `INSERT INTO friend 
+  (sender_id,receiver_id) SELECT * FROM (SELECT ?) AS temp 
   WHERE NOT EXISTS ( SELECT * FROM friend WHERE sender_id = ? AND receiver_id = ?)`
   const result = await query(queryString, [invite, invite[0], invite[1]])
+  return result
+}
+
+async function acceptInvite(invite) {
+  queryString = `
+  UPDATE friend SET status = 'Let\\'s Chat' WHERE receiver_id = ? AND sender_id = ?`
+  const result = await query(queryString, invite)
+  return result
+}
+
+async function rejectInvite(invite) {
+  queryString = `
+  DELETE FROM friend WHERE receiver_id = ? AND sender_id = ?`
+  const result = await query(queryString, invite)
   return result
 }
 
 module.exports = {
   getUserList,
   getFriendStatus,
-  makeFriend
+  getRooms,
+  createInvite,
+  acceptInvite,
+  rejectInvite
 }
 
 

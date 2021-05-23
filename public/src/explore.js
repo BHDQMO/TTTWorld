@@ -9,6 +9,7 @@ fetch('/explore/user_list', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
+    console.log(res)
     user = res.user_id
     userArr = res.data
     userData = {}
@@ -48,8 +49,10 @@ const renderUserDetail = function (element) {
   detail.querySelector('#name').textContent = data.name
   detail.querySelector('#introduction').textContent = data.introduction
   detail.querySelector('#interest').textContent = data.interest
+
   const button = document.querySelector('.invite')
   button.setAttribute('id', userId)
+  button.setAttribute('room', data.room)
 
   if (data.receivedInvite === 'Waiting') {
     button.textContent = 'Accept'
@@ -58,34 +61,41 @@ const renderUserDetail = function (element) {
     clone.querySelector('button').setAttribute('id', userId)
     button.after(clone)
   } else {
-    button.textContent = data.sentInvite || 'Invite'
+    button.textContent = data.sentInvite || data.receivedInvite || 'Invite'
   }
 }
 
 const action = function (element) {
   switch (element.textContent) {
-
     case 'Invite': {
       socket.emit('invite', [user, parseInt(element.id)])
       socket.on('invite', (user_id) => {
         userData[user_id].sentInvite = 'Waiting'
         element.textContent = 'Waiting'
       })
+      break
     }
-
+    case "Accept": {
+      userData[element.id].receivedInvite = "Let's Chat"
+      socket.emit('accept', [user, parseInt(element.id)])
+      socket.on('accept', (room) => {
+        document.querySelector('.reject').remove()
+        element.setAttribute('room', room)
+        element.textContent = "Let's Chat"
+      })
+      break
+    }
+    case "Reject": {
+      element.remove()
+      document.querySelector('.invite').textContent = 'Invite'
+      socket.emit('reject', [user, parseInt(element.id)])
+      break;
+    }
     case "Let's Chat": {
-      window.location = `/friend.html?user_id=${element.id}`
+      console.log(element.room)
+      window.location = `/friend.html?room=${element.room}`
+      break;
     }
-
-    // case "Accept": {
-    //   window.location = `/friend.html?user_id=${element.id}`
-    // }
-
-    // case "Reject": {
-    //   window.location = `/friend.html?user_id=${element.id}`
-    // }
-
   }
-
 }
 

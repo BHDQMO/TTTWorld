@@ -84,14 +84,9 @@ const getUserDetail = async (email) => {
   }
 };
 
-const wrapGeocode = async (geocode) => {
-  return
-}
-
 module.exports = {
   isEmailExist,
   signUp,
   nativeSignIn,
-  getUserDetail,
-  wrapGeocode
+  getUserDetail
 }
