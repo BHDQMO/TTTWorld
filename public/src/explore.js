@@ -9,7 +9,6 @@ fetch('/explore/user_list', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
-    console.log(res)
     user = res.user_id
     userArr = res.data
     userData = {}

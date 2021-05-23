@@ -151,7 +151,9 @@ const onConnect = (socket) => {
   socket.on("answer", Socket.answer(socket, io));
   socket.on("icecandidate", Socket.icecandidate(socket, io));
 
-  socket.on('textMessage', Socket.textMessage(socket, io))
+  socket.on('message', Socket.message(socket, io))
+
+  // socket.on('textMessage', Socket.textMessage(socket, io))
   socket.on('audioMessage', Socket.audioMessage(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))

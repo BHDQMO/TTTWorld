@@ -6,7 +6,11 @@ const translateText = async (req, res) => {
 
 const getFriendList = async (req, res) => {
   const user_id = req.user.user_id
-  const data = await Chat.getFriendList(user_id)
+  const result = await Chat.getFriendList(user_id)
+  const data = {
+    userId: user_id,
+    data: result
+  }
   res.send(data)
 };
 

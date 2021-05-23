@@ -39,8 +39,10 @@ const icecandidate = (socket, io) => ({ room, candidate }) => {
   socket.broadcast.in(room).emit('icecandidate', candidate);
 }
 
-const textMessage = (socket, io) => (msg) => {
-  io.emit('textMessage', `${socket.id}:` + msg)
+const message = (socket, io) => async (msg) => {
+  const result = await Chat.saveMessage(msg)
+  msg.time = result
+  io.emit('message', msg)
 }
 
 const audioMessage = (socket, io) => (blob) => {
@@ -68,7 +70,8 @@ module.exports = {
   offer,
   answer,
   icecandidate,
-  textMessage,
+  message,
+  // textMessage,
   audioMessage,
   invite,
   accept,

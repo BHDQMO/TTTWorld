@@ -8,7 +8,7 @@ main {
 }
 
 .friend {
-  width: 30%;
+  width: 40%;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -39,6 +39,10 @@ main {
   justify-content: flex-end;
 }
 
+#current {
+  border: 1px solid lightslategray;
+}
+
 #warn {
   text-align: center;
   color: red;
@@ -56,6 +60,14 @@ main {
 
 #messages>div:nth-child(odd) {
   background: #efefef;
+}
+
+#message>span {
+  margin: 10px
+}
+
+#message>button {
+  margin: 10px
 }
 
 #videophone {
@@ -121,4 +133,16 @@ main {
   border-radius: 10px;
   /* outline: none; */
   color: #fff;
+}
+
+.user_box {
+  margin: 10px;
+  border: 10px solid lightgreen;
+  display: flex;
+  align-items: center;
+}
+
+img {
+  max-width: 30%;
+  float: left;
 }

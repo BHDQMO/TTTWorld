@@ -1,4 +1,9 @@
 let socket = io()
+let userId
+let userName
+let friendList
+let room
+
 let peer
 let cacheStream
 let mediaRecorder
@@ -18,7 +23,6 @@ const audioConstraints = {
 }
 
 function connection() {
-  // socket = io()
   socket.emit('joinRoom', { username: 'test' })
 
   socket.on('joinRoom', (data) => {
@@ -42,28 +46,7 @@ function connection() {
   // return socket
 }
 
-socket.on('textMessage', (msg) => {
-  const item = document.createElement('div')
-  const msgContent = document.createElement('sapn')
-  msgContent.textContent = msg
 
-  const translate = document.createElement('button')
-  translate.textContent = 'Translate'
-  translate.setAttribute('onclick', 'translateMsg(this)')
-
-  const speak = document.createElement('button')
-  speak.textContent = 'Speak'
-  speak.setAttribute('onclick', 'speakMsg(this)')
-
-  const messages = document.getElementById('messages')
-
-  item.appendChild(msgContent)
-  item.appendChild(translate)
-  item.appendChild(speak)
-  messages.appendChild(item)
-
-  messages.scrollTop = messages.scrollHeight
-})
 
 socket.on('audioMessage', (blob) => {
   const newblob = new Blob([blob], { type: 'audio/ogg' })
@@ -372,17 +355,93 @@ function sendSDPBySignaling(event, sdp) {
 }
 
 // text message function
-
-const form = document.getElementById('form')
-const input = document.getElementById('input')
-
 form.addEventListener('submit', function (e) {
+  const input = document.getElementById('input')
+
   e.preventDefault()
-  if (input.value) {
-    socket.emit('textMessage', input.value)
+  const userinput = input.value
+  if (userinput) {
+    sendMessage('text', userinput)
     input.value = ''
   }
 })
+
+function showTime(time) {
+  const current = new Date()
+  const sendTime = new Date(time)
+  const year = sendTime.getFullYear()
+  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
+  const date = sendTime.getDate()
+  const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
+  const hour = sendTime.getHours()
+  const min = sendTime.getMinutes()
+  const oneDay = 1000 * 60 * 60 * 24
+  const oneWeek = oneDay * 7
+  const oneMonth = oneDay * 30
+  const oneYear = oneDay * 365
+  const timeGap = current - sendTime
+
+  if (timeGap < oneDay) {
+    return hour + ':' + min
+  } else if (timeGap < oneWeek) {
+    return day + ',' + hour + ':' + min
+  } else if (timeGap < oneMonth) {
+    return date + ' ' + day + ',' + hour + ':' + min
+  } else if (timeGap < oneYear) {
+    return month + ' ' + date + ',' + hour + ':' + min
+  } else {
+    return year + ',' + month + '' + date + ',' + hour + ':' + min
+  }
+}
+
+function sendMessage(type, content) {
+  msg = {
+    room: room,
+    sender: userId,
+    type: type,
+    content: content
+  }
+  socket.emit('message', msg)
+  socket.on('message', (msg) => {
+    const messages = document.getElementById('messages')
+    switch (msg.type) {
+      case 'text': {
+        console.log(msg)
+        const sender = msg.sender
+        const template = document.querySelector('#messageTemplate').content
+        const clone = document.importNode(template, true)
+        const message = clone.querySelector('#message')
+        const from = sender === userId ? 'myself' : 'other'
+        message.setAttribute('from', from)
+        if (sender !== userId) {
+          const headIcon = clone.querySelector('#headIcon')
+          headIcon.setAttribute('src', friendList[userId].picture)
+          headIcon.removeAttribute('hidden')
+        }
+        const senderSpan = clone.querySelector('#sender')
+        senderSpan.textContent = sender
+        const sourceSpan = clone.querySelector('#source')
+        sourceSpan.textContent = msg.content
+        const timeSpan = clone.querySelector('#time')
+        timeSpan.textContent = showTime(msg.time)
+        messages.append(clone)
+      }
+      case 'audio': {
+
+      }
+      case 'picture': {
+
+      }
+
+    }
+
+    messages.scrollTop = messages.scrollHeight
+  })
+}
+
+
+
+
 
 // audio message function
 const startAudioRecord = async function () {
@@ -454,19 +513,6 @@ function translateMsg(element) {
   console.log(text)
   console.log(target)
 
-  // let xhr = new XMLHttpRequest();
-  // xhr.open('POST', '/demoGoogleTranslate');
-  // xhr.onreadystatechange = function () {
-  //   if (xhr.readyState === 4) {
-  //     console.log(xhr.responseText)
-  //     const translateResult = document.createElement('span')
-  //     translateResult.textContent = res.data
-  //     ltranslateResult = element.parentNode.insertBefore(translateResult, element.parentNode.childNodes[1])
-  //   }
-  // };
-  // xhr.setRequestHeader('content-type', 'application/JSON')
-  // xhr.send(JSON.stringify(data));
-
   fetch(`/demoGoogleTranslate`, {
     method: "POST",
     headers: {
@@ -509,7 +555,6 @@ function startExchange() {
       }, 2 * 1000)
     }
   }
-
 
   recognition.onspeechend = function () {
     // recognition.start();
@@ -563,3 +608,36 @@ function startExchange() {
 function stopExchange() {
   recognition.stop();
 }
+
+// first come into this page 
+fetch('/chat/friend', {
+  method: 'GET',
+  headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
+}).then(res => res.json())
+  .then(res => {
+    userId = res.userId
+    friendList = res.data
+    friendData = {}
+    friendList.map(item => friendData[item.user_id] = item)
+    const template = document.querySelector('#uerBoxTemplate').content
+    friendList.map(user => {
+      const clone = document.importNode(template, true)
+      console.log(user)
+      clone.querySelector('img').setAttribute('src', user.picture)
+      clone.querySelector('#name').textContent = user.name
+      const exchange = user.native + '<->' + user.learning
+      clone.querySelector('#exchange').textContent = exchange
+      const friend_list = document.querySelector('.friend-list')
+      friend_list.append(clone)
+    })
+  })
+
+let params = (new URL(document.location)).searchParams
+room = params.get('room')
+fetch(`/chat/history?room=${room}`, {
+  method: 'GET',
+  headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
+}).then(res => res.json())
+  .then(res => {
+    console.log(res)
+  })
