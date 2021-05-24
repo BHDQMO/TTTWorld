@@ -26,24 +26,52 @@ async function createRoom(invite) {
 }
 
 const getFriendList = async (user_id) => {
+  // const qeuryString = `
+  // SELECT * FROM 
+  // ( 
+  //   SELECT receiver_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND sender_id = ?
+  //   UNION
+  //   SELECT sender_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND receiver_id = ?
+  // ) AS friend_list
+  // LEFT JOIN 
+  // ( 
+  //   SELECT user_id,name,native,learning,picture,interest FROM user
+  // ) AS user_data
+  // ON friend_list.user_id = user_data.user_id 
+  // `
+
   const qeuryString = `
   SELECT * FROM 
   ( 
-    SELECT receiver_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND sender_id = 35
+    SELECT receiver_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND sender_id = ?
     UNION
-    SELECT sender_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND receiver_id = 35
+    SELECT sender_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND receiver_id = ?
   ) AS friend_list
   LEFT JOIN 
   ( 
     SELECT user_id,name,native,learning,picture,interest FROM user
   ) AS user_data
-  ON friend_list.user_id = user_data.user_id`
+  ON friend_list.user_id = user_data.user_id 
+  `
+
+
   const result = await query(qeuryString, [user_id, user_id])
   return result
 }
 
+const getRooms = async (user_id) => {
+  const qeuryString = `
+  SELECT user_a AS user_id, id AS room_id FROM room WHERE user_b = ?
+  UNION
+  SELECT user_b AS user_id, id AS room_id FROM room WHERE user_a = ?
+  `
+  const result = await query(qeuryString, [user_id, user_id])
+  console.log(result)
+  return result
+}
+
 const getHistory = async (room) => {
-  const qeuryString = `SELECT * FROM history WHERE room = ?`
+  const qeuryString = `SELECT *  FROM history WHERE room = ?`
   const result = await query(qeuryString, room)
   return result
 }
@@ -64,6 +92,7 @@ const saveMessage = async (msg) => {
 module.exports = {
   createRoom,
   getFriendList,
+  getRooms,
   getHistory,
   saveMessage
 }

@@ -99,6 +99,10 @@ main {
   overflow: auto;
 }
 
+li {
+  list-style-type: none;
+}
+
 .contral {
   padding: 10px;
   display: flex;

@@ -51,6 +51,7 @@ const renderUserDetail = function (element) {
 
   const button = document.querySelector('.invite')
   button.setAttribute('id', userId)
+  console.log(data)
   button.setAttribute('room', data.room)
 
   if (data.receivedInvite === 'Waiting') {
@@ -78,6 +79,7 @@ const action = function (element) {
       userData[element.id].receivedInvite = "Let's Chat"
       socket.emit('accept', [user, parseInt(element.id)])
       socket.on('accept', (room) => {
+        console.log(room)
         document.querySelector('.reject').remove()
         element.setAttribute('room', room)
         element.textContent = "Let's Chat"
@@ -91,8 +93,9 @@ const action = function (element) {
       break;
     }
     case "Let's Chat": {
-      console.log(element.room)
-      window.location = `/friend.html?room=${element.room}`
+      const room = element.getAttribute('room')
+      // console.log(`/friend.html?room=${room}`)
+      window.location = `/friend.html?room=${room}`
       break;
     }
   }

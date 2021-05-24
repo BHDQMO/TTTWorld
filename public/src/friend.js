@@ -46,27 +46,6 @@ function connection() {
   // return socket
 }
 
-
-
-socket.on('audioMessage', (blob) => {
-  const newblob = new Blob([blob], { type: 'audio/ogg' })
-
-  const item = document.createElement('li')
-
-  const audio = document.createElement('audio')
-  audio.setAttribute('controls', '')
-  audio.controls = true
-  audio.src = window.URL.createObjectURL(newblob)
-
-  const translate = document.createElement('button')
-  translate.textContent = 'Translate'
-  translate.setAttribute('onclick', 'translateAudio(this)')
-
-  item.appendChild(audio)
-  item.appendChild(translate)
-  messages.appendChild(item)
-})
-
 async function calling() {
   try {
     if (peer) {
@@ -164,10 +143,10 @@ function onReceiveFile(event) {
   receiveProgress.value = receivedSize
 }
 
-function sendMessage() {
-  const textArea = document.querySelector('#dataChannelSend')
-  if (dataChannel.readyState === 'open') dataChannel.send(textArea.value)
-}
+// function sendMessage() {
+//   const textArea = document.querySelector('#dataChannelSend')
+//   if (dataChannel.readyState === 'open') dataChannel.send(textArea.value)
+// }
 
 function sendFileData() {
   const fileInput = document.querySelector('input#fileInput')
@@ -354,18 +333,6 @@ function sendSDPBySignaling(event, sdp) {
   socket.emit(event, sdp)
 }
 
-// text message function
-form.addEventListener('submit', function (e) {
-  const input = document.getElementById('input')
-
-  e.preventDefault()
-  const userinput = input.value
-  if (userinput) {
-    sendMessage('text', userinput)
-    input.value = ''
-  }
-})
-
 function showTime(time) {
   const current = new Date()
   const sendTime = new Date(time)
@@ -394,6 +361,76 @@ function showTime(time) {
   }
 }
 
+async function renderTestMessage(msg) {
+  msg.content = msg.content.toString()
+  const sender = msg.sender
+  const template = document.querySelector('#textMessageTemplate').content
+  const clone = document.importNode(template, true)
+  const message = clone.querySelector('#message')
+  const from = sender === userId ? 'myself' : 'other'
+  message.setAttribute('from', from)
+  // if (sender !== userId) {
+  //   const headIcon = clone.querySelector('#headIcon')
+  //   headIcon.setAttribute('src', friendData[sender].picture)
+  //   headIcon.removeAttribute('hidden')
+  // }
+  const senderSpan = clone.querySelector('#sender')
+  senderSpan.textContent = sender
+  const sourceSpan = clone.querySelector('#source')
+  sourceSpan.textContent = msg.content
+  const timeSpan = clone.querySelector('#time')
+  timeSpan.textContent = showTime(msg.time)
+  messages.append(clone)
+}
+
+async function renderAudioMessage(msg) {
+
+  // data come from server need to pass fetch.json()
+  // the buffer data has been hidden in msg.content.data
+  // convert buffer to arrayBuffer
+  if (msg.content.data) {
+    buffer = msg.content.data
+    var arrayBuffer = new ArrayBuffer(buffer.length);
+    var view = new Uint8Array(arrayBuffer);
+    buffer.map((b, i) => view[i] = b)
+    msg.content = arrayBuffer
+  }
+
+  const newblob = new Blob([msg.content], { type: 'audio/ogg' })
+  const item = document.createElement('li')
+  const audio = document.createElement('audio')
+  audio.setAttribute('controls', '')
+  audio.controls = true
+  audio.src = window.URL.createObjectURL(newblob)
+
+  const translate = document.createElement('button')
+  translate.textContent = 'Translate'
+  translate.setAttribute('onclick', 'translateAudio(this)')
+
+  item.appendChild(audio)
+  item.appendChild(translate)
+  // const messages = document.getElementById('messages')
+  messages.appendChild(item)
+  messages.scrollTop = messages.scrollHeight
+}
+
+async function renderMessage(msg) {
+  switch (msg.type) {
+    case 'text': {
+      renderTestMessage(msg)
+      break
+    }
+    case 'audio': {
+      renderAudioMessage(msg)
+      break
+    }
+    case 'picture': {
+      break
+    }
+  }
+  messages.scrollTop = messages.scrollHeight
+}
+
 function sendMessage(type, content) {
   msg = {
     room: room,
@@ -403,45 +440,20 @@ function sendMessage(type, content) {
   }
   socket.emit('message', msg)
   socket.on('message', (msg) => {
-    const messages = document.getElementById('messages')
-    switch (msg.type) {
-      case 'text': {
-        console.log(msg)
-        const sender = msg.sender
-        const template = document.querySelector('#messageTemplate').content
-        const clone = document.importNode(template, true)
-        const message = clone.querySelector('#message')
-        const from = sender === userId ? 'myself' : 'other'
-        message.setAttribute('from', from)
-        if (sender !== userId) {
-          const headIcon = clone.querySelector('#headIcon')
-          headIcon.setAttribute('src', friendList[userId].picture)
-          headIcon.removeAttribute('hidden')
-        }
-        const senderSpan = clone.querySelector('#sender')
-        senderSpan.textContent = sender
-        const sourceSpan = clone.querySelector('#source')
-        sourceSpan.textContent = msg.content
-        const timeSpan = clone.querySelector('#time')
-        timeSpan.textContent = showTime(msg.time)
-        messages.append(clone)
-      }
-      case 'audio': {
-
-      }
-      case 'picture': {
-
-      }
-
-    }
-
-    messages.scrollTop = messages.scrollHeight
+    renderMessage(msg)
   })
 }
 
-
-
-
+// text message function
+form.addEventListener('submit', function (e) {
+  e.preventDefault()
+  const input = document.getElementById('input')
+  const userinput = input.value
+  if (userinput) {
+    sendMessage('text', userinput)
+    input.value = ''
+  }
+})
 
 // audio message function
 const startAudioRecord = async function () {
@@ -450,23 +462,40 @@ const startAudioRecord = async function () {
   }
   mediaRecorder = new MediaRecorder(cacheStream)
   mediaRecorder.start()
-  console.log('start record')
-
-  let chunks = []
-
   setTimeout(stopAudioRecord, 10 * 1000)
 
+  let chunks = []
   mediaRecorder.ondataavailable = function (e) {
     chunks.push(e.data)
   }
 
   mediaRecorder.onstop = function (e) {
     const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
-    socket.emit('audioMessage', blob)
+    console.log(blob)
+    sendMessage('audio', blob)
+    // socket.emit('audioMessage', blob)
+    socket.on('audioMessage', (blob) => {
+      // const newblob = new Blob([blob], { type: 'audio/ogg' })
+      // const item = document.createElement('li')
+      // const audio = document.createElement('audio')
+      // audio.setAttribute('controls', '')
+      // audio.controls = true
+      // audio.src = window.URL.createObjectURL(newblob)
+
+      // const translate = document.createElement('button')
+      // translate.textContent = 'Translate'
+      // translate.setAttribute('onclick', 'translateAudio(this)')
+
+      // item.appendChild(audio)
+      // item.appendChild(translate)
+      // // const messages = document.getElementById('messages')
+      // messages.appendChild(item)
+      // messages.scrollTop = messages.scrollHeight
+    })
     chunks = []
 
     const localVideo = document.getElementById('localVideo')
-    if (!localVideo.srcObject) {
+    if (localVideo && !localVideo.srcObject) {
       cacheStream.getTracks().forEach((track) => {
         track.stop()
       })
@@ -622,7 +651,7 @@ fetch('/chat/friend', {
     const template = document.querySelector('#uerBoxTemplate').content
     friendList.map(user => {
       const clone = document.importNode(template, true)
-      console.log(user)
+      clone.querySelector('.user_box').id = user.user_id
       clone.querySelector('img').setAttribute('src', user.picture)
       clone.querySelector('#name').textContent = user.name
       const exchange = user.native + '<->' + user.learning
@@ -630,14 +659,27 @@ fetch('/chat/friend', {
       const friend_list = document.querySelector('.friend-list')
       friend_list.append(clone)
     })
+
+    let params = (new URL(document.location)).searchParams
+    room = params.get('room')
+    renderHistory()
   })
 
-let params = (new URL(document.location)).searchParams
-room = params.get('room')
-fetch(`/chat/history?room=${room}`, {
-  method: 'GET',
-  headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
-}).then(res => res.json())
-  .then(res => {
-    console.log(res)
-  })
+function renderHistory(element) {
+  document.querySelector('#messages').textContent = ''
+  if (element) {
+    room = friendData[element.id].room_id
+  }
+  fetch(`/chat/history?room=${room}`, {
+    method: 'GET',
+    headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
+  }).then(res => res.json())
+    .then(res => {
+      res.map(msg => renderMessage(msg))
+      messages.scrollTop = messages.scrollHeight
+    })
+}
+
+
+
+

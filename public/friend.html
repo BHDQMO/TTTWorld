@@ -26,7 +26,7 @@
       <div class="friend-list">
 
         <template id='uerBoxTemplate'>
-          <div class="user_box" id='' hidden>
+          <div class="user_box" id='' onclick='renderHistory(this)'>
             <img src=''>
             <div>
               <p id="name"></p>
@@ -37,18 +37,16 @@
       </div>
     </div>
     <div class="chat-box">
-      <div id="current">
-        <img src="" alt="">
-        <p></p>
-      </div>
       <div id="warn"></div>
       <div id="content">
-        <!-- <div id="videophone">
-          <video id="localVideo" autoplay></video>
-          <video id="remoteVideo" autoplay></video>
-        </div> -->
+        <template>
+          <div id="videophone">
+            <video id="localVideo" autoplay></video>
+            <video id="remoteVideo" autoplay></video>
+          </div>
+        </template>
         <div id="messages"></div>
-        <template id='messageTemplate'>
+        <template id='textMessageTemplate'>
           <div id='message' from="">
             <img id='headIcon' hidden>
             <span id='sender'></span>
@@ -57,6 +55,12 @@
             <button onclick="translateMsg(this)">Translate</button>
             <button onclick="speakMsg(this)">Speak</button>
           </div>
+        </template>
+        <template id='audioMessageTemplate'>
+          <li>
+            <audio controls="" src=""></audio>
+            <button onclick="translateAudio(this)">Translate</button>
+          </li>
         </template>
 
 
