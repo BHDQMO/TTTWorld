@@ -10,7 +10,6 @@ const getFriendList = async (req, res) => {
   const rooms = await Chat.getRooms(user_id)
   let roomPair = {}
   rooms.map(room => roomPair[room.user_id] = room.room_id)
-  console.log(result)
   result = result.map(user => {
     user.room_id = roomPair[user.user_id]
     return user

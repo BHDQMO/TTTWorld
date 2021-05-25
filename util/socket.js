@@ -1,52 +1,26 @@
 const Explore = require('../server/models/explore_model')
 const Chat = require('../server/models/chat_model')
 
-const Room1 = 'general'
-const users = {
-  [Room1]: {},
-};
-
-const joinRoom = (socket, io) => ({ username, room = Room1 }) => {
-  socket.join(room, () => {
-    // push user for the suitable room
-    users[room][socket.client.id] = { username: username, id: socket.client.id }
-    // Notify all the users in the same room
-    socket.broadcast.in(room).emit('joinRoom', users[room]);
-  });
+const joinRoom = (socket, io) => async ({ userId, room }) => {
+  socket.join(room)
+  io.to(room).emit('joinRoom', { userId, room });
+  console.log(await io.sockets.adapter.rooms)//to all
+  // socket.to(room).emit('online'); //to other
 }
 
-const leaveRoom = (socket, io) => ({ room, username }) => {
-  socket.leave(room, () => {
-    let usersRoom = users[room]
-    delete users[room][socket.client.id]
-    // usersRoom = usersRoom.filter((user) => (user.username !== username)) // delete user from the array
-    socket.broadcast.in(room).emit('leaveRoom', usersRoom); // To all the users in the same room
-  })
-}
-
-const offer = (socket, io) => ({ room, offer }) => {
-  console.log('switch offer')
-  socket.broadcast.in(room).emit('offer', offer);
-}
-
-const answer = (socket, io) => ({ room, answer }) => {
-  console.log('switch answer')
-  socket.broadcast.in(room).emit('answer', answer);
-}
-
-const icecandidate = (socket, io) => ({ room, candidate }) => {
-  console.log('switch icecandidate')
-  socket.broadcast.in(room).emit('icecandidate', candidate);
+const leaveRoom = (socket, io) => async ({ userId, room }) => {
+  socket.leave(room)
+  io.to(room).emit('leaveRoom', userId);
+  // socket.to(room).emit('offline');
 }
 
 const message = (socket, io) => async (msg) => {
   const result = await Chat.saveMessage(msg)
   msg.time = result
-  io.emit('message', msg)
-}
-
-const audioMessage = (socket, io) => (blob) => {
-  io.emit('audioMessage', blob)
+  console.log(msg)
+  console.log(await io.sockets.adapter.rooms)
+  io.to(msg.room).emit('message', msg)
+  // io.emit('message', msg)
 }
 
 const invite = (socket, io) => async (invite) => {
@@ -64,6 +38,21 @@ const reject = (socket, io) => async (invite) => {
   await Explore.rejectInvite(invite)
 };
 
+const offer = (socket, io) => ({ room, offer }) => {
+  console.log('switch offer')
+  socket.broadcast.in(room).emit('offer', offer);
+}
+
+const answer = (socket, io) => ({ room, answer }) => {
+  console.log('switch answer')
+  socket.broadcast.in(room).emit('answer', answer);
+}
+
+const icecandidate = (socket, io) => ({ room, candidate }) => {
+  console.log('switch icecandidate')
+  socket.broadcast.in(room).emit('icecandidate', candidate);
+}
+
 module.exports = {
   joinRoom,
   leaveRoom,
@@ -71,8 +60,6 @@ module.exports = {
   answer,
   icecandidate,
   message,
-  // textMessage,
-  audioMessage,
   invite,
   accept,
   reject

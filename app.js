@@ -123,28 +123,10 @@ app.use(function (err, req, res, next) {
 })
 
 const onConnect = (socket) => {
-
-  // // Listening for joining a room (joinRoom event)
-  // socket.on("joinRoom", Socket.joinRoom(socket));
-  // socket.on("disconnect", () => Socket.leaveRoom(socket)({ room: "general" }));
-
-  // // for peer to peer communicate
-  // socket.on("offer", (offer) => Socket.offer(socket)({ room: "general", offer }));
-  // socket.on("answer", (answer) => Socket.answer(socket)({ room: "general", answer }));
-  // socket.on("icecandidate", (candidate) => Socket.icecandidate(socket)({ room: "general", candidate }));
-
-  // socket.on('chat message', (msg) => {
-  //   io.emit('chat message', `${socket.id}:` + msg)
-  // })
-
-  // socket.on('record', (blob) => {
-  //   io.emit('record', blob)
-  // })
-
-
+  console.log('Socket server connected')
   // Listening for joining a room (joinRoom event)
   socket.on("joinRoom", Socket.joinRoom(socket, io));
-  socket.on("disconnect", Socket.leaveRoom(socket, io));
+  socket.on("leaveRoom", Socket.leaveRoom(socket, io));
 
   // for peer to peer communicate
   socket.on("offer", Socket.offer(socket, io));
@@ -152,9 +134,6 @@ const onConnect = (socket) => {
   socket.on("icecandidate", Socket.icecandidate(socket, io));
 
   socket.on('message', Socket.message(socket, io))
-
-  // socket.on('textMessage', Socket.textMessage(socket, io))
-  socket.on('audioMessage', Socket.audioMessage(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))
   socket.on('accept', Socket.accept(socket, io))

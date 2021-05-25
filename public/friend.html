@@ -39,12 +39,6 @@
     <div class="chat-box">
       <div id="warn"></div>
       <div id="content">
-        <template>
-          <div id="videophone">
-            <video id="localVideo" autoplay></video>
-            <video id="remoteVideo" autoplay></video>
-          </div>
-        </template>
         <div id="messages"></div>
         <template id='textMessageTemplate'>
           <div id='message' from="">
@@ -62,17 +56,43 @@
             <button onclick="translateAudio(this)">Translate</button>
           </li>
         </template>
-
-
       </div>
       <div class="chat-box-footer">
         <div class="contral">
-          <div class="videoContral">
+          <div class="exchange">
+            <!-- Popup Form -->
+            <button class="open-button" onclick="openForm()">Booking</button>
             <button onclick="startExchange()">Exchange</button>
             <button onclick="stopExchange()">Time up</button>
+            <div class="form-popup" name="exchangeForm">
+              <form class="form-container" oninput="result.value=parseInt(ratio.value)">
+                <label for="time"><b>Time</b></label>
+                <input class="container" type="datetime-local" id="time" name="time" value="2021-01-01T00:00"
+                  min="2021-01-01T00:00">
+
+                <label class="title" for="duration"><b>Duration</b></label>
+                <div class="container" id="duration-box">
+                  <input type="text" name="duration"><b>mins</b>
+                </div>
+
+                <label class="title" for="ratio"><b>Ratio</b></label>
+                <div class="container" id="ratio-box">
+                  <label for="ratio" id="first-lang">English</label>
+                  <div id="ratio-bar">
+                    <input type="range" id="ratio" name="ratio" value="50" step="10" />
+                    <output name="result" for="ratio">50</output>
+                  </div>
+                  <label for="ratio" id="second-lang">Chinese</label>
+                </div>
+
+                <button type="submit" class="btn" onclick="exchange()">Send</button>
+                <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
+              </form>
+            </div>
+
           </div>
           <div class="videoContral">
-            <button onclick="connection()">Connection</button>
+            <!-- <button onclick="connection()">Connection</button> -->
             <button onclick="calling()">Call</button>
             <button onclick="closing()">Hang Up</button>
           </div>
@@ -87,6 +107,15 @@
         </form>
       </div>
 
+    </div>
+    <div class="video-box">
+      <video id="localVideo" autoplay></video>
+      <video id="remoteVideo" autoplay></video>
+      </template>
+      <template>
+        <video id="localVideo" autoplay></video>
+        <video id="remoteVideo" autoplay></video>
+      </template>
     </div>
   </main>
 

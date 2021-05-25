@@ -66,7 +66,6 @@ const getRooms = async (user_id) => {
   SELECT user_b AS user_id, id AS room_id FROM room WHERE user_a = ?
   `
   const result = await query(qeuryString, [user_id, user_id])
-  console.log(result)
   return result
 }
 
