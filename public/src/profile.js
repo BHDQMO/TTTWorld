@@ -1,3 +1,6 @@
+let socket
+let friendData
+
 const renderProfile = (res) => {
   data = res.data
   const picture = document.getElementById('picture')
@@ -29,5 +32,25 @@ fetch('/user/profile', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
-  .then(renderProfile)
+  .then(res => {
+    user_id = res.data.user_id
+    socket = io({
+      auth: {
+        user_id
+      }
+    })
+
+    socket.on('friend_data', ({ friendList }) => {
+      friendData = {}
+      friendList.map(item => friendData[item.user_id] = item)
+      socket.on('friend_online', ({ friend_id }) => {
+        online_notice(friend_id)
+      })
+    })
+    renderProfile(res)
+  })
+
+
+
+
 

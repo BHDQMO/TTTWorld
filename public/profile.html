@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Socket.IO chat</title>
+  <title>Talk To The World</title>
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"
@@ -10,6 +10,7 @@
     crossorigin="anonymous"></script> -->
   <link href="./styles/profile.css" rel="stylesheet">
   <link href="./styles/header.css" rel="stylesheet">
+  <link href="./styles/notice.css" rel="stylesheet">
 </head>
 
 <body>
@@ -41,8 +42,20 @@
       <div id="address"></div>
     </div>
   </main>
+  <div id="online-notice">
+    <template id="online-notice-template">
+      <div id="online-notice-item">
+        <img id="picture">
+        <span id="name"></span>
+        <span>online</span>
+      </div>
+    </template>
+  </div>
   <footer>
   </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./src/notice.js"></script>
   <script src="./src/profile.js"></script>
 </body>
 

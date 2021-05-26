@@ -48,7 +48,6 @@ const signUp = async (req, res) => {
     picture: user.picture
   }, TOKEN_SECRET)
   user = await User.signUp(user, interests)
-  // console.log(user)
   res.status(200).send({
     data: {
       token: user.token,
@@ -116,7 +115,7 @@ const signIn = async (req, res) => {
     data: {
       token: user.token,
       user: {
-        id: user.id,
+        user_id: user.user_id,
         provider: user.provider,
         name: user.name,
         email: user.email,

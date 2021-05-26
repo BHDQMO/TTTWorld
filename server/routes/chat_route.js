@@ -1,14 +1,21 @@
 const router = require('express').Router();
 
 const {
+  upload,
   wrapAsync,
   authentication
 } = require('../../util/util')
 
+const cpUpload = upload.fields([{
+  name: 'picture',
+  maxCount: 1
+}])
+
 const {
   translateText,
   getFriendList,
-  getHistory
+  getHistory,
+  createExchange
 } = require('../controllers/chat_controller');
 
 router.route('/chat/translate')
@@ -19,5 +26,8 @@ router.route('/chat/friend')
 
 router.route('/chat/history')
   .get(authentication(), wrapAsync(getHistory))
+
+router.route('/chat/exchange')
+  .post(cpUpload, wrapAsync(createExchange))
 
 module.exports = router;

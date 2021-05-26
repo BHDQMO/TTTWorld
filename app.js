@@ -122,8 +122,12 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Internal Server Error')
 })
 
-const onConnect = (socket) => {
+const onConnect = (socket, next) => {
+
+  Socket.friendOnline(socket, io)
+
   console.log('Socket server connected')
+  // socket.on("login", Socket.login(socket, io));
   // Listening for joining a room (joinRoom event)
   socket.on("joinRoom", Socket.joinRoom(socket, io));
   socket.on("leaveRoom", Socket.leaveRoom(socket, io));
@@ -140,6 +144,7 @@ const onConnect = (socket) => {
   socket.on('reject', Socket.reject(socket, io))
 };
 
+io.use(Socket.login)
 io.on("connect", onConnect);
 
 server.listen(port, () => {

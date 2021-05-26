@@ -9,13 +9,18 @@ signInForm.addEventListener('submit', (e) => {
     formData.append('provider', 'native')
     e.preventDefault();
     let xhr = new XMLHttpRequest();
-    xhr.open('POST', '/user/signIn');
+    xhr.open('POST', '/user/signin');
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
-        alert('signIn completed!');
-        const data = JSON.parse(xhr.responseText)
-        window.localStorage.setItem('JWT', data.data.token)
-        window.location.assign('/profile.html')
+        const data = JSON.parse(xhr.responseText).data
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert('signIn completed!');
+          window.localStorage.setItem('JWT', data.token)
+          window.localStorage.setItem('TTTWorld_user_id', data.user.user_id)
+          window.location.assign('/profile.html')
+        }
       }
     };
     xhr.send(formData);

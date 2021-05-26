@@ -2,9 +2,10 @@
 <html>
 
 <head>
-  <title>Socket.IO chat</title>
+  <title>Talk To The World</title>
   <link href="./styles/friend.css" rel="stylesheet">
   <link href="./styles/header.css" rel="stylesheet">
+  <link href="./styles/notice.css" rel="stylesheet">
 </head>
 
 <body>
@@ -37,25 +38,33 @@
       </div>
     </div>
     <div class="chat-box">
-      <div id="warn"></div>
-      <div id="content">
+      <div id="chat-box-head">
+        <img src="" id="other_pic">
+        <label id="other_name" for="other_pic">Name</label>
+        <div id="warn"></div>
+      </div>
+      <div id="chat-box-main">
         <div id="messages"></div>
-        <template id='textMessageTemplate'>
+        <template id='messageTemplate'>
           <div id='message' from="">
             <img id='headIcon' hidden>
-            <span id='sender'></span>
-            <span id='source'></span>
-            <span id='time'></span>
-            <button onclick="translateMsg(this)">Translate</button>
-            <button onclick="speakMsg(this)">Speak</button>
+            <!-- <span id='sender'></span> -->
+            <span id='content' hidden></span>
+            <audio controls src="" style="display: none"></audio>
+            <span id='sendTime'></span>
+            <button id='translateMsgBtn' onclick="translateMsg(this)">Translate</button>
+            <button id='translateAudioBtn' onclick="translateAudio(this)">Translate</button>
+            <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
           </div>
         </template>
-        <template id='audioMessageTemplate'>
-          <li>
-            <audio controls="" src=""></audio>
+        <!-- <template id='audioMessageTemplate'>
+          <div id='message' from="">
+            <img id='headIcon' hidden>
+            <audio controls src=""></audio>
+            <span id='sendTime'></span>
             <button onclick="translateAudio(this)">Translate</button>
-          </li>
-        </template>
+          </div>
+        </template> -->
       </div>
       <div class="chat-box-footer">
         <div class="contral">
@@ -64,30 +73,38 @@
             <button class="open-button" onclick="openForm()">Booking</button>
             <button onclick="startExchange()">Exchange</button>
             <button onclick="stopExchange()">Time up</button>
-            <div class="form-popup" name="exchangeForm">
-              <form class="form-container" oninput="result.value=parseInt(ratio.value)">
+            <div class="form-popup">
+              <form class="form-container" oninput="result.value=parseInt(ratio.value)" name="exchangeForm">
                 <label for="time"><b>Time</b></label>
-                <input class="container" type="datetime-local" id="time" name="time" value="2021-01-01T00:00"
+                <input type="datetime-local" id="time" name="start_time" value="2021-01-01T00:00"
                   min="2021-01-01T00:00">
 
                 <label class="title" for="duration"><b>Duration</b></label>
                 <div class="container" id="duration-box">
-                  <input type="text" name="duration"><b>mins</b>
+                  <input type="text" name="duration" placeholder="60"><b>mins</b>
                 </div>
 
                 <label class="title" for="ratio"><b>Ratio</b></label>
                 <div class="container" id="ratio-box">
-                  <label for="ratio" id="first-lang">English</label>
+                  <label for="ratio" id="first-lang"></label>
                   <div id="ratio-bar">
                     <input type="range" id="ratio" name="ratio" value="50" step="10" />
                     <output name="result" for="ratio">50</output>
                   </div>
-                  <label for="ratio" id="second-lang">Chinese</label>
+                  <label for="ratio" id="second-lang"></label>
                 </div>
 
+                <label class="title" for="noticing"><b>Noticing</b></label>
+                <div class="form-container container" id="noticing-box">
+                  <input type="checkbox" id='noticing'>
+                  <input type="text" id='notice-time' name='noticing' placeholder="10">
+                  <b>mins</b>
+                </div>
                 <button type="submit" class="btn" onclick="exchange()">Send</button>
                 <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
               </form>
+
+
             </div>
 
           </div>
@@ -101,7 +118,7 @@
             <button onclick="stopAudioRecord()">Stop</button>
           </div>
         </div>
-        <form id="form" action="">
+        <form id="form">
           <input id="input" autocomplete="off" />
           <button>Send</button>
         </form>
@@ -118,11 +135,20 @@
       </template>
     </div>
   </main>
-
+  <div id="online-notice">
+    <template id="online-notice-template">
+      <div id="online-notice-item">
+        <img id="picture">
+        <span id="name"></span>
+        <span>online</span>
+      </div>
+    </template>
+  </div>
 
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./src/friend.js"></script>
+  <script src="./src/notice.js"></script>
 </body>
 
 </html>

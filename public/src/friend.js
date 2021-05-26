@@ -1,7 +1,7 @@
-let socket = io()
-
-let userId
-let userName
+let socket
+let user
+let user_id
+let friendData
 let friendList
 let room
 
@@ -23,78 +23,70 @@ const audioConstraints = {
   audio: { sampleRate: 16000 }
 }
 
-async function renderTestMessage(msg) {
+async function renderMessage(msg) {
   const sender = msg.sender
-  const template = document.querySelector('#textMessageTemplate').content
+  const template = document.querySelector('#messageTemplate').content
   const clone = document.importNode(template, true)
-  const message = clone.querySelector('#message')
-  const from = sender === userId ? 'myself' : 'other'
-  message.setAttribute('from', from)
-  // if (sender !== userId) {
-  //   const headIcon = clone.querySelector('#headIcon')
-  //   headIcon.setAttribute('src', friendData[sender].picture)
-  //   headIcon.removeAttribute('hidden')
-  // }
-  const senderSpan = clone.querySelector('#sender')
-  senderSpan.textContent = sender
-  const sourceSpan = clone.querySelector('#source')
-  sourceSpan.textContent = msg.content
-  const timeSpan = clone.querySelector('#time')
-  timeSpan.textContent = showTime(msg.time)
-  messages.append(clone)
-}
 
-async function renderAudioMessage(msg) {
-  // data come from server need to pass fetch.json()
-  // the buffer data has been hidden in msg.content.data
-  // convert buffer to arrayBuffer
-  if (msg.content.data) {
-    buffer = msg.content.data
-    var arrayBuffer = new ArrayBuffer(buffer.length);
-    var view = new Uint8Array(arrayBuffer);
-    buffer.map((b, i) => view[i] = b)
-    msg.content = arrayBuffer
+  if (sender !== user_id) {
+    const headIcon = clone.querySelector('#headIcon')
+    headIcon.setAttribute('src', friendData[sender].picture)
+    headIcon.removeAttribute('hidden')
+    from = 'other'
+  } else {
+    from = 'myself'
   }
 
-  const newblob = new Blob([msg.content], { type: 'audio/ogg' })
-  const item = document.createElement('li')
-  const audio = document.createElement('audio')
-  audio.setAttribute('controls', '')
-  audio.controls = true
-  audio.src = window.URL.createObjectURL(newblob)
+  const message = clone.querySelector('#message')
+  message.setAttribute('from', from)
+  const timeSpan = clone.querySelector('#sendTime')
+  timeSpan.textContent = showTime(msg.time)
 
-  const translate = document.createElement('button')
-  translate.textContent = 'Translate'
-  translate.setAttribute('onclick', 'translateAudio(this)')
-
-  item.appendChild(audio)
-  item.appendChild(translate)
-  // const messages = document.getElementById('messages')
-  messages.appendChild(item)
-  messages.scrollTop = messages.scrollHeight
-}
-
-async function renderMessage(msg) {
   switch (msg.type) {
     case 'text': {
-      renderTestMessage(msg)
+      const sourceSpan = clone.querySelector('#content')
+      sourceSpan.removeAttribute('hidden')
+      sourceSpan.textContent = msg.content
+
+      const translateAudioBtn = clone.querySelector('#translateAudioBtn')
+      translateAudioBtn.remove()
+      // translateAudioBtn.setAttribute('hidden', '')
       break
     }
     case 'audio': {
-      renderAudioMessage(msg)
+      let audioBlob
+      if (msg.content.data) {
+        buffer = msg.content.data
+        var arrayBuffer = new ArrayBuffer(buffer.length);
+        var view = new Uint8Array(arrayBuffer);
+        buffer.map((b, i) => view[i] = b)
+        msg.content = arrayBuffer
+      }
+      audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
+      const audio = clone.querySelector('audio')
+      audio.setAttribute('style', 'display: block')
+      audio.src = window.URL.createObjectURL(audioBlob)
+
+      const translateMsgBtn = clone.querySelector('#translateMsgBtn')
+      translateMsgBtn.setAttribute('hidden', '')
+      const speakBtn = clone.querySelector('#speakBtn')
+      speakBtn.setAttribute('hidden', '')
+      translateMsgBtn.remove()
+      speakBtn.remove()
       break
     }
     case 'picture': {
       break
     }
   }
+  messages.append(clone)
   messages.scrollTop = messages.scrollHeight
 }
 
 function sendMessage(type, content) {
   msg = {
     room: room,
-    sender: userId,
+    sender: user_id,
     type: type,
     content: content
   }
@@ -150,9 +142,9 @@ const startAudioRecord = async function () {
 async function renderHistory(element) {
   document.querySelector('#messages').textContent = ''
 
-  socket.emit('leaveRoom', { userId, room })
+  socket.emit('leaveRoom', { user_id, room })
   if (element) { room = friendData[element.id].room_id }
-  socket.emit('joinRoom', { userId, room })
+  socket.emit('joinRoom', { user_id, room })
 
   fetch(`/chat/history?room=${room}`, {
     method: 'GET',
@@ -170,10 +162,19 @@ fetch('/chat/friend', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
-    userId = res.userId
+    user = res.user
+    user_id = res.user.user_id
     friendList = res.data
     friendData = {}
     friendList.map(item => friendData[item.user_id] = item)
+
+    socket = io({
+      auth: {
+        user_id
+      }
+    })
+
+    //render friend list
     const template = document.querySelector('#uerBoxTemplate').content
     friendList.map(user => {
       const clone = document.importNode(template, true)
@@ -186,26 +187,56 @@ fetch('/chat/friend', {
       friend_list.append(clone)
     })
 
+    //set room as the global variable
     let params = (new URL(document.location)).searchParams
     room = parseInt(params.get('room'))
+
+    //decide talk to whom and collect data
+    let other_pic
+    let other_name
+    let target
+    if (!room) {
+      target = 0
+    } else {
+      rooms = friendList.map(user => user.room_id)
+      target = rooms.indexOf(room)
+    }
+
+    console.log(friendList)
+    room = friendList[target].room_id
+    other_pic = friendList[target].picture
+    other_name = friendList[target].name
+
+    //render popup form
+    document.querySelector('#first-lang').textContent = user.native
+    document.querySelector('#second-lang').textContent = user.learning
+
+    //redner chat box header
+    document.querySelector('#other_pic').setAttribute('src', other_pic)
+    document.querySelector('#other_name').textContent = other_name
+
     renderHistory()
-    socket.emit('joinRoom', { userId, room })
+
+    socket.emit('joinRoom', { user_id, room })
     socket.on('connect', () => {
       console.log('[socket] connect');
     });
+
     socket.on('disconnect', () => {
       console.log('[socket] disconnect')
     })
-    socket.on('joinRoom', ({ userId, room }) => {
-      console.log(`[Room] ${userId} join ${room}`)
+    socket.on('joinRoom', ({ user_id, room }) => {
+      console.log(`[Room] ${user_id} join ${room}`)
     })
     socket.on('leaveRoom', (data) => {
       console.log(`[Room] ${data} leave`)
-      console.log(data)
     })
     socket.on('message', (msg) => {
-      // console.log(msg)
       renderMessage(msg)
+    })
+
+    socket.on('friend_online', ({ friend_id }) => {
+      online_notice(friend_id)
     })
 
     socket.on('offer', handleSDPOffer)
@@ -560,7 +591,8 @@ function speakMsg(element) {
 
 // translate text
 function translateMsg(element) {
-  const text = element.parentNode.firstChild.textContent.split(':')[1]
+  const text = element.parentNode.querySelector('#source').textContent
+  console.log(element.parentNode)
   const target = 'en' //need change follow the user's native zh-TWen-US
   const data = {
     text, target
@@ -666,12 +698,44 @@ function closeForm() {
   document.querySelector(".form-popup").style.display = "none";
 }
 
-function exchange() {
-  let exchangeForm = document.forms.exchangeForm
-  const formData = new FormData(exchangeForm)
-  fetch('/chat/exchange', { method: 'POST' })
-    .then(res => res.json())
-    .then(res => {
+function exchange(e) {
+  let exchangeForm = document.forms.namedItem('exchangeForm');
+  console.log(exchangeForm)
+  exchangeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(exchangeForm);
+    formData.append('publisher_id', user_id);
+    formData.append('first_lang', user.native);
+    formData.append('second_lang', user.learning);
+    checkBox = document.getElementById("noticing");
+    if (checkBox.checked !== true) {
+      formData.set('noticing', null);
+    }
 
+    // let xhr = new XMLHttpRequest();
+    // xhr.open('POST', '/chat/exchange');
+    // xhr.onreadystatechange = function () {
+    //   if (xhr.readyState === 4) {
+    //     // alert('signIn completed!');
+    //     // const data = JSON.parse(xhr.responseText)
+    //     // window.localStorage.setItem('JWT', data.data.token)
+    //     // window.location.assign('/profile.html')
+    //   }
+    // };
+    // xhr.send(formData);
+
+    fetch('/chat/exchange', {
+      method: 'POST',
+      body: formData,
+      // headers: {
+      //   'Authorization': 'Bearer ' + window.localStorage.
+      //     getItem('JWT'),
+      //   'Content-Type': 'application/JSON'
+      // }
     })
+      .then(res => res.json())
+      .then(res => {
+
+      })
+  })
 }

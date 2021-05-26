@@ -40,16 +40,22 @@ main {
   justify-content: flex-end;
 }
 
-#current {
-  border: 1px solid lightslategray;
-}
-
 #warn {
   text-align: center;
   color: red;
 }
 
-#content {
+#chat-box-head {
+  border-radius: 10px;
+  padding: 5px;
+  background: white;
+  margin: 0 0 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+#chat-box-main {
   flex-grow: 1;
   padding: 10px;
   background: white;
@@ -59,16 +65,63 @@ main {
   /* align-items: center; */
 }
 
-#messages>div:nth-child(odd) {
+/* #messages>div:nth-child(odd) {
   background: #efefef;
+} */
+
+#message {
+  height: 2.5rem;
+  display: flex;
+  align-items: flex-end;
 }
 
-#message>span {
-  margin: 10px
+#headIcon {
+  border-radius: 50%;
+  margin: 0 5px;
+}
+
+#content {
+  height: 2rem;
+  border-radius: 1rem;
+  padding: 0 10px;
+  line-height: 2rem;
+}
+
+#message[from="other"]>span#content {
+  background: cornflowerblue;
+  margin: 0 5px 0 0;
+}
+
+#message[from="myself"]>span#content {
+  margin: 0 10px 0 5px;
+  background: rgba(93, 226, 93, 0.219);
+}
+
+#message[from="myself"] {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+#sendTime {
+  font-size: 25%;
+  font-weight: bold;
+  color: gray;
 }
 
 #message>button {
-  margin: 10px
+  display: none;
+  margin: 0 5px;
+  border-radius: 0.5rem;
+  padding: 0 5px;
+}
+
+#message:hover>button {
+  display: block;
+}
+
+audio {
+  margin: 0 10px 0 5px;
+  height: 2rem;
 }
 
 .video-box {
@@ -87,9 +140,6 @@ main {
 #localVideo {
   object-fit: cover;
   height: 40%;
-  /* position: absolute;
-  bottom: 0px;
-  right: 0px; */
 }
 
 #messages {
@@ -105,7 +155,6 @@ li {
 .contral {
   padding: 10px;
   display: flex;
-  /* align-items: stretch; */
   justify-content: space-between
 }
 
@@ -117,7 +166,7 @@ li {
 }
 
 #form {
-  background: rgba(0, 75, 255, 0);
+  /* background: rgba(0, 75, 255, 0); */
   /* padding: 5px 10px 10px 0px; */
   display: flex;
   height: 2rem;
@@ -147,16 +196,20 @@ li {
 
 .user_box {
   margin: 10px;
-  border: 10px solid lightgreen;
+  border: 1px solid lightgreen;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80px;
+  height: 50px;
+}
+
+.user_box:hover {
+  background: lightsteelblue;
 }
 
 img {
+  border-radius: 50%;
   max-width: 30%;
-  /* float: left; */
   height: 80%;
 }
 
@@ -175,10 +228,6 @@ img {
   border: none;
   cursor: pointer;
   opacity: 0.8;
-  /* position: absolute;
-  bottom: 0px;
-  left: 0px; */
-  /* width: 280px; */
 }
 
 /* The popup form - hidden by default */
@@ -188,7 +237,8 @@ img {
   position: absolute;
   bottom: 40px;
   left: 0px;
-  border: 3px solid #f1f1f1;
+  border: 10px solid #635f5f;
+  border-radius: 10px;
   z-index: 9;
 }
 
@@ -204,7 +254,7 @@ img {
 
 /* Full-width input fields */
 
-.form-container input[type=text], .form-container input[type=password] {
+.form-container input[type=text], .form-container input[type=password] .form-container input[type=text] {
   width: 100%;
   padding: 0 5px;
   margin: 5px 0;
@@ -221,7 +271,7 @@ img {
 
 /* Set a style for the submit/login button */
 
-.form-container .btn {
+.btn {
   background-color: #04AA6D;
   color: white;
   padding: 5px;
@@ -235,7 +285,7 @@ img {
 
 /* Add a red background color to the cancel button */
 
-.form-container .cancel {
+.cancel {
   background-color: red;
 }
 
@@ -276,4 +326,10 @@ img {
 
 b {
   padding: 0 5px;
+}
+
+#noticing-box {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
 }

@@ -15,7 +15,7 @@ const getFriendList = async (req, res) => {
     return user
   })
   const data = {
-    userId: user_id,
+    user: req.user,
     data: result
   }
   res.send(data)
@@ -42,8 +42,14 @@ const getHistory = async (req, res) => {
   res.send(data)
 };
 
+const createExchange = async (req, res) => {
+  const exchange = req.body
+  const result = await Chat.createExchange(exchange)
+}
+
 module.exports = {
   translateText,
   getFriendList,
-  getHistory
+  getHistory,
+  createExchange
 };

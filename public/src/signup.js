@@ -2,14 +2,21 @@ let signUpForm = document.forms.namedItem('signUpForm');
 signUpForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const formData = new FormData(signUpForm);
+  console.log(formData.get('name'))
   let xhr = new XMLHttpRequest();
-  xhr.open('POST', '/user/signUp');
+  xhr.open('POST', '/user/signup');
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      alert('signup completed!');
       const data = JSON.parse(xhr.responseText)
-      window.localStorage.setItem('JWT', data.data.token)
-      window.location.assign('/profile.html')
+      if (data.data.error) {
+        alert(data.data.error);
+      } else {
+        alert('signIn completed!');
+        console.log(data.data)
+        window.localStorage.setItem('JWT', data.data.token)
+        window.localStorage.setItem('TTTWorld_user_id', data.data.user.user_id)
+        window.location.assign('/profile.html')
+      }
     }
   };
   xhr.send(formData);

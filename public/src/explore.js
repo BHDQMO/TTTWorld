@@ -1,6 +1,6 @@
-let socket = io('/')
+let socket
 
-let user //current user
+let user_id //current user
 let userArr //Array
 let userData //pair
 
@@ -9,10 +9,22 @@ fetch('/explore/user_list', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
-    user = res.user_id
+    user_id = res.user_id
     userArr = res.data
     userData = {}
     userArr.map(item => userData[item.user_id] = item.data)
+
+    socket = io({
+      auth: {
+        user_id
+      }
+    })
+
+    socket.on('friend_online', ({ friend_id }) => {
+      const friendData = userData
+      online_notice(friend_id)
+    })
+
     renderUserList()
   })
 
@@ -68,7 +80,7 @@ const renderUserDetail = function (element) {
 const action = function (element) {
   switch (element.textContent) {
     case 'Invite': {
-      socket.emit('invite', [user, parseInt(element.id)])
+      socket.emit('invite', [user_id, parseInt(element.id)])
       socket.on('invite', (user_id) => {
         userData[user_id].sentInvite = 'Waiting'
         element.textContent = 'Waiting'
@@ -77,7 +89,7 @@ const action = function (element) {
     }
     case "Accept": {
       userData[element.id].receivedInvite = "Let's Chat"
-      socket.emit('accept', [user, parseInt(element.id)])
+      socket.emit('accept', [user_id, parseInt(element.id)])
       socket.on('accept', (room) => {
         console.log(room)
         document.querySelector('.reject').remove()
@@ -89,7 +101,7 @@ const action = function (element) {
     case "Reject": {
       element.remove()
       document.querySelector('.invite').textContent = 'Invite'
-      socket.emit('reject', [user, parseInt(element.id)])
+      socket.emit('reject', [user_id, parseInt(element.id)])
       break;
     }
     case "Let's Chat": {
