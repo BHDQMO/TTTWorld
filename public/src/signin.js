@@ -1,3 +1,4 @@
+
 let signInForm = document.forms.namedItem('signInForm');
 signInForm.addEventListener('submit', (e) => {
   const formData = new FormData(signInForm);
@@ -18,8 +19,17 @@ signInForm.addEventListener('submit', (e) => {
         } else {
           alert('signIn completed!');
           window.localStorage.setItem('JWT', data.token)
-          window.localStorage.setItem('TTTWorld_user_id', data.user.user_id)
-          window.location.assign('/profile.html')
+          const socket = io({
+            auth: {
+              user_id: data.user.user_id
+            }
+          })
+          console.log(data.user)
+          socket.emit("signin", data.user)
+          socket.on('signin', () => {
+            window.location.assign('/profile.html')
+          })
+
         }
       }
     };

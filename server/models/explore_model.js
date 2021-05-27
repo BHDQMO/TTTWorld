@@ -50,6 +50,30 @@ async function getFriendStatus(user, userIds) {
   return initation
 
 }
+
+async function getWaitingInvite(user_id) {
+  queryString = `
+  SELECT * FROM (
+    SELECT sender_id AS user_id, \`read\` FROM friend WHERE status = 'Waiting' AND receiver_id = ? AND \`read\` = 0
+  ) AS waiting_invite
+  LEFT JOIN 
+  (
+    SELECT user_id, name, native, learning, picture FROM user
+  ) AS user_temp
+  ON waiting_invite.user_id = user_temp.user_id
+  `
+  const result = await query(queryString, [user_id])
+  return result
+}
+
+async function readInvite(user_id) {
+  queryString = `
+  UPDATE friend SET \`read\` = 1 WHERE receiver_id = ? AND status = 'Waiting' 
+  `
+  const result = await query(queryString, [user_id])
+  return result
+}
+
 async function getRooms(user, friendList) {
   const queryString = `
   SELECT * FROM 
@@ -92,6 +116,8 @@ async function rejectInvite(invite) {
 module.exports = {
   getUserList,
   getFriendStatus,
+  getWaitingInvite,
+  readInvite,
   getRooms,
   createInvite,
   acceptInvite,

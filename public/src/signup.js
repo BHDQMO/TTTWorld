@@ -14,7 +14,6 @@ signUpForm.addEventListener('submit', (e) => {
         alert('signIn completed!');
         console.log(data.data)
         window.localStorage.setItem('JWT', data.data.token)
-        window.localStorage.setItem('TTTWorld_user_id', data.data.user.user_id)
         window.location.assign('/profile.html')
       }
     }

@@ -34,19 +34,16 @@ fetch('/user/profile', {
 }).then(res => res.json())
   .then(res => {
     user_id = res.data.user_id
+
     socket = io({
       auth: {
         user_id
       }
     })
 
-    socket.on('friend_data', ({ friendList }) => {
-      friendData = {}
-      friendList.map(item => friendData[item.user_id] = item)
-      socket.on('friend_online', ({ friend_id }) => {
-        online_notice(friend_id)
-      })
-    })
+    socket.on('friend_online', online_notice)
+    socket.on('waitingInvite', renderWaitingIvite)
+
     renderProfile(res)
   })
 

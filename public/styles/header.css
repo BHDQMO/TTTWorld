@@ -56,7 +56,7 @@ a {
   padding: 0 3px;
 }
 
-.tag+.tag {
+.tag+.tag, .tag+.dropdown {
   border-left: 2px solid #3f3a3a;
 }
 
@@ -73,4 +73,69 @@ a {
   color: white;
   font-weight: bold;
   font-size: 25px;
+}
+
+/* The container <div> - needed to position the dropdown content */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+
+.dropdown-content {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  right: 0px;
+  top: 40px;
+  background-color: #f1f1f1;
+  /* width: 250px; */
+  font-size: 1rem;
+  align-items: center;
+  justify-content: space-around;
+  padding: 5px
+}
+
+/* Links inside the dropdown */
+
+.dropdown-content a {
+  display: flex;
+  height: 3rem;
+  color: black;
+  text-decoration: none;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* Change color of dropdown links on hover */
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown-content img {
+  height: 100%;
+  border-radius: 50%;
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+.dropdown-content button {
+  border: 1px solid darkolivegreen;
+  border-radius: 5px;
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+.dropdown-content span {
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+/* Show the dropdown menu on hover */
+
+.dropdown:hover .dropdown-content {
+  display: flex;
 }

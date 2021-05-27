@@ -16,22 +16,42 @@ const login = (socket, next) => {
   socket.user_id = user_id
   socket_ids[user_id] = socket.id
   next()
-
 }
 
-const friendOnline = async (socket, io) => {
-  const user_id = socket.user_id
-  const friendList = await Chat.getFriendList(user_id)
-  io.to(socket.id).emit('friend_data', { friendList: friendList });
+const sendWaitingInvite = async (socket, io) => {
+  const waitingInvite = await Explore.getWaitingInvite(socket.user_id)
+  let unreadNum = 0
+  waitingInvite.map(invite => {
+    if (invite.read === 0) { unreadNum++ }
+  })
+  const data = {
+    unreadNum,
+    waitingInvite
+  }
+  io.to(socket.id).emit('waitingInvite', data)
+}
 
-  friendIdList = friendList.map(friend => friend.user_Id)
+const readInvite = (socket, io) => async (user_id) => {
+  const result = await Explore.readInvite(socket.user_id)
+  console.log(result)
+}
+
+const onlineNotice = (socket, io) => async (user) => {
+  const friendList = await Chat.getFriendList(user.user_id)
+  const roomList = await Chat.getRooms(user.user_id)
+  const roomPair = {}
+  roomList.map(room => roomPair[room.user_id] = room.room_id)
+  console.log(socket_ids)
   friendList.map(friend => {
     const friend_id = friend.user_id
     const friend_socket_id = socket_ids[friend_id]
     if (friend_socket_id) {
-      io.to(friend_socket_id).emit('friend_online', { friend_id: user_id });
+      console.log(friend_socket_id)
+      user.room_id = roomPair[friend_id]
+      io.to(friend_socket_id).emit('friend_online', user);
     }
   })
+  io.to(socket.id).emit('signin');
 }
 
 // socket_ids[socket_ids.handshack.auth.user_id] = socket.id
@@ -58,7 +78,18 @@ const message = (socket, io) => async (msg) => {
 
 const invite = (socket, io) => async (invite) => {
   await Explore.createInvite(invite)
-  socket.emit('invite', invite[1])
+  io.to(socket_ids[invite[0]]).emit('invite', invite[1])
+
+  const waitingInvite = await Explore.getWaitingInvite(invite[1])
+  let unreadNum = 0
+  waitingInvite.map(invite => {
+    if (invite.read === 0) { unreadNum++ }
+  })
+  const data = {
+    unreadNum,
+    waitingInvite
+  }
+  io.to(socket_ids[invite[1]]).emit('waitingInvite', data)
 };
 
 const accept = (socket, io) => async (invite) => {
@@ -88,7 +119,9 @@ const icecandidate = (socket, io) => ({ room, candidate }) => {
 
 module.exports = {
   login,
-  friendOnline,
+  sendWaitingInvite,
+  onlineNotice,
+  readInvite,
   joinRoom,
   leaveRoom,
   offer,

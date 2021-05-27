@@ -124,9 +124,10 @@ app.use(function (err, req, res, next) {
 
 const onConnect = (socket, next) => {
 
-  Socket.friendOnline(socket, io)
-
   console.log('Socket server connected')
+  Socket.sendWaitingInvite(socket, io)
+  socket.on("signin", Socket.onlineNotice(socket, io));
+  socket.on("readInvite", Socket.readInvite(socket, io));
   // socket.on("login", Socket.login(socket, io));
   // Listening for joining a room (joinRoom event)
   socket.on("joinRoom", Socket.joinRoom(socket, io));

@@ -20,10 +20,8 @@ fetch('/explore/user_list', {
       }
     })
 
-    socket.on('friend_online', ({ friend_id }) => {
-      const friendData = userData
-      online_notice(friend_id)
-    })
+    socket.on('friend_online', online_notice)
+    socket.on('waitingInvite', renderWaitingIvite)
 
     renderUserList()
   })

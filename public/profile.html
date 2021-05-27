@@ -20,7 +20,21 @@
       <a href="/friend.html" class="tag">Friend</a>
       <a href="/explore.html" class="tag">Explore</a>
       <a href="/profile.html" class="tag">Profile</a>
-      <div class="tag">Notice</div>
+      <div class="dropdown">
+        <div class="tag">Notice</div>
+        <div class="dropdown-content">
+          <span id="bufferMsg">There is no news</span>
+          <template id="notice_dropdown_template">
+            <a href="#">
+              <img src="" alt="">
+              <span id="someoneName"></span>
+              <span id="lang"></span>
+              <button class="invite" id="" onclick="noticeAction(this)">Accept</button>
+              <button class="reject" id="" onclick="noticeAction(this)">Reject</button>
+            </a>
+          </template>
+        </div>
+      </div>
       <sapn class="count-circle">
         <sapn class="count">0</sapn>
       </sapn>

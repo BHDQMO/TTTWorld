@@ -202,7 +202,6 @@ fetch('/chat/friend', {
       target = rooms.indexOf(room)
     }
 
-    console.log(friendList)
     room = friendList[target].room_id
     other_pic = friendList[target].picture
     other_name = friendList[target].name
@@ -235,9 +234,8 @@ fetch('/chat/friend', {
       renderMessage(msg)
     })
 
-    socket.on('friend_online', ({ friend_id }) => {
-      online_notice(friend_id)
-    })
+    socket.on('friend_online', online_notice)
+    socket.on('waitingInvite', renderWaitingIvite)
 
     socket.on('offer', handleSDPOffer)
     socket.on('answer', handleSDPAnswer)
