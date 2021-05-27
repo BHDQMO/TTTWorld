@@ -3,7 +3,8 @@ let user
 let user_id
 let friendData
 let friendList
-let room
+let talkTo
+// let room
 
 let peer
 let cacheStream
@@ -25,73 +26,85 @@ const audioConstraints = {
 
 async function renderMessage(msg) {
   const sender = msg.sender
-  const template = document.querySelector('#messageTemplate').content
-  const clone = document.importNode(template, true)
+  if (sender === talkTo.user_id || sender === user_id) {
+    const template = document.querySelector('#messageTemplate').content
+    const clone = document.importNode(template, true)
 
-  if (sender !== user_id) {
-    const headIcon = clone.querySelector('#headIcon')
-    headIcon.setAttribute('src', friendData[sender].picture)
-    headIcon.removeAttribute('hidden')
-    from = 'other'
-  } else {
-    from = 'myself'
-  }
-
-  const message = clone.querySelector('#message')
-  message.setAttribute('from', from)
-  const timeSpan = clone.querySelector('#sendTime')
-  timeSpan.textContent = showTime(msg.time)
-
-  switch (msg.type) {
-    case 'text': {
-      const sourceSpan = clone.querySelector('#content')
-      sourceSpan.removeAttribute('hidden')
-      sourceSpan.textContent = msg.content
-
-      const translateAudioBtn = clone.querySelector('#translateAudioBtn')
-      translateAudioBtn.remove()
-      // translateAudioBtn.setAttribute('hidden', '')
-      break
+    if (sender !== user_id) {
+      const headIcon = clone.querySelector('#headIcon')
+      headIcon.setAttribute('src', friendData[sender].picture)
+      headIcon.removeAttribute('hidden')
+      from = 'other'
+    } else {
+      from = 'myself'
     }
-    case 'audio': {
-      let audioBlob
-      if (msg.content.data) {
-        buffer = msg.content.data
-        var arrayBuffer = new ArrayBuffer(buffer.length);
-        var view = new Uint8Array(arrayBuffer);
-        buffer.map((b, i) => view[i] = b)
-        msg.content = arrayBuffer
+
+    const message = clone.querySelector('#message')
+    message.setAttribute('from', from)
+    const timeSpan = clone.querySelector('#sendTime')
+    timeSpan.textContent = showTime(msg.time)
+
+    switch (msg.type) {
+      case 'text': {
+        const sourceSpan = clone.querySelector('#content')
+        sourceSpan.removeAttribute('hidden')
+        sourceSpan.textContent = msg.content
+
+        const translateAudioBtn = clone.querySelector('#translateAudioBtn')
+        translateAudioBtn.remove()
+        // translateAudioBtn.setAttribute('hidden', '')
+        break
       }
-      audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
-      const audio = clone.querySelector('audio')
-      audio.setAttribute('style', 'display: block')
-      audio.src = window.URL.createObjectURL(audioBlob)
+      case 'audio': {
+        let audioBlob
+        if (msg.content.data) {
+          buffer = msg.content.data
+          var arrayBuffer = new ArrayBuffer(buffer.length);
+          var view = new Uint8Array(arrayBuffer);
+          buffer.map((b, i) => view[i] = b)
+          msg.content = arrayBuffer
+        }
+        audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
+        const audio = clone.querySelector('audio')
+        audio.setAttribute('style', 'display: block')
+        audio.src = window.URL.createObjectURL(audioBlob)
 
-      const translateMsgBtn = clone.querySelector('#translateMsgBtn')
-      translateMsgBtn.setAttribute('hidden', '')
-      const speakBtn = clone.querySelector('#speakBtn')
-      speakBtn.setAttribute('hidden', '')
-      translateMsgBtn.remove()
-      speakBtn.remove()
-      break
+        const translateMsgBtn = clone.querySelector('#translateMsgBtn')
+        translateMsgBtn.setAttribute('hidden', '')
+        const speakBtn = clone.querySelector('#speakBtn')
+        speakBtn.setAttribute('hidden', '')
+        translateMsgBtn.remove()
+        speakBtn.remove()
+        break
+      }
+      case 'picture': {
+        break
+      }
     }
-    case 'picture': {
-      break
-    }
+    messages.append(clone)
+    messages.scrollTop = messages.scrollHeight
+  } else {
+    const user_box = document.querySelector(`div[id='${sender}']`)
+    const count = user_box.querySelector('.count')
+    const num = count.textContent
+    const count_circle = user_box.querySelector('.count-circle')
+    count_circle.style = 'display: flex'
+    count.textContent = parseInt(num) + 1
   }
-  messages.append(clone)
-  messages.scrollTop = messages.scrollHeight
 }
 
 function sendMessage(type, content) {
-  msg = {
-    room: room,
-    sender: user_id,
-    type: type,
-    content: content
+  data = {
+    receiver: talkTo.user_id,
+    msg: {
+      room: talkTo.room_id,
+      sender: user_id,
+      type: type,
+      content: content
+    }
   }
-  console.log('before send')
-  socket.emit('message', msg)
+
+  socket.emit('message', data)
 }
 
 // text message function
@@ -140,13 +153,27 @@ const startAudioRecord = async function () {
 }
 
 async function renderHistory(element) {
+
   document.querySelector('#messages').textContent = ''
 
-  socket.emit('leaveRoom', { user_id, room })
-  if (element) { room = friendData[element.id].room_id }
-  socket.emit('joinRoom', { user_id, room })
+  socket.emit('leaveRoom', { user_id, room: talkTo.room_id })
+  if (element) {
+    talkTo = friendData[element.id]
+  }
+  socket.emit('joinRoom', { user_id, room: talkTo.room_id })
 
-  fetch(`/chat/history?room=${room}`, {
+  const user_box = document.querySelector(`div[id='${talkTo.user_id}']`)
+  const count = user_box.querySelector('.count')
+  if (count.textContent !== '0') {
+    const count_circle = user_box.querySelector('.count-circle')
+    count_circle.style = 'display: none'
+    count.textContent = 0
+    data = [talkTo.user_id, talkTo.room_id]
+    console.log(data)
+    socket.emit('readMessage', data)
+  }
+
+  fetch(`/chat/history?room=${talkTo.room_id}`, {
     method: 'GET',
     headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
   }).then(res => res.json())
@@ -156,7 +183,7 @@ async function renderHistory(element) {
     })
 }
 
-// first come into this page 
+// first come into this page
 fetch('/chat/friend', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
@@ -167,6 +194,7 @@ fetch('/chat/friend', {
     friendList = res.data
     friendData = {}
     friendList.map(item => friendData[item.user_id] = item)
+    console.log(friendList)
 
     socket = io({
       auth: {
@@ -183,40 +211,43 @@ fetch('/chat/friend', {
       clone.querySelector('#name').textContent = user.name
       const exchange = user.native + '<->' + user.learning
       clone.querySelector('#exchange').textContent = exchange
+      const unread = user.unread
+      if (unread > 0) {
+        clone.querySelector('.count-circle').style = 'display: flex'
+        clone.querySelector('.count').textContent = unread
+      }
       const friend_list = document.querySelector('.friend-list')
       friend_list.append(clone)
+
     })
 
     //set room as the global variable
     let params = (new URL(document.location)).searchParams
-    room = parseInt(params.get('room'))
+    let room = parseInt(params.get('room'))
 
     //decide talk to whom and collect data
-    let other_pic
-    let other_name
-    let target
     if (!room) {
-      target = 0
+      talkTo = friendList[0]
     } else {
-      rooms = friendList.map(user => user.room_id)
-      target = rooms.indexOf(room)
+      talkToId = friendList.map(friend => {
+        if (friend.room === room) {
+          return friend
+        }
+      })
+      talkTo = friendData[talkToId]
     }
-
-    room = friendList[target].room_id
-    other_pic = friendList[target].picture
-    other_name = friendList[target].name
 
     //render popup form
     document.querySelector('#first-lang').textContent = user.native
     document.querySelector('#second-lang').textContent = user.learning
 
     //redner chat box header
-    document.querySelector('#other_pic').setAttribute('src', other_pic)
-    document.querySelector('#other_name').textContent = other_name
+    document.querySelector('#other_pic').setAttribute('src', talkTo.picture)
+    document.querySelector('#other_name').textContent = talkTo.name
 
     renderHistory()
 
-    socket.emit('joinRoom', { user_id, room })
+    socket.emit('joinRoom', { user_id, room: talkTo.room_id })
     socket.on('connect', () => {
       console.log('[socket] connect');
     });
@@ -436,7 +467,7 @@ function handleICEGatheringStateChange() {
 }
 
 function handleIceCandidate(event) {
-  socket.emit('icecandidate', { room: room, candidate: event.candidate })
+  socket.emit('icecandidate', { room: talkTo.room_id, candidate: event.candidate })
 }
 
 function handleRemoteStream(event) {

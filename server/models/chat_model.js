@@ -85,11 +85,32 @@ const saveMessage = async (msg) => {
   }
 }
 
+const readMessage = async (data) => {
+  console.log(data)
+  const querySrting = `
+  UPDATE history SET \`read\` = 1 WHERE sender = ? AND room = ? AND \`read\` = 0
+  `
+  const result = await query(querySrting, data)
+  return result
+}
+
 const createExchange = async (exchange) => {
   const result = await query(`INSERT INTO exchange SET ?`, exchange)
   console.log(result)
   return result.insertId
 }
+
+const getUnreadMsgNum = async (roomList) => {
+  const queryString = `
+  SELECT sender, COUNT(*) AS unread 
+  FROM history 
+  WHERE \`read\` = 0 AND sender <> 35 AND room IN (11,12,13,14)
+  GROUP BY sender
+  `
+  const result = await query(queryString, roomList)
+  return result
+}
+
 
 module.exports = {
   createRoom,
@@ -98,7 +119,9 @@ module.exports = {
   getRooms,
   getHistory,
   saveMessage,
-  createExchange
+  readMessage,
+  createExchange,
+  getUnreadMsgNum,
 }
 
 // function () {

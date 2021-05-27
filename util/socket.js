@@ -57,23 +57,35 @@ const onlineNotice = (socket, io) => async (user) => {
 // socket_ids[socket_ids.handshack.auth.user_id] = socket.id
 // console.log(socket_ids)
 
-const joinRoom = (socket, io) => async ({ userId, room }) => {
+const joinRoom = (socket, io) => async ({ user_id, room }) => {
   socket.join(room)
-  io.to(room).emit('joinRoom', { userId, room });
-  // console.log(await io.sockets.adapter.rooms)
+  io.to(room).emit('joinRoom', { user_id, room });
+  console.log(io.sockets.adapter.rooms)
   // socket.to(room).emit('online'); //to other
 }
 
-const leaveRoom = (socket, io) => async ({ userId, room }) => {
+const leaveRoom = (socket, io) => async ({ user_id, room }) => {
   socket.leave(room)
-  io.to(room).emit('leaveRoom', userId);
+  io.to(room).emit('leaveRoom', user_id);
   // socket.to(room).emit('offline');
 }
 
-const message = (socket, io) => async (msg) => {
+const message = (socket, io) => async (data) => {
+  const msg = data.msg
   const result = await Chat.saveMessage(msg)
   msg.time = result
+  console.log(io.sockets.adapter.rooms)
   io.to(msg.room).emit('message', msg)
+  if (!io.sockets.adapter.rooms.get(msg.room).has(socket_ids[data.receiver])) {
+    console.log(socket_ids[data.receiver])
+    io.to(socket_ids[data.receiver]).emit('message', msg)
+  }
+
+}
+
+const readMessage = (socket, io) => async (data) => {
+  const result = await Chat.readMessage(data)
+  console.log(result)
 }
 
 const invite = (socket, io) => async (invite) => {
@@ -128,6 +140,7 @@ module.exports = {
   answer,
   icecandidate,
   message,
+  readMessage,
   invite,
   accept,
   reject,

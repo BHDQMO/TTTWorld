@@ -195,6 +195,7 @@ li {
 }
 
 .user_box {
+  position: relative;
   margin: 10px;
   border: 1px solid lightgreen;
   display: flex;
@@ -332,4 +333,22 @@ b {
   display: flex;
   flex-direction: row;
   align-content: center;
+}
+
+.user_box .count-circle {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: none;
+  border-radius: 10.5px;
+  min-width: 21px;
+  background: red;
+  justify-content: center;
+}
+
+.user_box .count {
+  padding: 0 9px;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
 }

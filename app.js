@@ -139,6 +139,7 @@ const onConnect = (socket, next) => {
   socket.on("icecandidate", Socket.icecandidate(socket, io));
 
   socket.on('message', Socket.message(socket, io))
+  socket.on('readMessage', Socket.readMessage(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))
   socket.on('accept', Socket.accept(socket, io))
