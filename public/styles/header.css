@@ -10,7 +10,7 @@
 }
 
 body {
-  /* position: relative; */
+  position: relative;
   height: 100vh;
   width: 100vw;
   margin: 0;
@@ -138,4 +138,24 @@ a {
 
 .dropdown:hover .dropdown-content {
   display: flex;
+}
+
+.tool_box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.tool_box>div {
+  padding: 5px;
+  border: 1px solid darkolivegreen;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.tool_box th {
+  padding: 5px;
+  border: 1px solid darkolivegreen;
+  margin: 10px;
 }
