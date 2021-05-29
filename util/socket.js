@@ -33,6 +33,7 @@ const sendWaitingInvite = async (socket, io) => {
 
 const readInvite = (socket, io) => async (user_id) => {
   const result = await Explore.readInvite(socket.user_id)
+  console.log(result)
 }
 
 const onlineNotice = (socket, io) => async (user) => {
@@ -40,10 +41,12 @@ const onlineNotice = (socket, io) => async (user) => {
   const roomList = await Chat.getRooms(user.user_id)
   const roomPair = {}
   roomList.map(room => roomPair[room.user_id] = room.room_id)
+  console.log(socket_ids)
   friendList.map(friend => {
     const friend_id = friend.user_id
     const friend_socket_id = socket_ids[friend_id]
     if (friend_socket_id) {
+      console.log(friend_socket_id)
       user.room_id = roomPair[friend_id]
       io.to(friend_socket_id).emit('friend_online', user);
     }
@@ -57,6 +60,7 @@ const onlineNotice = (socket, io) => async (user) => {
 const joinRoom = (socket, io) => async ({ user_id, room }) => {
   socket.join(room)
   io.to(room).emit('joinRoom', { user_id, room });
+  console.log(io.sockets.adapter.rooms)
   // socket.to(room).emit('online'); //to other
 }
 
@@ -70,8 +74,10 @@ const message = (socket, io) => async (data) => {
   const msg = data.msg
   const result = await Chat.saveMessage(msg)
   msg.time = result
+  console.log(io.sockets.adapter.rooms)
   io.to(msg.room).emit('message', msg)
   if (!io.sockets.adapter.rooms.get(msg.room).has(socket_ids[data.receiver])) {
+    console.log(socket_ids[data.receiver])
     io.to(socket_ids[data.receiver]).emit('message', msg)
   }
 
@@ -79,6 +85,7 @@ const message = (socket, io) => async (data) => {
 
 const readMessage = (socket, io) => async (data) => {
   const result = await Chat.readMessage(data)
+  console.log(result)
 }
 
 const invite = (socket, io) => async (invite) => {
@@ -107,23 +114,20 @@ const reject = (socket, io) => async (invite) => {
   await Explore.rejectInvite(invite)
 };
 
+const offer = (socket, io) => ({ room, offer }) => {
+  console.log('switch offer')
+  socket.broadcast.in(room).emit('offer', offer);
+}
+
+const answer = (socket, io) => ({ room, answer }) => {
+  console.log('switch answer')
+  socket.broadcast.in(room).emit('answer', answer);
+}
+
 const icecandidate = (socket, io) => ({ room, candidate }) => {
   console.log('switch icecandidate')
-  socket.to(room).emit('icecandidate', { room, candidate });
+  socket.broadcast.in(room).emit('icecandidate', candidate);
 }
-
-const offer = (socket, io) => (data) => {
-  const room = data.room
-  console.log('switch offer')
-  socket.to(room).emit('offer', data);
-}
-
-const answer = (socket, io) => (data) => {
-  console.log('switch answer')
-  socket.to(data.room).emit('answer', data);
-}
-
-
 
 module.exports = {
   login,
