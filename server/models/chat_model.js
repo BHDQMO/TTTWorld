@@ -76,9 +76,10 @@ const saveMessage = async (msg) => {
   await transaction()
   try {
     const result = await query(`INSERT INTO history SET ?`, msg)
-    const timeStamp = await query(`SELECT time FROM history WHERE id = ?`, [result.insertId])
+    const historyId = result.insertId
+    const timeStamp = await query(`SELECT time FROM history WHERE id = ?`, [historyId])
     await commit()
-    return timeStamp[0].time
+    return { time: timeStamp[0].time, historyId }
   } catch (error) {
     rollback()
     return error

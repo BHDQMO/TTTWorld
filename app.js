@@ -35,70 +35,45 @@ app.post('/demoGoogleTranslate', async (req, res) => {
 })
 
 app.post('/demoGoogleSpeechToTest', async (req, res) => {
-  var body = Buffer.from([]); // create a buffer
-  req.on('data', function (data) {
-    body = Buffer.concat([body, data]);
-  });
-  req.on('end', async function () {
+  console.log(req.body)
 
-    var pathname = "test.ogg";
-    fs.writeFileSync(pathname, body);
 
-    const encoding = 'LINEAR16';
-    const sampleRateHertz = 16000;
-    const languageCode = 'en-US';
-    const audio = {
-      content: fs.readFileSync(pathname).toString('base64'),
-    }
+  var buffer = Buffer.from([]); // create a buffer
+  buffer = Buffer.concat([buffer, req.body]);
+  var pathname = "test.ogg";
+  fs.writeFileSync(pathname, buffer);
 
-    const config = {
-      encoding: encoding,
-      // sampleRateHertz: sampleRateHertz,
-      languageCode: languageCode,
-    };
 
-    const request = {
-      config: config,
-      audio: audio,
-    };
+  // var buffer = Buffer.from([]); // create a buffer
+  // req.on('data', function (data) {
+  //   buffer = Buffer.concat([buffer, data]);
+  // });
+  // req.on('end', async function () {
 
-    const translateResult = await Google.translateAudio(request)
-    console.log(`Transcription: ${translateResult}`)
+  //   var pathname = "test.ogg";
+  //   fs.writeFileSync(pathname, body);
 
-    // var pathname = "test.ogg";
-    // const speech = require('@google-cloud/speech');
-    // const client = new speech.SpeechClient();
+  //   const encoding = 'LINEAR16';
+  //   const sampleRateHertz = 16000;
+  //   const languageCode = 'en-US';
+  //   const audio = {
+  //     content: fs.readFileSync(pathname).toString('base64'),
+  //   }
 
-    // async function transcribeContextClasses() {
-    //   const audio = {
-    //     content: fs.readFileSync(pathname).toString('base64'),
-    //   }
+  //   const config = {
+  //     encoding: encoding,
+  //     // sampleRateHertz: sampleRateHertz,
+  //     languageCode: languageCode,
+  //   };
 
-    //   const config = {
-    //     encoding: 'LINEAR16',
-    //     languageCode: 'en-US',
-    //     speechContexts: [speechContext],
-    //   };
+  //   const request = {
+  //     config: config,
+  //     audio: audio,
+  //   };
 
-    //   const request = {
-    //     config: config,
-    //     audio: audio,
-    //   };
-
-    //   // Detects speech in the audio file.
-    //   const [response] = await client.recognize(request);
-    //   console.log(response)
-
-    //   response.results.forEach((result, index) => {
-    //     const transcript = result.alternatives[0].transcript;
-    //     console.log('-'.repeat(20));
-    //     console.log(`First alternative of result ${index}`);
-    //     console.log(`Transcript: ${transcript}`);
-    //     res.send(transcript)
-    //   });
-    // }
-    // transcribeContextClasses();
-  });
+  //   const translateResult = await Google.translateAudio(request)
+  //   console.log(`Transcription: ${translateResult}`)
+  // });
 
 })
 

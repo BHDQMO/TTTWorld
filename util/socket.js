@@ -69,10 +69,16 @@ const leaveRoom = (socket, io) => async ({ user_id, room }) => {
 const message = (socket, io) => async (data) => {
   const msg = data.msg
   const result = await Chat.saveMessage(msg)
-  msg.time = result
+  msg.time = result.time
+  msg.id = result.historyId
+  console.log(msg)
   io.to(msg.room).emit('message', msg)
-  if (!io.sockets.adapter.rooms.get(msg.room).has(socket_ids[data.receiver])) {
-    io.to(socket_ids[data.receiver]).emit('message', msg)
+  try {
+    if (!io.sockets.adapter.rooms.get(msg.room).has(socket_ids[data.receiver])) {
+      io.to(socket_ids[data.receiver]).emit('message', msg)
+    }
+  } catch (e) {
+    console.log("can't find the room num in sever list")
   }
 
 }
@@ -122,8 +128,6 @@ const answer = (socket, io) => (data) => {
   console.log('switch answer')
   socket.to(data.room).emit('answer', data);
 }
-
-
 
 module.exports = {
   login,

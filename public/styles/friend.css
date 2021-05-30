@@ -8,13 +8,31 @@ main {
 }
 
 .friend {
-  width: 20%;
+  flex-grow: 1;
   padding: 10px;
   min-width: 300px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
+}
+
+.chat-box {
+  flex-grow: 1;
+  padding: 10px 10px 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.video-box {
+  flex-grow: 1;
+  padding: 10px 10px 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: space-around;
 }
 
 .friend-list-title {
@@ -29,15 +47,6 @@ main {
   background: white;
   border-radius: 10px;
   text-align: center
-}
-
-.chat-box {
-  flex-grow: 1;
-  padding: 10px 10px 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-end;
 }
 
 #warn {
@@ -65,19 +74,43 @@ main {
   /* align-items: center; */
 }
 
-/* #messages>div:nth-child(odd) {
-  background: #efefef;
-} */
-
 #message {
-  height: 2.5rem;
+  /* height: 2.5rem; */
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
+  margin: 10px 0;
 }
 
 #headIcon {
+  height: 2.5rem;
   border-radius: 50%;
   margin: 0 5px;
+}
+
+#messageBody {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#replyMsg #content, #replyMsg audio {
+  border-radius: 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background: rgba(211, 211, 211, 0.25)
+}
+
+#replyMsg .fix {
+  text-decoration-line: line-through;
+  text-decoration-color: red;
+}
+
+#originMsg {
+  display: flex;
+}
+
+#originMsg .fix {
+  color: limegreen;
 }
 
 #content {
@@ -87,19 +120,56 @@ main {
   line-height: 2rem;
 }
 
-#message[from="other"]>span#content {
+#message[from="other"] #originMsg span#content {
   background: cornflowerblue;
   margin: 0 5px 0 0;
 }
 
-#message[from="myself"]>span#content {
-  margin: 0 10px 0 5px;
-  background: rgba(93, 226, 93, 0.219);
-}
+/* #message[from="myself"] #messageBody {
+  align-items: baseline;
+} */
 
 #message[from="myself"] {
   display: flex;
   flex-direction: row-reverse;
+  justify-content: right;
+  padding: 0 10px 0 0
+}
+
+#message[from="myself"] #messageBody {
+  border-radius: 10px;
+  background: rgb(151, 100, 151);
+}
+
+#message[from="myself"] {
+  border-radius: 10px;
+}
+
+#message[from="myself"] #originMsg #replyMsg+#originMsg {
+  border-top: 1px solid lightsalmon;
+  display: flex;
+}
+
+#message[from="myself"] .messageItem {
+  flex-direction: row-reverse;
+}
+
+#message[from="myself"] #originMsg span#content {
+  /* margin: 0 10px 0 5px; */
+  /* background: rgba(93, 226, 93, 0.219); */
+  text-overflow: ellipsis;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#message[from="myself"] #translationMsg span#content {
+  /* margin: 0 10px 0 5px; */
+  background: rgba(211, 211, 211, 0.25)
+}
+
+#translationMsg span#content {
+  background: rgba(211, 211, 211, 0.25)
 }
 
 #sendTime {
@@ -108,28 +178,21 @@ main {
   color: gray;
 }
 
-#message>button {
+#message button {
   display: none;
   margin: 0 5px;
   border-radius: 0.5rem;
   padding: 0 5px;
 }
 
-#message:hover>button {
+#message:hover button {
   display: block;
 }
 
 audio {
-  margin: 0 10px 0 5px;
+  /* margin: 0 10px 0 5px; */
   height: 2rem;
-}
-
-.video-box {
-  padding: 10px 10px 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-content: center;
-  justify-content: space-around;
+  width: 7rem;
 }
 
 #remoteVideo {
@@ -165,6 +228,43 @@ li {
   background: yellowgreen;
 }
 
+#replyTo {
+  display: none;
+  /* justify-content: space-between; */
+  margin: 0 0 10px;
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+#replyTo #leftPart {
+  flex-grow: 1;
+  display: flex;
+}
+
+#replyTo img {
+  height: 2rem;
+}
+
+#replyTo #replyBody {
+  display: flex;
+  flex-direction: column;
+}
+
+#replyTo span {
+  height: 2rem;
+  padding: 0 10px;
+  line-height: 2rem;
+}
+
+#replyTo span#content {
+  background: rgba(95, 158, 160, 0.24);
+}
+
+#cancelReply {
+  cursor: pointer;
+}
+
 #form {
   /* background: rgba(0, 75, 255, 0); */
   /* padding: 5px 10px 10px 0px; */
@@ -192,6 +292,18 @@ li {
   border-radius: 10px;
   /* outline: none; */
   color: #fff;
+}
+
+#recordVoiceMsgBtn {
+  background: rgba(45, 58, 56, 0.74);
+  /* border: none; */
+  padding: 0 1rem;
+  /* margin: 0.25rem; */
+  border-radius: 10px;
+  /* outline: none; */
+  color: #fff;
+  display: inline-block;
+  /* text-align: center; */
 }
 
 .user_box {

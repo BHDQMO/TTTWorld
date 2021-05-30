@@ -1,28 +1,21 @@
+'user strict'
+
 let socket
 let user
 let user_id
 let friendData
 let friendList
 let talkTo
-// let room
+let historyData = {}
 
 let localPeer
 let cacheStream
 let mediaRecorder
 
-// const isPortrait = true;
-// const videoConstraints = {
-//   'audio': false,
-//   'video': {
-//     facingMode: 'user',
-//     width: isPortrait ? 480 : 640,
-//     height: isPortrait ? 640 : 480,
-//   },
-// }
-
-const audioConstraints = {
-  audio: { sampleRate: 16000 }
-}
+let textTranslatelang = 'en' //native lang
+let audioTranlateLang = 'en-US' //native lang
+let speechSynthesisLang = 'en-US' //text lang
+let speechRecognitionLang = 'zh-TW' //target Lang when exchange 'zh-TW''en-US'
 
 async function renderMessage(msg) {
   const sender = msg.sender
@@ -30,6 +23,7 @@ async function renderMessage(msg) {
     const template = document.querySelector('#messageTemplate').content
     const clone = document.importNode(template, true)
 
+    let from
     if (sender !== user_id) {
       const headIcon = clone.querySelector('#headIcon')
       headIcon.setAttribute('src', friendData[sender].picture)
@@ -39,32 +33,152 @@ async function renderMessage(msg) {
       from = 'myself'
     }
 
+    const msgReplyBtn = document.querySelector(`button[historyId ='${msg.reply}']`)
+    let replyContent
+
+    if (msg.reply !== null) {
+      replyType = msgReplyBtn.getAttribute('contentType')
+      switch (replyType) {
+        case 'text': {
+          const textElement = msgReplyBtn.parentNode.children[0]
+          replyContent = document.importNode(textElement, true)
+          if (msg.correct === 1) {
+            let wrongString = replyContent.textContent.split('')
+            let rightString = msg.content.split('')
+            const result = patienceDiff(wrongString, rightString).lines
+
+            let tempString = ''
+            let isDetected = false
+            const markedWrongSpans = document.createElement('div')
+            console.log(result)
+            result.map((char, i) => {
+              if (char.aIndex !== -1) {
+                if (char.bIndex !== -1 && isDetected === false) {
+                  tempString += char.line
+                } else if (char.bIndex === -1 && isDetected === false) {
+                  const tempElement = document.createElement('span')
+                  tempElement.textContent = tempString
+                  tempElement.setAttribute('class', 'pass')
+                  markedWrongSpans.appendChild(tempElement)
+                  tempString = '' + char.line
+                  isDetected = true
+                } else if (char.bIndex === -1 && isDetected === true) {
+                  tempString += char.line
+                } else if (char.bIndex !== -1 && isDetected === true) {
+                  const tempElement = document.createElement('span')
+                  tempElement.textContent = tempString
+                  tempElement.setAttribute('class', 'fix')
+                  markedWrongSpans.appendChild(tempElement)
+                  tempString = '' + char.line
+                  isDetected = false
+                }
+                if (i === result.length - 1) {
+                  const tempElement = document.createElement('span')
+                  tempElement.textContent = tempString
+                  if (isDetected === false) {
+                    tempElement.setAttribute('class', 'pass')
+                  } else {
+                    tempElement.setAttribute('class', 'fix')
+                  }
+                  markedWrongSpans.appendChild(tempElement)
+                }
+              }
+            })
+            replyContent = markedWrongSpans
+          }
+
+          break
+        }
+        case 'audio': {
+          const audioElement = msgReplyBtn.parentNode.children[1]
+          replyContent = document.importNode(audioElement, true)
+          break
+        }
+      }
+      const replyMsg = clone.querySelector('#replyMsg')
+      replyMsg.append(replyContent)
+      replyMsg.style = 'display:flex'
+    }
+
+
     const message = clone.querySelector('#message')
     message.setAttribute('from', from)
+    const replyBtn = clone.querySelector("#reply")
+    replyBtn.setAttribute('historyId', msg.id)
+    replyBtn.setAttribute('senderId', msg.sender)
+    replyBtn.setAttribute('contentType', msg.type)
     const timeSpan = clone.querySelector('#sendTime')
     timeSpan.textContent = showTime(msg.time)
 
     switch (msg.type) {
       case 'text': {
-        const sourceSpan = clone.querySelector('#content')
-        sourceSpan.removeAttribute('hidden')
-        sourceSpan.textContent = msg.content
 
+        //render correction
+        if (msg.correct === 1) {
+          let wrongString = replyContent.textContent.split('')
+          let rightString = msg.content.split('')
+          const result = patienceDiff(wrongString, rightString).lines
+
+          let tempString = ''
+          let isDetected = false
+          let markedRightSpans = document.createElement('div')
+          console.log(result)
+          result.map((char, i) => {
+            if (char.bIndex !== -1) {
+              if (char.aIndex !== -1 && isDetected === false) {
+                tempString += char.line
+              } else if (char.aIndex === -1 && isDetected === false) {
+                const tempElement = document.createElement('span')
+                tempElement.textContent = tempString
+                tempElement.setAttribute('class', 'pass')
+                markedRightSpans.appendChild(tempElement)
+                tempString = '' + char.line
+                isDetected = true
+              } else if (char.aIndex === -1 && isDetected === true) {
+                tempString += char.line
+              } else if (char.aIndex !== -1 && isDetected === true) {
+                const tempElement = document.createElement('span')
+                tempElement.textContent = tempString
+                tempElement.setAttribute('class', 'fix')
+                markedRightSpans.appendChild(tempElement)
+                tempString = '' + char.line
+                isDetected = false
+              }
+              if (i === result.length - 1) {
+                const tempElement = document.createElement('span')
+                tempElement.textContent = tempString
+                if (isDetected === false) {
+                  tempElement.setAttribute('class', 'pass')
+                } else {
+                  tempElement.setAttribute('class', 'fix')
+                }
+                markedRightSpans.appendChild(tempElement)
+              }
+            }
+
+          })
+
+          const originMsg = clone.querySelector('#originMsg')
+          const audio = clone.querySelector('#originMsg audio')
+          markedRightSpans = originMsg.insertBefore(markedRightSpans, audio)
+        } else {
+          const sourceSpan = clone.querySelector('#originMsg #content')
+          sourceSpan.removeAttribute('hidden')
+          sourceSpan.textContent = msg.content
+        }
         const translateAudioBtn = clone.querySelector('#translateAudioBtn')
         translateAudioBtn.remove()
-        // translateAudioBtn.setAttribute('hidden', '')
         break
       }
       case 'audio': {
-        let audioBlob
         if (msg.content.data) {
-          buffer = msg.content.data
+          const buffer = msg.content.data
           var arrayBuffer = new ArrayBuffer(buffer.length);
           var view = new Uint8Array(arrayBuffer);
           buffer.map((b, i) => view[i] = b)
           msg.content = arrayBuffer
         }
-        audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
+        const audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
         const audio = clone.querySelector('audio')
         audio.setAttribute('style', 'display: block')
         audio.src = window.URL.createObjectURL(audioBlob)
@@ -73,14 +187,19 @@ async function renderMessage(msg) {
         translateMsgBtn.setAttribute('hidden', '')
         const speakBtn = clone.querySelector('#speakBtn')
         speakBtn.setAttribute('hidden', '')
+        const correctBtn = clone.querySelector('#correctBtn')
+        correctBtn.setAttribute('hidden', '')
         translateMsgBtn.remove()
         speakBtn.remove()
+        correctBtn.remove()
         break
       }
       case 'picture': {
         break
       }
     }
+
+    const messages = document.querySelector('#messages')
     messages.append(clone)
     messages.scrollTop = messages.scrollHeight
   } else {
@@ -94,28 +213,129 @@ async function renderMessage(msg) {
 }
 
 function sendMessage(type, content) {
-  data = {
+  let historyId = null
+  const replyBody = document.querySelector('#replyBody')
+  if (replyBody) {
+    historyId = replyBody.getAttribute('historyId')
+    replyBody.lastChild.remove()
+    document.querySelector('#replyTo').style = 'display:none'
+  }
+
+  let correct = false
+  const userInput = document.querySelector('#input')
+  if (userInput.hasAttribute('correct')) {
+    correct = true
+    userInput.removeAttribute('correct')
+  }
+
+  const data = {
     receiver: talkTo.user_id,
     msg: {
+      reply: historyId,
+      correct: correct,
       room: talkTo.room_id,
       sender: user_id,
       type: type,
-      content: content
+      content: content,
     }
   }
-
+  console.log(data)
   socket.emit('message', data)
 }
 
+// reply message
+function reply(element) {
+  const testContent = document.querySelector('#replyTo #content')
+  const audioContent = document.querySelector('#replyTo audio')
+  if (testContent) {
+    testContent.remove()
+  }
+  if (audioContent) {
+    audioContent.remove()
+  }
+
+  const type = element.getAttribute('contentType')
+  let clone
+  switch (type) {
+    case 'text': {
+      const textElement = element.parentNode.children[0]
+      clone = textElement.cloneNode('deep')
+      break
+    }
+    case 'audio': {
+      const audioElement = element.parentNode.children[1]
+      clone = audioElement.cloneNode('deep')
+      break
+    }
+  }
+
+  const replyTo = document.querySelector('#replyTo')
+  const sender = parseInt(element.getAttribute('sender'))
+  const historyId = parseInt(element.getAttribute('historyId'))
+  try {
+    replyTo.querySelector('img').src = friendData[sender].picture
+    replyTo.querySelector('span#senderName').textContent = friendData[sender].name
+  } catch (e) {
+    replyTo.querySelector('img').src = user.picture
+    replyTo.querySelector('span#senderName').textContent = user.name
+  }
+  const replyBody = document.querySelector('#replyBody')
+  replyBody.setAttribute('historyId', historyId)
+  console.log(clone)
+  replyBody.append(clone)
+  replyTo.style = 'display:flex'
+
+  //return for correct
+
+  return clone.textContent
+}
+
+// cancel reply
+function cancelReply() {
+  const testContent = document.querySelector('#replyTo #content')
+  const audioContent = document.querySelector('#replyTo audio')
+  if (testContent) {
+    testContent.remove()
+  }
+  if (audioContent) {
+    audioContent.remove()
+  }
+  const replyTo = document.querySelector('#replyTo')
+  replyTo.style = 'display:none'
+}
+
+function correct(element) {
+  const replyBtnElement = element.previousElementSibling
+  const userInputBox = document.querySelector('#input')
+  userInputBox.value = reply(replyBtnElement)
+  userInputBox.setAttribute('correct', '')
+}
+
+
 // text message function
+const form = document.forms.textInput
 form.addEventListener('submit', function (e) {
   e.preventDefault()
+
   const input = document.getElementById('input')
   const userinput = input.value
+
   if (userinput) {
     sendMessage('text', userinput)
     input.value = ''
   }
+})
+
+
+const recordVoiceMsgBtn = document.querySelector('#recordVoiceMsgBtn')
+recordVoiceMsgBtn.addEventListener('mousedown', (event) => {
+  startAudioRecord()
+  event.target.style = 'background: lightgrey'
+})
+
+recordVoiceMsgBtn.addEventListener('mouseup', (event) => {
+  stopAudioRecord()
+  event.target.style = 'background: rgba(45, 58, 56, 0.74)'
 })
 
 const stopAudioRecord = function () {
@@ -125,12 +345,15 @@ const stopAudioRecord = function () {
 
 // audio message function
 const startAudioRecord = async function () {
+  const audioConstraints = {
+    audio: { sampleRate: 16000 }
+  }
   if (!cacheStream) {
     await getUserStream(audioConstraints)
   }
   mediaRecorder = new MediaRecorder(cacheStream)
   mediaRecorder.start()
-  setTimeout(stopAudioRecord, 10 * 1000)
+  const timeoutID = setTimeout(stopAudioRecord, 10 * 1000)
 
   let chunks = []
   mediaRecorder.ondataavailable = function (e) {
@@ -138,8 +361,8 @@ const startAudioRecord = async function () {
   }
 
   mediaRecorder.onstop = function (e) {
+    clearTimeout(timeoutID)
     const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
-    console.log(blob)
     sendMessage('audio', blob)
     chunks = []
 
@@ -156,6 +379,7 @@ async function renderHistory(element) {
   document.querySelector('#messages').textContent = ''
 
   socket.emit('leaveRoom', { user_id, room: talkTo.room_id })
+  // on click diffenet friend, need render respective history
   if (element) {
     talkTo = friendData[element.id]
   }
@@ -167,7 +391,7 @@ async function renderHistory(element) {
     const count_circle = user_box.querySelector('.count-circle')
     count_circle.style = 'display: none'
     count.textContent = 0
-    data = [talkTo.user_id, talkTo.room_id]
+    const data = [talkTo.user_id, talkTo.room_id]
     console.log(data)
     socket.emit('readMessage', data)
   }
@@ -177,8 +401,9 @@ async function renderHistory(element) {
     headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
   }).then(res => res.json())
     .then(res => {
-      res.map(msg => renderMessage(msg))
-      messages.scrollTop = messages.scrollHeight
+      res.map((msg) => {
+        renderMessage(msg)
+      })
     })
 }
 
@@ -228,7 +453,7 @@ fetch('/chat/friend', {
     if (!room) {
       talkTo = friendList[0]
     } else {
-      talkToId = friendList.map(friend => {
+      const talkToId = friendList.map(friend => {
         if (friend.room === room) {
           return friend
         }
@@ -267,41 +492,10 @@ fetch('/chat/friend', {
     socket.on('friend_online', online_notice)
     socket.on('waitingInvite', renderWaitingIvite)
 
-
     socket.on('offer', handleSDPOffer)
     socket.on('answer', handleSDPAnswer)
     socket.on('icecandidate', handleNewIceCandidate)
   })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 async function calling() {
   try {
@@ -348,44 +542,19 @@ function closing() {
   localPeer.close()
   localPeer = null
   cacheStream = null
-  dataChannel = null
 }
-// core functions end
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // utils
 async function createPeerConnection() {
   localPeer = new RTCPeerConnection()//........................................................................................................................
   localPeer.onicecandidate = handleIceCandidate
   localPeer.onnegotiationneeded = handleNegotiationNeeded
-  localPeer.ontrack = await handleRemoteStream
-
-  // //not necessary
-  // localPeer.onconnectionstatechange = handleConnectionStateChange
-  // localPeer.oniceconnectionstatechange = handleICEConnectionStateChange
-  // localPeer.onicegatheringstatechange = handleICEGatheringStateChange
-  // localPeer.onsignalingstatechange = handleSignalingStateChange
-
-  // localPeer.ondatachannel = handleDataChannel
-  // dataChannel = localPeer.createDataChannel('my local channel')
+  localPeer.ontrack = handleRemoteStream
 }
 
 function handleIceCandidate(event) {
   if (event.candidate) {
-    console.log(`建立new ICE candicate${event.candidate}`)
-    console.log(event.candidate)
+    console.log(`*** [WebRTC] find new ICE candicate ${event.candidate.candidate}`)
     socket.emit('icecandidate', { room: talkTo.room_id, candidate: event.candidate })
   }
   //........................................................................................................................
@@ -395,67 +564,29 @@ function handleIceCandidate(event) {
 
 async function handleNewIceCandidate({ room, candidate }) {
   try {
+    if (!localPeer) {
+      createPeerConnection()
+    }
     await localPeer.addIceCandidate(candidate)
-    console.log(`*** 成功加入新取得的 ICE candidate: ${JSON.stringify(candidate)}`)
+    console.log(`*** [WebRTC] add ICE candidate: ${JSON.stringify(candidate.candidate)}`)
   } catch (error) {
-    console.log(`*** 失敗加入新取得的 ICE candidate: ${error.toString()}`)
+    console.log(`*** [WebRTC] fail to add ICE candidate: ${error.toString()}`)
   }
 }
 
 async function getUserStream(constraints) {
-  function OldGetUserMedia() {
-    return navigator.getUserMedia
-      || navigator.webkitGetUserMedia
-      || navigator.mozGetUserMedia
-      || navigator.msGetUserMedia;
-  }
-
-  async function getUserMedia(constraints) {
-    if ('mediaDevices' in navigator) {
-      return navigator.mediaDevices.getUserMedia(constraints)
-    }
-    // 相容處理，依照新接口
-    navigator.mediaDevices = {};
-
-    navigator.mediaDevices.getUserMedia = function (constraints) {
-      const getUserMedia = OldGetUserMedia()
-
-      //不支援的情況下
-      if (!getUserMedia) {
-        return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
-      }
-
-      // 保持跟原先api一樣故將其封裝成promise
-      return new Promise(function (resolve, reject) {
-        getUserMedia.call(navigator, constraints, resolve, reject);
-      });
-    }
-
-    return navigator.mediaDevices.getUserMedia(constraints)
-  }
-
-  cacheStream = await getUserMedia(constraints)
+  cacheStream = await navigator.mediaDevices.getUserMedia(constraints)
 }
 
 async function addStreamProcess(constraints) {
-  let errMsg = ''
   try {
     await getUserStream(constraints)
   } catch (error) {
-    errMsg = 'get User Stream error ===> ' + error.toString()
-    throw new Error(errMsg)
+    throw new Error('*** [WebRTC] get User Stream error: ' + error.toString())
   }
 
   const localVideo = document.getElementById('localVideo')
   localVideo.srcObject = cacheStream
-
-  // if (window.webkitURL) {
-  //   localVideo.src = window.webkitURL.createObjectURL(cacheStream);
-  // } else if ("srcObject" in localVideo) {
-  //   localVideo.srcObject = cacheStream;
-  // } else {
-  //   localVideo.src = window.URL.createObjectURL(mediaStream);
-  // }
 
   try {
     cacheStream
@@ -463,36 +594,32 @@ async function addStreamProcess(constraints) {
       .forEach((track) => localPeer.addTrack(track, cacheStream))//........................................................................................................................
     //triggers renegotiation by firing a negotiationneeded event
   } catch (error) {
-    errMsg = 'Peer add Transceiver error ===> ' + error.toString()
-    throw new Error(errMsg)
+    throw new Error('*** [WebRTC] Peer add Track error: ' + error.toString())
   }
 }
 
 async function handleNegotiationNeeded() {
-  console.log('*** handleNegotiationNeeded fired!')
+  console.log('*** [WebRTC] handleNegotiationNeeded fired!')
   try {
-    console.log('createOffer ...')
-    console.log('setLocalDescription ...')
-
     const offerOptions = {
       offerToReceiveAudio: 1,
       offerToReceiveVideo: 1
     }
+    console.log('*** [WebRTC] createOffer ...')
     const offer = await localPeer.createOffer(offerOptions)
+    console.log('*** [WebRTC] setLocalDescription ...')
     await localPeer.setLocalDescription(offer)
-
-    console.log('signaling offer ...')
 
     const data = {
       sender: user_id,
       room: talkTo.room_id,
       offer: localPeer.localDescription
     }
-
+    console.log('*** [WebRTC] signaling offer ...')
     socket.emit('offer', data)//........................................................................................................................
   } catch (error) {
-    console.log(`Failed to create session description: ${error.toString()}`)
-    console.log(`Error ${error.name}: ${error.message}`)
+    console.log(`*** [WebRTC] failed to create offer: ${error.toString()}`)
+    console.log(`*** [WebRTC] Error ${error.name}: ${error.message}`)
   }
 }
 
@@ -500,9 +627,7 @@ async function handleNegotiationNeeded() {
 //........................................................................................................................
 
 async function handleSDPOffer(data) {
-
-  const room = data.room
-  const offer = data.offer
+  console.log('*** [WebRTC] receive offer')
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -522,20 +647,19 @@ async function handleSDPOffer(data) {
     reverseButtons: true
   }).then(async (result) => {
     if (result.isConfirmed) {
-      const videoConstraints = await settingVideoConstraints()
-      console.log('*** 收到遠端送來的offer')
       try {
         if (!localPeer) {
           await createPeerConnection()
         }
-        console.log('set Remote Description ...')
+        console.log('*** [WebRTC] set Remote Description ...')
         await localPeer.setRemoteDescription(data.offer)
         if (!cacheStream) {
+          const videoConstraints = await settingVideoConstraints()
           await addStreamProcess(videoConstraints)
         }
         await createAnswer(data)
       } catch (error) {
-        console.log(`Failed to create session description: ${error.toString()}`)
+        console.log(`*** [WebRTC] Failed to create answer: ${error.toString()}`)
         console.log(`Error ${error.name}: ${error.message}`)
       }
     } else if (result.isDenied) {
@@ -550,119 +674,37 @@ async function handleSDPOffer(data) {
 
 async function createAnswer(data) {
   try {
-    console.log('create Answer ...')
+    console.log('*** [WebRTC] create Answer ...')
     const answer = await localPeer.createAnswer()
-    console.log('set Local Description ...')
+    console.log('*** [WebRTC] set Local Description ...')
     await localPeer.setLocalDescription(answer)
-    console.log('signaling answer ...')
+    console.log('*** [WebRTC] signaling answer ...')
     data.answer = answer
     socket.emit('answer', data)//........................................................................................................................
   } catch (error) {
-    errMsg = 'Create Answer error ===> ' + error.toString()
-    throw new Error(errMsg)
+    console.log('*** [WebRTC] Create Answer error: ' + error.toString())
   }
 }
 
-// socket.on('answer', handleSDPAnswer)
+// socket.on('answer', handleSDPAnswer)//.......................................
 
 async function handleSDPAnswer(data) {
-  console.log('*** 遠端接受我們的offer並發送answer回來')
+  console.log('*** [WebRTC] receive answer')
   try {
-    console.log('set Remote Description ...')
+    console.log('*** [WebRTC] set Remote Description ...')
     await localPeer.setRemoteDescription(data.answer)
   } catch (error) {
-    console.log(`Error ${error.name}: ${error.message}`)
+    console.log(`*** [WebRTC] Error ${error.name}: ${error.message}`)
   }
 }
 
 async function handleRemoteStream(event) {
-  console.log("render remote stream")
+  console.log("*** [WebRTC] render remote stream")
   // console.log(event.streams.length)
-  if (event.streams.length !== 0) {
-    const remoteVideo = document.getElementById('remoteVideo')
-    if (remoteVideo.srcObject !== event.streams[0]) {
-      remoteVideo.srcObject = event.streams[0]
-    }
+  const remoteVideo = document.querySelector("remoteVideo")
+  if (event.streams.length !== 0 && remoteVideo.srcObject !== event.streams[0]) {
+    remoteVideo.srcObject = event.streams[0]
   }
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function handleConnectionStateChange() {
-//   console.log('*** WebRTC connectionState 狀態改變: ' + peer.connectionState)
-
-//   switch (peer.connectionState) {
-//     case 'closed':
-//     case 'failed':
-//     case 'disconnected':
-//       closing()
-//       break
-//   }
-// }
-
-// function handleICEConnectionStateChange() {
-//   console.log('*** ICE agent連線狀態改變: ' + peer.iceConnectionState)
-
-//   switch (peer.iceConnectionState) {
-//     case 'closed':
-//     case 'failed':
-//     case 'disconnected':
-//       closing()
-//       break
-//   }
-// }
-
-// function handleICEGatheringStateChange() {
-//   console.log('*** ICE gathering state changed to: ' + peer.iceGatheringState)
-// }
-
-// function handleSignalingStateChange() {
-//   console.log('*** WebRTC signaling 狀態改變: ' + peer.signalingState)
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function sendSDPBySignaling(event, sdp) {
-  socket.emit(event, sdp)
 }
 
 async function settingVideoConstraints() {
@@ -687,172 +729,6 @@ async function settingVideoConstraints() {
     resolve(formValues)
   })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const receiveBuffer = []
-// let receivedSize = 0
-// function onReceiveFile(event) {
-//   console.log('Received Message', event)
-//   console.log(`Received Message ${event.data.byteLength}`)
-//   receiveBuffer.push(event.data)
-//   receivedSize += event.data.byteLength
-
-//   const receiveProgress = document.querySelector('progress#receiveProgress')
-//   receiveProgress.value = receivedSize
-// }
-
-// function handleDataChannel(event) {
-//   console.log('Receive Data Channel Callback', event)
-//   const receiveChannel = event.channel
-
-//   receiveChannel.onmessage = onReceiveMessageCallback
-//   receiveChannel.onopen = onChannelStageChange(receiveChannel)
-//   receiveChannel.onclose = onChannelStageChange(receiveChannel)
-// }
-
-// function sendMessage() {
-//   const textArea = document.querySelector('#dataChannelSend')
-//   if (dataChannel.readyState === 'open') dataChannel.send(textArea.value)
-// }
-
-// function sendFileData() {
-//   const fileInput = document.querySelector('input#fileInput')
-//   const file = fileInput.files[0]
-//   console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`)
-
-//   // Handle 0 size files.
-//   if (file.size === 0) {
-//     alert('File is empty, please select a non-empty file')
-//     return
-//   }
-
-//   const fileChannel = peer.createDataChannel('FileChannel')
-//   fileChannel.onopen = () => {
-//     const sendProgress = document.querySelector('progress#sendProgress')
-//     sendProgress.max = file.size
-//     const chunkSize = 16384
-//     const fileReader = new FileReader()
-//     let offset = 0
-//     fileReader.addEventListener('error', error => console.error('Error reading file:', error))
-//     fileReader.addEventListener('abort', event => console.log('File reading aborted:', event))
-//     fileReader.addEventListener('load', e => {
-//       console.log('FileRead.onload ', e)
-//       fileChannel.send(e.target.result)
-//       offset += e.target.result.byteLength
-//       sendProgress.value = offset
-//       if (offset < file.size) {
-//         readSlice(offset)
-//       }
-//     })
-//     const readSlice = o => {
-//       console.log('readSlice ', o)
-//       const slice = file.slice(offset, o + chunkSize)
-//       fileReader.readAsArrayBuffer(slice)
-//     }
-//     readSlice(0)
-//   }
-//   fileChannel.onclose = () => console.log('closing File Channel')
-// }
-
-function onChannelStageChange(channel) {
-  const readyState = channel.readyState
-  console.log('Channel Stage Change ==> ', channel)
-  console.log(`channel state is: ${readyState}`)
-}
-
-function onReceiveMessageCallback(event) {
-  const type = event.target.label
-  if (type === 'FileChannel') onReceiveFile(event)
-  else console.log('Received Message ==> ', event.data)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function showTime(time) {
   const current = new Date()
@@ -882,6 +758,31 @@ function showTime(time) {
   }
 }
 
+// translate text
+function translateMsg(element) {
+  const text = element.parentNode.querySelector('#content').textContent
+  const target = textTranslatelang //need change follow the user's native zh-TWen-US
+  const data = {
+    text, target
+  }
+  fetch(`/demoGoogleTranslate`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/JSON'
+    },
+    body: JSON.stringify(data)
+  }).then(res => res.json())
+    .then(res => {
+      console.log(res)
+      const translateMsg = element.parentNode.parentNode.children[1]
+      const translateContent = translateMsg.querySelector('span')
+      translateContent.textContent = res.data
+      translateMsg.style = 'display: flex'
+      // translateResult = element.parentNode.insertBefore(translateResult, element.parentNode.childNodes[1])
+    })
+  return
+}
+
 // translate audio
 async function translateAudio(element) {
   const audio = element.parentNode.firstChild.getAttribute('src');
@@ -890,7 +791,14 @@ async function translateAudio(element) {
     .then(res => res.blob()) // mixin takes a Response stream and reads it to completion.
     .then(blob => {
       console.log(blob)
-      fetch(`/demoGoogleSpeechToTest`, { method: "POST", body: blob })
+      const data = {
+        targetLang: audioTranlateLang,
+        blob: blob
+      }
+      fetch(`/demoGoogleSpeechToTest`, {
+        method: "POST",
+        body: data
+      })
         .then(res => console.log(res.text()))
     })
 }
@@ -898,7 +806,7 @@ async function translateAudio(element) {
 // speechSynthesis
 function speakMsg(element) {
   const msgContent = element.parentNode.firstChild.textContent.split(':')[1]
-  const targetLang = 'en-US' //need change follow the Lang of this msg
+  const targetLang = speechSynthesisLang //need change follow the Lang of this msg
 
   var synth = window.speechSynthesis
   var utterThis = new SpeechSynthesisUtterance(msgContent);
@@ -906,75 +814,62 @@ function speakMsg(element) {
   synth.speak(utterThis);
 }
 
-// translate text
-function translateMsg(element) {
-  const text = element.parentNode.querySelector('#source').textContent
-  console.log(element.parentNode)
-  const target = 'en' //need change follow the user's native zh-TWen-US
-  const data = {
-    text, target
-  }
-  console.log(text)
-  console.log(target)
-
-  fetch(`/demoGoogleTranslate`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/JSON'
-    },
-    body: JSON.stringify(data)
-
-  }).then(res => res.json())
-    .then(res => {
-      const translateResult = document.createElement('span')
-      translateResult.textContent = res.data
-      ltranslateResult = element.parentNode.insertBefore(translateResult, element.parentNode.childNodes[1])
-    })
-  return
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 var recognition = new SpeechRecognition();
-recognition.lang = 'zh-TW'; //en-US
+recognition.lang = speechRecognitionLang
 recognition.maxAlternatives = 1;
-recognition.continuous = true;
+recognition.interimResults = true;
+// recognition.continuous = true;
+let voiceRecorder
 
-function startExchange() {
+function startSpeechRecognition() {
   recognition.start();
+
+  recognition.onstart = async function (event) {
+    console.log('[SpeechRecognition] recognition start');
+
+    const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+    voiceRecorder = new MediaRecorder(voiceStream)
+    voiceRecorder.start()
+
+    let chunks = []
+    mediaRecorder.ondataavailable = function (e) {
+      chunks.push(e.data)
+    }
+
+    mediaRecorder.onstop = function (e) {
+      const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
+      console.log(blob)
+      sendMessage('audio', blob)
+      chunks = []
+
+      const localVideo = document.getElementById('localVideo')
+      if (localVideo && !localVideo.srcObject) {
+        cacheStream.getTracks().forEach((track) => {
+          track.stop()
+        })
+      }
+    }
+  }
+
+  recognition.onaudiostart = function (event) {
+    console.log('[SpeechRecognition] audio start');
+  }
+
+  recognition.onsoundstart = function (event) {
+    console.log('[SpeechRecognition] sound start');
+  }
+
+  recognition.onspeechstart = function (event) {
+    console.log('[SpeechRecognition] speechs tart');
+  }
+
   recognition.onresult = function (event) {
-    resultList = event.results
-    lastIndex = resultList.length - 1
-    lastResult = resultList[lastIndex][0]
+    const resultList = event.results
+    const lastIndex = resultList.length - 1
+    const lastResult = resultList[lastIndex][0]
     console.log(event.results)
     console.log('Confidence: ' + lastResult.confidence + '\n' + lastResult.transcript.toLowerCase());
 
@@ -989,51 +884,34 @@ function startExchange() {
     }
   }
 
-  recognition.onspeechend = function () {
-  }
-
-  recognition.onerror = function (event) {
-    testBtn.textContent = 'Start new test';
-    diagnosticPara.textContent = 'Error occurred in recognition: ' + event.error;
-  }
-
-  recognition.onaudiostart = function (event) {
-    console.log('SpeechRecognition.onaudiostart');
-  }
-
-  recognition.onaudioend = function (event) {
-    console.log('SpeechRecognition.onaudioend');
-  }
-
-  recognition.onend = function (event) {
-    console.log('SpeechRecognition.onend');
-  }
-
   recognition.onnomatch = function (event) {
-    console.log('SpeechRecognition.onnomatch');
+    console.log('[SpeechRecognition] no match');
   }
 
-  recognition.onsoundstart = function (event) {
-    console.log('SpeechRecognition.onsoundstart');
+  recognition.onspeechend = function () {
+    console.log('[SpeechRecognition] speech end');
   }
 
   recognition.onsoundend = function (event) {
-    console.log('SpeechRecognition.onsoundend');
+    console.log('[SpeechRecognition] sound end');
   }
 
-  recognition.onspeechstart = function (event) {
-    console.log('SpeechRecognition.onspeechstart');
+  recognition.onaudioend = function (event) {
+    console.log('[SpeechRecognition] audio end');
   }
-  recognition.onstart = function (event) {
-    console.log('SpeechRecognition.onstart');
+
+  recognition.onend = function (event) {
+    console.log('[SpeechRecognition] recognition end');
+    recognition.start();
+  }
+
+  recognition.onerror = function (event) {
+    console.log('[SpeechRecognition] error occurred: ' + event.error);
   }
 }
 
-function stopExchange() {
+function stopSpeechRecognition() {
   recognition.stop();
-}
-
-function booking() {
 
 }
 
@@ -1045,7 +923,7 @@ function closeForm() {
   document.querySelector(".form-popup").style.display = "none";
 }
 
-function exchange(e) {
+function bookingExchange(e) {
   let exchangeForm = document.forms.namedItem('exchangeForm');
   console.log(exchangeForm)
   exchangeForm.addEventListener('submit', (e) => {
@@ -1054,7 +932,7 @@ function exchange(e) {
     formData.append('publisher_id', user_id);
     formData.append('first_lang', user.native);
     formData.append('second_lang', user.learning);
-    checkBox = document.getElementById("noticing");
+    const checkBox = document.getElementById("noticing");
     if (checkBox.checked !== true) {
       formData.set('noticing', null);
     }

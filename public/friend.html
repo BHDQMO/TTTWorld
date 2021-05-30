@@ -30,9 +30,9 @@
           </template>
         </div>
       </div>
-      <sapn class="count-circle">
-        <sapn class="count">0</sapn>
-      </sapn>
+      <span class="count-circle">
+        <span class="count">0</span>
+      </span>
     </div>
   </header>
   <main>
@@ -47,9 +47,9 @@
               <p id="name"></p>
               <p id="exchange"></p>
             </div>
-            <sapn class="count-circle">
-              <sapn class="count">0</sapn>
-            </sapn>
+            <span class="count-circle">
+              <span class="count">0</span>
+            </span>
           </div>
         </template>
       </div>
@@ -65,31 +65,33 @@
         <template id='messageTemplate'>
           <div id='message' from="">
             <img id='headIcon' hidden>
-            <!-- <span id='sender'></span> -->
-            <span id='content' hidden></span>
-            <audio controls src="" style="display: none"></audio>
+            <div id='messageBody'>
+              <div class="messageItem" id='replyMsg' hidden>
+              </div>
+              <div class="messageItem" id='originMsg'>
+                <span id='content' hidden></span>
+                <audio controls src="" style="display: none"></audio>
+                <button id='translateMsgBtn' onclick="translateMsg(this)">Translate</button>
+                <button id='translateAudioBtn' onclick="translateAudio(this)">Translate</button>
+                <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
+                <button id='reply' onclick="reply(this)">Reply</button>
+                <button id='correctBtn' onclick="correct(this)">Correct</button>
+              </div>
+              <div class="messageItem" id='translateMsg' hidden>
+                <span id='content'></span>
+              </div>
+            </div>
             <span id='sendTime'></span>
-            <button id='translateMsgBtn' onclick="translateMsg(this)">Translate</button>
-            <button id='translateAudioBtn' onclick="translateAudio(this)">Translate</button>
-            <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
           </div>
         </template>
-        <!-- <template id='audioMessageTemplate'>
-          <div id='message' from="">
-            <img id='headIcon' hidden>
-            <audio controls src=""></audio>
-            <span id='sendTime'></span>
-            <button onclick="translateAudio(this)">Translate</button>
-          </div>
-        </template> -->
       </div>
       <div class="chat-box-footer">
         <div class="contral">
           <div class="exchange">
             <!-- Popup Form -->
             <button class="open-button" onclick="openForm()">Booking</button>
-            <button onclick="startExchange()">Exchange</button>
-            <button onclick="stopExchange()">Time up</button>
+            <button onclick="startSpeechRecognition()">Exchange</button>
+            <button onclick="stopSpeechRecognition()">Time up</button>
             <div class="form-popup">
               <form class="form-container" oninput="result.value=parseInt(ratio.value)" name="exchangeForm">
                 <label for="time"><b>Time</b></label>
@@ -117,11 +119,9 @@
                   <input type="text" id='notice-time' name='noticing' placeholder="10">
                   <b>mins</b>
                 </div>
-                <button type="submit" class="btn" onclick="exchange()">Send</button>
+                <button type="submit" class="btn" onclick="bookingExchange()">Send</button>
                 <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
               </form>
-
-
             </div>
 
           </div>
@@ -130,15 +130,24 @@
             <button onclick="calling()">Call</button>
             <button onclick="closing()">Hang Up</button>
           </div>
-          <div class="audioContral">
-            <button onclick="startAudioRecord()">Record</button>
-            <button onclick="stopAudioRecord()">Stop</button>
-          </div>
         </div>
-        <form id="form">
-          <input id="input" autocomplete="off" />
-          <button>Send</button>
-        </form>
+        <div id='inputBox'>
+          <div id='replyTo'>
+            <div id="leftPart">
+              <img>
+              <div id='replyBody'>
+                <span id="senderName"></span>
+              </div>
+            </div>
+            <div id='cancelReply' onclick='cancelReply()'>Cancel</div>
+          </div>
+          <form id="form" name='textInput'>
+            <input id="input" autocomplete="off" />
+            <div id='recordVoiceMsgBtn'>Voice</div>
+            <button>Send</button>
+          </form>
+        </div>
+
       </div>
 
     </div>
@@ -164,6 +173,7 @@
   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="./src/util.js"></script>
   <script src="./src/notice.js"></script>
   <script src="./src/friend.js"></script>
 </body>
