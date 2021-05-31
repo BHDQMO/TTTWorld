@@ -87,6 +87,10 @@ const readMessage = (socket, io) => async (data) => {
   const result = await Chat.readMessage(data)
 }
 
+const favorite = (socket, io) => async (data) => {
+  const result = await Chat.addFavorite(data)
+}
+
 const invite = (socket, io) => async (invite) => {
   await Explore.createInvite(invite)
   io.to(socket_ids[invite[0]]).emit('invite', invite[1])
@@ -140,6 +144,7 @@ module.exports = {
   answer,
   icecandidate,
   message,
+  favorite,
   readMessage,
   invite,
   accept,

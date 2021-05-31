@@ -53,22 +53,26 @@
     <div class="tool_box">
       <div id="favorite">
         <label for="favorite">favorite</label>
-        <table>
-          <tr>
-            <th>Name</th>
-            <th>Content</th>
-            <th>Reply</th>
-            <th>Time</th>
-          </tr>
-          <template id="favorite_template">
-            <tr>
-              <td id='name'>Yaron</td>
-              <td id='contnet'>31</td>
-              <td id='reply'>Chinese</td>
-              <td id='time'>English</td>
-            </tr>
-          </template>
-        </table>
+        <template id='messageTemplate'>
+          <div id='message' from="">
+            <img id='headIcon'>
+            <span id='name'></span>
+            <div id='messageBody'>
+              <div class="messageItem" id='replyMsg' hidden>
+                <span id='content' hidden></span>
+                <audio controls src="" style="display: none"></audio>
+              </div>
+              <div class="messageItem" id='originMsg'>
+                <span id='content' hidden></span>
+                <audio controls src="" style="display: none"></audio>
+              </div>
+              <div class="messageItem" id='translateMsg' hidden>
+                <span id='content'></span>
+              </div>
+            </div>
+            <span id='sendTime'></span>
+          </div>
+        </template>
       </div>
       <div id="exchange">
         <label for="exchange">Exchange</label>
@@ -84,13 +88,13 @@
           </tr>
           <template id="exchange_template">
             <tr>
-              <th id='host'>Host</th>
-              <th id='with'>With</th>
-              <th id='time'>Time</th>
-              <th id='duration'>Duration</th>
-              <th id='first_lang'>1st Language</th>
-              <th id='second_lang'>2st Language</th>
-              <th id='ratio'>Ratio</th>
+              <td id='host'>Host</td>
+              <td id='with'>With</td>
+              <td id='time'>Time</td>
+              <td id='duration'>Duration</td>
+              <td id='first_lang'>1st Language</td>
+              <td id='second_lang'>2st Language</td>
+              <td id='ratio'>Ratio</td>
             </tr>
           </template>
         </table>
@@ -111,6 +115,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="./src/notice.js"></script>
+  <script src="./src/util.js"></script>
   <script src="./src/profile.js"></script>
 </body>
 

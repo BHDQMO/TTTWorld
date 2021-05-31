@@ -76,6 +76,7 @@
                 <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
                 <button id='reply' onclick="reply(this)">Reply</button>
                 <button id='correctBtn' onclick="correct(this)">Correct</button>
+                <button id='favoriteBtn' onclick="favorite(this)">Favorite</button>
               </div>
               <div class="messageItem" id='translateMsg' hidden>
                 <span id='content'></span>
@@ -95,19 +96,19 @@
             <div class="form-popup">
               <form class="form-container" oninput="result.value=parseInt(ratio.value)" name="exchangeForm">
                 <label for="time"><b>Time</b></label>
-                <input type="datetime-local" id="time" name="start_time" value="2021-01-01T00:00"
+                <input type="datetime-local" name="start_time" id="time" value="2021-01-01T00:00"
                   min="2021-01-01T00:00">
 
                 <label class="title" for="duration"><b>Duration</b></label>
                 <div class="container" id="duration-box">
-                  <input type="text" name="duration" placeholder="60"><b>mins</b>
+                  <input type="text" name="duration" placeholder="60" value="60"><b>mins</b>
                 </div>
 
                 <label class="title" for="ratio"><b>Ratio</b></label>
                 <div class="container" id="ratio-box">
                   <label for="ratio" id="first-lang"></label>
                   <div id="ratio-bar">
-                    <input type="range" id="ratio" name="ratio" value="50" step="10" />
+                    <input type="range" name="ratio" id="ratio" value="50" step="10" />
                     <output name="result" for="ratio">50</output>
                   </div>
                   <label for="ratio" id="second-lang"></label>
@@ -115,8 +116,8 @@
 
                 <label class="title" for="noticing"><b>Noticing</b></label>
                 <div class="form-container container" id="noticing-box">
-                  <input type="checkbox" id='noticing'>
-                  <input type="text" id='notice-time' name='noticing' placeholder="10">
+                  <input type="checkbox" name='notice' id='noticing' checked>
+                  <input type="text" name='ahead_time' id='notice-time' placeholder="10" value="10">
                   <b>mins</b>
                 </div>
                 <button type="submit" class="btn" onclick="bookingExchange()">Send</button>

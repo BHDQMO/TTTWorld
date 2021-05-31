@@ -326,3 +326,32 @@ function patienceDiffPlus(aLines, bLines) {
 
   return difference;
 }
+
+//****************************/
+function showTime(time) {
+  const current = new Date()
+  const sendTime = new Date(time)
+  const year = sendTime.getFullYear()
+  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
+  const date = sendTime.getDate()
+  const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
+  const hour = sendTime.getHours()
+  const min = sendTime.getMinutes()
+  const oneDay = 1000 * 60 * 60 * 24
+  const oneWeek = oneDay * 7
+  const oneMonth = oneDay * 30
+  const oneYear = oneDay * 365
+  const timeGap = current - sendTime
+
+  if (timeGap < oneDay) {
+    return hour + ':' + min
+  } else if (timeGap < oneWeek) {
+    return day + ',' + hour + ':' + min
+  } else if (timeGap < oneMonth) {
+    return date + ' ' + day + ',' + hour + ':' + min
+  } else if (timeGap < oneYear) {
+    return month + ' ' + date + ',' + hour + ':' + min
+  } else {
+    return year + ',' + month + '' + date + ',' + hour + ':' + min
+  }
+}

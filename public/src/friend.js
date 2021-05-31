@@ -50,7 +50,6 @@ async function renderMessage(msg) {
             let tempString = ''
             let isDetected = false
             const markedWrongSpans = document.createElement('div')
-            console.log(result)
             result.map((char, i) => {
               if (char.aIndex !== -1) {
                 if (char.bIndex !== -1 && isDetected === false) {
@@ -86,7 +85,6 @@ async function renderMessage(msg) {
             })
             replyContent = markedWrongSpans
           }
-
           break
         }
         case 'audio': {
@@ -122,7 +120,6 @@ async function renderMessage(msg) {
           let tempString = ''
           let isDetected = false
           let markedRightSpans = document.createElement('div')
-          console.log(result)
           result.map((char, i) => {
             if (char.bIndex !== -1) {
               if (char.aIndex !== -1 && isDetected === false) {
@@ -239,7 +236,6 @@ function sendMessage(type, content) {
       content: content,
     }
   }
-  console.log(data)
   socket.emit('message', data)
 }
 
@@ -309,6 +305,12 @@ function correct(element) {
   const userInputBox = document.querySelector('#input')
   userInputBox.value = reply(replyBtnElement)
   userInputBox.setAttribute('correct', '')
+}
+
+function favorite(element) {
+  history_id = element.parentNode.querySelector('#reply').getAttribute('historyId')
+  const data = { user_id, history_id }
+  socket.emit('favorite', data)
 }
 
 
@@ -418,8 +420,6 @@ fetch('/chat/friend', {
     friendList = res.data
     friendData = {}
     friendList.map(item => friendData[item.user_id] = item)
-    console.log(friendList)
-
     socket = io({
       auth: {
         user_id
@@ -730,34 +730,6 @@ async function settingVideoConstraints() {
   })
 }
 
-function showTime(time) {
-  const current = new Date()
-  const sendTime = new Date(time)
-  const year = sendTime.getFullYear()
-  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
-  const date = sendTime.getDate()
-  const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(sendTime).toUpperCase().slice(0, 3)
-  const hour = sendTime.getHours()
-  const min = sendTime.getMinutes()
-  const oneDay = 1000 * 60 * 60 * 24
-  const oneWeek = oneDay * 7
-  const oneMonth = oneDay * 30
-  const oneYear = oneDay * 365
-  const timeGap = current - sendTime
-
-  if (timeGap < oneDay) {
-    return hour + ':' + min
-  } else if (timeGap < oneWeek) {
-    return day + ',' + hour + ':' + min
-  } else if (timeGap < oneMonth) {
-    return date + ' ' + day + ',' + hour + ':' + min
-  } else if (timeGap < oneYear) {
-    return month + ' ' + date + ',' + hour + ':' + min
-  } else {
-    return year + ',' + month + '' + date + ',' + hour + ':' + min
-  }
-}
-
 // translate text
 function translateMsg(element) {
   const text = element.parentNode.querySelector('#content').textContent
@@ -929,12 +901,15 @@ function bookingExchange(e) {
   exchangeForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(exchangeForm);
+    formData.append('room_id', talkTo.room_id);
     formData.append('publisher_id', user_id);
     formData.append('first_lang', user.native);
     formData.append('second_lang', user.learning);
     const checkBox = document.getElementById("noticing");
-    if (checkBox.checked !== true) {
-      formData.set('noticing', null);
+    if (formData.get('notice') === 'on') {
+      formData.set('notice', 1);
+    } else {
+      formData.set('notice', 0);
     }
 
     fetch('/chat/exchange', {

@@ -126,9 +126,15 @@ const signIn = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  res.status(200).send({
-    data: req.user
-  });
+  const user_id = req.user.user_id
+  const favoriteData = await User.getFavorite(user_id)
+  const exchangeData = await User.getExchange(user_id)
+  const data = {
+    user: req.user,
+    favorite: favoriteData,
+    exchange: exchangeData
+  }
+  res.status(200).send({ data });
 };
 
 module.exports = {

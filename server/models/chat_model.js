@@ -56,6 +56,12 @@ const getFriendList = async (user_id) => {
 //   return result
 // }
 
+const addFavorite = async (data) => {
+  const result = await query(`INSERT INTO favorite SET ?`, data)
+  return result
+}
+
+
 const getRooms = async (user_id) => {
   const queryString = `
   SELECT user_a AS user_id, id AS room_id FROM room WHERE user_b = ?
@@ -117,6 +123,7 @@ module.exports = {
   createRoom,
   getFriendList,
   // getFriendIdList,
+  addFavorite,
   getRooms,
   getHistory,
   saveMessage,

@@ -84,9 +84,110 @@ const getUserDetail = async (email) => {
   }
 };
 
+const getFavorite = async (user_id) => {
+  await transaction()
+  try {
+    let queryString = `
+    SELECT * FROM
+    (SELECT id AS favorite_id, history_id FROM favorite WHERE user_id = ?) AS favorite_list
+    LEFT JOIN history
+    ON favorite_list.history_id = history.id
+    `
+    let favoriteData = await query(queryString, [user_id])
+    favoriteData = favoriteData.map(item => {
+      if (item.type === 'text') {
+        item.content = item.content.toString()
+      }
+      return item
+    })
+    let sender = []
+    let reply = []
+    favoriteData.map(item => {
+      if (sender.includes(item.sender) === false) {
+        sender.push(item.sender)
+      }
+      if (item.reply) {
+        reply.push(item.reply)
+      }
+    })
+    queryString = `
+    SELECT user_id,name,picture FROM user WHERE user_id IN (?)
+    `
+    const senderResult = await query(queryString, [sender])
+    const senderData = {}
+    senderResult.map(result => senderData[result.user_id] = result)
+    queryString = `
+    SELECT * FROM history WHERE id IN (?)
+    `
+    let replyResult = await query(queryString, [reply])
+    replyResult = replyResult.map(item => {
+      if (item.type === 'text') {
+        item.content = item.content.toString()
+      }
+      return item
+    })
+    const replyData = {}
+    replyResult.map(result => replyData[result.id] = result)
+    await commit()
+
+    const data = {
+      favoriteData,
+      senderData,
+      replyData
+    }
+
+    return data
+  } catch (error) {
+    await rollback()
+    return error
+  }
+};
+
+const getExchange = async (user_id) => {
+  let queryString = `
+  SELECT * FROM \`exchange\` AS exchangetable
+  LEFT JOIN
+  (
+    SELECT id AS room_id FROM room WHERE user_a = ?
+    UNION
+    SELECT id AS room_id FROM room WHERE user_b = ?
+    ) AS roomlist
+    ON roomlist.room_id = exchangetable.room_id
+  `
+  const exchangeData = await query(queryString, [user_id, user_id])
+  const roomList = []
+  exchangeData.map(item => {
+    if (roomList.includes(item.room_id) === false) {
+      roomList.push(item.room_id)
+    }
+  }
+  )
+  queryString = `
+  SELECT user.user_id, name, picture, room_id FROM 
+  (SELECT user_a AS user_id, id AS room_id FROM room WHERE id IN ?
+  UNION
+  SELECT user_b AS user_id, id AS room_id FROM room WHERE id IN ?
+  ) AS roommatelist
+  LEFT JOIN user
+  ON roommatelist.user_id = user.user_id
+  WHERE user.user_id <> ?
+  `
+
+  const roommateResult = await query(queryString, [[roomList], [roomList], user_id])
+  const roommateData = {}
+  roommateResult.map(item => { roommateData[item.room_id] = item })
+  const data = {
+    exchangeData,
+    roommateData
+  }
+  return data
+};
+
 module.exports = {
   isEmailExist,
   signUp,
   nativeSignIn,
-  getUserDetail
+  getUserDetail,
+  getFavorite,
+  getExchange
 }
