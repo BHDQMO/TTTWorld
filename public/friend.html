@@ -3,9 +3,10 @@
 
 <head>
   <title>Talk To The World</title>
-  <link href="./styles/friend.css" rel="stylesheet">
+
   <link href="./styles/header.css" rel="stylesheet">
   <link href="./styles/notice.css" rel="stylesheet">
+  <link href="./styles/friend.css" rel="stylesheet">
 </head>
 
 <body>
@@ -37,7 +38,7 @@
   </header>
   <main>
     <div class="friend">
-      <div class="friend-list-title">Friend List</div>
+      <h1 class="friend-list-title">Recent</h1>
       <div class="friend-list">
 
         <template id='uerBoxTemplate'>
@@ -58,10 +59,20 @@
       <div id="chat-box-head">
         <img src="" id="other_pic">
         <label id="other_name" for="other_pic">Name</label>
+
         <div id="warn"></div>
+        <div id="currentLang"></div>
+        <div id="timer"></div>
       </div>
       <div id="chat-box-main">
-        <div id="messages"></div>
+        <div class="video-box" hidden>
+          <video id="localVideo" autoplay></video>
+          <video id="remoteVideo" autoplay></video>
+        </div>
+        <div class='message-box'>
+          <div id="messages">
+          </div>
+        </div>
         <template id='messageTemplate'>
           <div id='message' from="">
             <img id='headIcon' hidden>
@@ -71,12 +82,14 @@
               <div class="messageItem" id='originMsg'>
                 <span id='content' hidden></span>
                 <audio controls src="" style="display: none"></audio>
-                <button id='translateMsgBtn' onclick="translateMsg(this)">Translate</button>
-                <button id='translateAudioBtn' onclick="translateAudio(this)">Translate</button>
-                <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
-                <button id='reply' onclick="reply(this)">Reply</button>
-                <button id='correctBtn' onclick="correct(this)">Correct</button>
-                <button id='favoriteBtn' onclick="favorite(this)">Favorite</button>
+                <div id='toolbar'>
+                  <button id='translateMsgBtn' onclick="translateMsg(this)">Translate</button>
+                  <button id='translateAudioBtn' onclick="translateAudio(this)">Translate</button>
+                  <button id='speakBtn' onclick="speakMsg(this)">Speak</button>
+                  <button id='reply' onclick="reply(this)">Reply</button>
+                  <button id='correctBtn' onclick="correct(this)">Correct</button>
+                  <button id='favoriteBtn' onclick="favorite(this)">Favorite</button>
+                </div>
               </div>
               <div class="messageItem" id='translateMsg' hidden>
                 <span id='content'></span>
@@ -91,8 +104,9 @@
           <div class="exchange">
             <!-- Popup Form -->
             <button class="open-button" onclick="openForm()">Booking</button>
-            <button onclick="startSpeechRecognition()">Exchange</button>
-            <button onclick="stopSpeechRecognition()">Time up</button>
+            <button onclick="startexchangeDemo()">Exchange</button>
+            <button onclick="swap()">Swap</button>
+            <button onclick="stopexchangeDemo()">Time up</button>
             <div class="form-popup">
               <form class="form-container" oninput="result.value=parseInt(ratio.value)" name="exchangeForm">
                 <label for="time"><b>Time</b></label>
@@ -151,15 +165,6 @@
 
       </div>
 
-    </div>
-    <div class="video-box">
-      <video id="localVideo" autoplay></video>
-      <video id="remoteVideo" autoplay></video>
-      </template>
-      <template>
-        <video id="localVideo" autoplay></video>
-        <video id="remoteVideo" autoplay></video>
-      </template>
     </div>
   </main>
   <div id="online-notice">

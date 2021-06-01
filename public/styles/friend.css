@@ -1,4 +1,5 @@
 main {
+  height: 90vh;
   flex-grow: 1;
   background: rgba(0, 75, 255, 0.5);
   display: flex;
@@ -8,7 +9,6 @@ main {
 }
 
 .friend {
-  flex-grow: 1;
   padding: 10px;
   min-width: 300px;
   display: flex;
@@ -23,22 +23,24 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-end;
+  justify-content: space-between;
+  height: 90vh;
 }
 
 .video-box {
-  flex-grow: 1;
-  padding: 10px 10px 10px 0;
-  display: flex;
+  padding: 0 10px 0 0;
+  display: none;
   flex-direction: column;
   align-content: center;
-  justify-content: space-around;
+  justify-content: space-between;
+  width: 432px;
 }
 
 .friend-list-title {
   background: white;
   border-radius: 10px;
-  text-align: center
+  text-align: center;
+  font-size: x-large;
 }
 
 .friend-list {
@@ -66,23 +68,17 @@ main {
 
 #chat-box-main {
   flex-grow: 1;
-  padding: 10px;
-  background: white;
-  border-radius: 10px;
   display: flex;
-  flex-direction: column;
-  /* align-items: center; */
 }
 
 #message {
-  /* height: 2.5rem; */
   display: flex;
   align-items: stretch;
   margin: 10px 0;
 }
 
 #headIcon {
-  height: 2.5rem;
+  height: 2rem;
   border-radius: 50%;
   margin: 0 5px;
 }
@@ -91,13 +87,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-}
-
-#replyMsg #content, #replyMsg audio {
-  border-radius: 0;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  background: rgba(211, 211, 211, 0.25)
+  border-radius: 10px;
 }
 
 #replyMsg .fix {
@@ -107,69 +97,59 @@ main {
 
 #originMsg {
   display: flex;
+  position: relative;
 }
 
-#originMsg .fix {
+#originMsg .correction {
   color: limegreen;
 }
 
-#content {
+#content, #spanContainer {
   height: 2rem;
   border-radius: 1rem;
   padding: 0 10px;
   line-height: 2rem;
 }
 
-#message[from="other"] #originMsg span#content {
-  background: cornflowerblue;
-  margin: 0 5px 0 0;
+#message[from="myself"] #messageBody {
+  align-items: flex-end;
+  background: rgb(147, 172, 180)
 }
 
-/* #message[from="myself"] #messageBody {
-  align-items: baseline;
-} */
+#message[from="other"] #messageBody {
+  background: rgb(168, 210, 252);
+}
 
 #message[from="myself"] {
-  display: flex;
   flex-direction: row-reverse;
   justify-content: right;
   padding: 0 10px 0 0
 }
 
-#message[from="myself"] #messageBody {
-  border-radius: 10px;
-  background: rgb(151, 100, 151);
-}
-
-#message[from="myself"] {
-  border-radius: 10px;
-}
-
-#message[from="myself"] #originMsg #replyMsg+#originMsg {
-  border-top: 1px solid lightsalmon;
-  display: flex;
-}
-
-#message[from="myself"] .messageItem {
+#message[from="myself"] #originMsg {
   flex-direction: row-reverse;
 }
 
-#message[from="myself"] #originMsg span#content {
-  /* margin: 0 10px 0 5px; */
-  /* background: rgba(93, 226, 93, 0.219); */
-  text-overflow: ellipsis;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
+#message[from="myself"] #replyMsg {
+  justify-content: flex-end;
+  width: -webkit-fill-available;
+  border-bottom: 1px solid rgb(127, 170, 185)
 }
 
-#message[from="myself"] #translationMsg span#content {
-  /* margin: 0 10px 0 5px; */
-  background: rgba(211, 211, 211, 0.25)
+#message[from="other"] #replyMsg {
+  width: -webkit-fill-available;
+  border-bottom: 1px solid rgb(137, 196, 255);
 }
 
-#translationMsg span#content {
-  background: rgba(211, 211, 211, 0.25)
+#message[from="myself"] #translateMsg {
+  justify-content: flex-end;
+  width: -webkit-fill-available;
+  border-top: 1px solid rgb(127, 170, 185)
+}
+
+#message[from="other"] #translateMsg {
+  width: -webkit-fill-available;
+  border-top: 1px solid rgb(137, 196, 255);
 }
 
 #sendTime {
@@ -179,35 +159,66 @@ main {
 }
 
 #message button {
-  display: none;
-  margin: 0 5px;
-  border-radius: 0.5rem;
-  padding: 0 5px;
+  padding: 0 3px;
 }
 
-#message:hover button {
+#message:hover #toolbar {
   display: block;
 }
 
+#toolbar {
+  display: none;
+  position: absolute;
+  top: 2rem;
+  z-index: 10;
+  background: rgb(239, 239, 239);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+#toolbar button+button {
+  border-left: 1px solid gray
+}
+
 audio {
-  /* margin: 0 10px 0 5px; */
   height: 2rem;
   width: 7rem;
 }
 
+#message[from="other"] audio::-webkit-media-controls-panel {
+  background-color: rgb(168, 210, 252);
+}
+
+#message[from="myself"] audio::-webkit-media-controls-panel {
+  background-color: rgb(147, 172, 180);
+}
+
 #remoteVideo {
   object-fit: cover;
-  height: 40%;
+  height: auto;
+  width: -webkit-fill-available;
+  border-radius: 10px;
 }
 
 #localVideo {
   object-fit: cover;
-  height: 40%;
+  height: auto;
+  width: -webkit-fill-available;
+  border-radius: 10px;
+}
+
+.message-box {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
 }
 
 #messages {
   flex-grow: 1;
-  max-height: 482px;
+  max-height: 69vh;
   overflow: auto;
 }
 
@@ -216,7 +227,7 @@ li {
 }
 
 .contral {
-  padding: 10px;
+  padding: 10px 0;
   display: flex;
   justify-content: space-between
 }
@@ -230,7 +241,6 @@ li {
 
 #replyTo {
   display: none;
-  /* justify-content: space-between; */
   margin: 0 0 10px;
   background: white;
   border-radius: 10px;
@@ -266,14 +276,11 @@ li {
 }
 
 #form {
-  /* background: rgba(0, 75, 255, 0); */
-  /* padding: 5px 10px 10px 0px; */
   display: flex;
   height: 2rem;
 }
 
 #input {
-  /* border-: none; */
   padding-left: 1rem;
   flex-grow: 1;
   border-radius: 10px;
@@ -286,24 +293,19 @@ li {
 
 #form>button {
   background: #333;
-  /* border: none; */
   padding: 0 1rem;
-  /* margin: 0.25rem; */
   border-radius: 10px;
-  /* outline: none; */
   color: #fff;
 }
 
 #recordVoiceMsgBtn {
   background: rgba(45, 58, 56, 0.74);
-  /* border: none; */
   padding: 0 1rem;
-  /* margin: 0.25rem; */
   border-radius: 10px;
-  /* outline: none; */
   color: #fff;
   display: inline-block;
-  /* text-align: center; */
+  line-height: 2rem;
+  margin-right: 10px;
 }
 
 .user_box {
@@ -336,7 +338,6 @@ img {
 
 .open-button {
   background-color: #555;
-  color: white;
   padding: 16px 20px;
   border: none;
   cursor: pointer;
@@ -372,13 +373,11 @@ img {
   padding: 0 5px;
   margin: 5px 0;
   border: none;
-  /* background: #f1f1f1; */
 }
 
 /* When the inputs get focus, do something */
 
 .form-container input[type=text]:focus, .form-container input[type=password]:focus {
-  /* background-color: #ddd; */
   outline: none;
 }
 

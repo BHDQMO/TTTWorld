@@ -10,12 +10,14 @@ let historyData = {}
 
 let localPeer
 let cacheStream
-let mediaRecorder
+let mediaRecorder //new MediaRecorder(cacheStream) for voiceRecorder
+let voiceRecorder //new MediaRecorder(cacheStream) for SpeechRecognition
 
 let textTranslatelang = 'en' //native lang
 let audioTranlateLang = 'en-US' //native lang
 let speechSynthesisLang = 'en-US' //text lang
-let speechRecognitionLang = 'zh-TW' //target Lang when exchange 'zh-TW''en-US'
+let speechRecognitionLearningLang = 'en-US' //target Lang when exchange 'zh-TW''en-US'
+let speechRecognitionNativeLang = 'zh-TW'
 
 async function renderMessage(msg) {
   const sender = msg.sender
@@ -40,16 +42,16 @@ async function renderMessage(msg) {
       replyType = msgReplyBtn.getAttribute('contentType')
       switch (replyType) {
         case 'text': {
-          const textElement = msgReplyBtn.parentNode.children[0]
+          const textElement = msgReplyBtn.parentNode.parentNode.children[0]
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
             let wrongString = replyContent.textContent.split('')
             let rightString = msg.content.split('')
             const result = patienceDiff(wrongString, rightString).lines
-
             let tempString = ''
             let isDetected = false
             const markedWrongSpans = document.createElement('div')
+            markedWrongSpans.setAttribute('id', 'spanContainer')
             result.map((char, i) => {
               if (char.aIndex !== -1) {
                 if (char.bIndex !== -1 && isDetected === false) {
@@ -83,12 +85,13 @@ async function renderMessage(msg) {
                 }
               }
             })
+
             replyContent = markedWrongSpans
           }
           break
         }
         case 'audio': {
-          const audioElement = msgReplyBtn.parentNode.children[1]
+          const audioElement = msgReplyBtn.parentNode.parentNode.children[1]
           replyContent = document.importNode(audioElement, true)
           break
         }
@@ -120,6 +123,9 @@ async function renderMessage(msg) {
           let tempString = ''
           let isDetected = false
           let markedRightSpans = document.createElement('div')
+          markedRightSpans.setAttribute('id', 'spanContainer')
+          markedRightSpans.setAttribute('id', 'content')
+
           result.map((char, i) => {
             if (char.bIndex !== -1) {
               if (char.aIndex !== -1 && isDetected === false) {
@@ -136,7 +142,7 @@ async function renderMessage(msg) {
               } else if (char.aIndex !== -1 && isDetected === true) {
                 const tempElement = document.createElement('span')
                 tempElement.textContent = tempString
-                tempElement.setAttribute('class', 'fix')
+                tempElement.setAttribute('class', 'correction')
                 markedRightSpans.appendChild(tempElement)
                 tempString = '' + char.line
                 isDetected = false
@@ -147,7 +153,7 @@ async function renderMessage(msg) {
                 if (isDetected === false) {
                   tempElement.setAttribute('class', 'pass')
                 } else {
-                  tempElement.setAttribute('class', 'fix')
+                  tempElement.setAttribute('class', 'correction')
                 }
                 markedRightSpans.appendChild(tempElement)
               }
@@ -156,6 +162,8 @@ async function renderMessage(msg) {
           })
 
           const originMsg = clone.querySelector('#originMsg')
+          const textSpan = clone.querySelector('#content')
+          textSpan.remove()
           const audio = clone.querySelector('#originMsg audio')
           markedRightSpans = originMsg.insertBefore(markedRightSpans, audio)
         } else {
@@ -168,6 +176,8 @@ async function renderMessage(msg) {
         break
       }
       case 'audio': {
+        console.log(msg.content)
+        console.log(msg.content.data)
         if (msg.content.data) {
           const buffer = msg.content.data
           var arrayBuffer = new ArrayBuffer(buffer.length);
@@ -175,6 +185,7 @@ async function renderMessage(msg) {
           buffer.map((b, i) => view[i] = b)
           msg.content = arrayBuffer
         }
+        console.log(msg.content)
         const audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
         const audio = clone.querySelector('audio')
         audio.setAttribute('style', 'display: block')
@@ -211,17 +222,17 @@ async function renderMessage(msg) {
 
 function sendMessage(type, content) {
   let historyId = null
-  const replyBody = document.querySelector('#replyBody')
-  if (replyBody) {
+  const replyBodyNum = document.querySelector('#replyBody').children.length
+  if (replyBodyNum > 1) {
     historyId = replyBody.getAttribute('historyId')
     replyBody.lastChild.remove()
     document.querySelector('#replyTo').style = 'display:none'
   }
 
-  let correct = false
+  let correct = 0
   const userInput = document.querySelector('#input')
   if (userInput.hasAttribute('correct')) {
-    correct = true
+    correct = 1
     userInput.removeAttribute('correct')
   }
 
@@ -254,20 +265,26 @@ function reply(element) {
   let clone
   switch (type) {
     case 'text': {
-      const textElement = element.parentNode.children[0]
+      const textElement = element.parentNode.parentNode.children[0]
       clone = textElement.cloneNode('deep')
+      if (clone.tagName = 'div') {
+        const span = document.createElement('span')
+        span.id = 'content'
+        span.textContent = clone.innerText
+        clone = span
+      }
       break
     }
     case 'audio': {
-      const audioElement = element.parentNode.children[1]
+      const audioElement = element.parentNode.parentNode.children[1]
       clone = audioElement.cloneNode('deep')
       break
     }
   }
 
   const replyTo = document.querySelector('#replyTo')
-  const sender = parseInt(element.getAttribute('sender'))
-  const historyId = parseInt(element.getAttribute('historyId'))
+  const sender = parseInt(element.getAttribute('senderid'))
+  const historyId = parseInt(element.getAttribute('historyid'))
   try {
     replyTo.querySelector('img').src = friendData[sender].picture
     replyTo.querySelector('span#senderName').textContent = friendData[sender].name
@@ -276,8 +293,9 @@ function reply(element) {
     replyTo.querySelector('span#senderName').textContent = user.name
   }
   const replyBody = document.querySelector('#replyBody')
+  const messages = document.querySelector('#messages')
+  messages.style = 'max-height: 59vh'
   replyBody.setAttribute('historyId', historyId)
-  console.log(clone)
   replyBody.append(clone)
   replyTo.style = 'display:flex'
 
@@ -298,6 +316,8 @@ function cancelReply() {
   }
   const replyTo = document.querySelector('#replyTo')
   replyTo.style = 'display:none'
+  const messages = document.querySelector('#messages')
+  messages.style = 'max-height: 69vh'
 }
 
 function correct(element) {
@@ -308,9 +328,10 @@ function correct(element) {
 }
 
 function favorite(element) {
-  history_id = element.parentNode.querySelector('#reply').getAttribute('historyId')
+  history_id = element.parentNode.parentNode.querySelector('#reply').getAttribute('historyId')
   const data = { user_id, history_id }
   socket.emit('favorite', data)
+  Swal.fire('Add to your collection!')
 }
 
 
@@ -326,18 +347,8 @@ form.addEventListener('submit', function (e) {
     sendMessage('text', userinput)
     input.value = ''
   }
-})
-
-
-const recordVoiceMsgBtn = document.querySelector('#recordVoiceMsgBtn')
-recordVoiceMsgBtn.addEventListener('mousedown', (event) => {
-  startAudioRecord()
-  event.target.style = 'background: lightgrey'
-})
-
-recordVoiceMsgBtn.addEventListener('mouseup', (event) => {
-  stopAudioRecord()
-  event.target.style = 'background: rgba(45, 58, 56, 0.74)'
+  const messages = document.querySelector('#messages')
+  messages.style = 'max-height: 69vh'
 })
 
 const stopAudioRecord = function () {
@@ -350,21 +361,30 @@ const startAudioRecord = async function () {
   const audioConstraints = {
     audio: { sampleRate: 16000 }
   }
+
   if (!cacheStream) {
     await getUserStream(audioConstraints)
+  } else if (cacheStream.active === false) {
+    await getUserStream(audioConstraints)
+  } else if (cacheStream.getAudioTracks().length === 0) {
+    await getUserStream(audioConstraints)
   }
+
   mediaRecorder = new MediaRecorder(cacheStream)
   mediaRecorder.start()
   const timeoutID = setTimeout(stopAudioRecord, 10 * 1000)
 
   let chunks = []
   mediaRecorder.ondataavailable = function (e) {
+    console.log(e.data)
     chunks.push(e.data)
   }
 
   mediaRecorder.onstop = function (e) {
+    console.log(chunks)
     clearTimeout(timeoutID)
     const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
+    console.log(blob)
     sendMessage('audio', blob)
     chunks = []
 
@@ -377,6 +397,17 @@ const startAudioRecord = async function () {
   }
 }
 
+const recordVoiceMsgBtn = document.querySelector('#recordVoiceMsgBtn')
+recordVoiceMsgBtn.addEventListener('mousedown', (event) => {
+  startAudioRecord()
+  event.target.style = 'background: lightgrey'
+})
+
+recordVoiceMsgBtn.addEventListener('mouseup', (event) => {
+  stopAudioRecord()
+  event.target.style = 'background: rgba(45, 58, 56, 0.74)'
+})
+
 async function renderHistory(element) {
   document.querySelector('#messages').textContent = ''
 
@@ -386,6 +417,9 @@ async function renderHistory(element) {
     talkTo = friendData[element.id]
   }
   socket.emit('joinRoom', { user_id, room: talkTo.room_id })
+
+  document.querySelector('#other_pic').setAttribute('src', talkTo.picture)
+  document.querySelector('#other_name').textContent = talkTo.name
 
   const user_box = document.querySelector(`div[id='${talkTo.user_id}']`)
   const count = user_box.querySelector('.count')
@@ -532,6 +566,8 @@ function closing() {
   // Stop the webcam preview as well by pausing the <video> element, then stopping each of the getUserMedia() tracks on it.
   const localVideo = document.getElementById('localVideo')
   if (localVideo.srcObject) {
+    const videoBbox = document.querySelector('.video-box')
+    videoBbox.style = 'display:none'
     localVideo.pause()
     localVideo.srcObject.getTracks().forEach((track) => {
       track.stop()
@@ -585,7 +621,10 @@ async function addStreamProcess(constraints) {
     throw new Error('*** [WebRTC] get User Stream error: ' + error.toString())
   }
 
-  const localVideo = document.getElementById('localVideo')
+  const videoBbox = document.querySelector('.video-box')
+  videoBbox.style = 'display:flex'
+  const localVideo = document.querySelector('#localVideo')
+  console.log(localVideo)
   localVideo.srcObject = cacheStream
 
   try {
@@ -701,7 +740,7 @@ async function handleSDPAnswer(data) {
 async function handleRemoteStream(event) {
   console.log("*** [WebRTC] render remote stream")
   // console.log(event.streams.length)
-  const remoteVideo = document.querySelector("remoteVideo")
+  const remoteVideo = document.querySelector("#remoteVideo")
   if (event.streams.length !== 0 && remoteVideo.srcObject !== event.streams[0]) {
     remoteVideo.srcObject = event.streams[0]
   }
@@ -710,13 +749,14 @@ async function handleRemoteStream(event) {
 async function settingVideoConstraints() {
   return new Promise(async (resolve, reject) => {
     const { value: formValues } = await Swal.fire({
-      title: 'Multiple inputs',
+      title: 'Set the environment',
       html:
-        '<lable for = "swal-input1"> Camera </lable>' +
-        '<input type = "checkbox" id="swal-input1" class="swal2-input">' +
-        '<lable for = "swal-input2"> Microphone </lable>' +
-        '<input type = "checkbox" id="swal-input2" class="swal2-input" value = true >',
+        // '<lable for = "swal-input1"> Camera </lable>' +
+        'Camera:<input type = "checkbox" id="swal-input1" class="swal2-input">' +
+        // '<lable for = "swal-input2"> Microphone </lable>' +
+        'Microphone:<input type = "checkbox" id="swal-input2" class="swal2-input" value = true >',
       focusConfirm: false,
+      icon: 'question',
       preConfirm: () => {
         const isCamera = document.getElementById('swal-input1')
         const isVoice = document.getElementById('swal-input2')
@@ -732,7 +772,7 @@ async function settingVideoConstraints() {
 
 // translate text
 function translateMsg(element) {
-  const text = element.parentNode.querySelector('#content').textContent
+  const text = element.parentNode.parentNode.querySelector('#content').innerText
   const target = textTranslatelang //need change follow the user's native zh-TWen-US
   const data = {
     text, target
@@ -746,7 +786,7 @@ function translateMsg(element) {
   }).then(res => res.json())
     .then(res => {
       console.log(res)
-      const translateMsg = element.parentNode.parentNode.children[1]
+      const translateMsg = element.parentNode.parentNode.parentNode.children[2]
       const translateContent = translateMsg.querySelector('span')
       translateContent.textContent = res.data
       translateMsg.style = 'display: flex'
@@ -757,19 +797,20 @@ function translateMsg(element) {
 
 // translate audio
 async function translateAudio(element) {
-  const audio = element.parentNode.firstChild.getAttribute('src');
+  const audio = element.parentNode.parentNode.children[1].getAttribute('src');
+  console.log(audio)
 
   fetch(audio)
     .then(res => res.blob()) // mixin takes a Response stream and reads it to completion.
     .then(blob => {
       console.log(blob)
-      const data = {
-        targetLang: audioTranlateLang,
-        blob: blob
-      }
+
       fetch(`/demoGoogleSpeechToTest`, {
         method: "POST",
-        body: data
+        body: blob,
+        headers: {
+          'targetLang': `${audioTranlateLang}`,
+        }
       })
         .then(res => console.log(res.text()))
     })
@@ -777,114 +818,261 @@ async function translateAudio(element) {
 
 // speechSynthesis
 function speakMsg(element) {
-  const msgContent = element.parentNode.firstChild.textContent.split(':')[1]
+  const msgContent = element.parentNode.parentNode.children[0].innerText
   const targetLang = speechSynthesisLang //need change follow the Lang of this msg
-
-  var synth = window.speechSynthesis
-  var utterThis = new SpeechSynthesisUtterance(msgContent);
-  utterThis.voice = synth.getVoices().find(voice => voice.lang === targetLang)
-  synth.speak(utterThis);
+  try {
+    var synth = window.speechSynthesis
+    var utterThis = new SpeechSynthesisUtterance(msgContent);
+    utterThis.voice = synth.getVoices().find(voice => voice.lang === targetLang)
+    console.log(synth.getVoices())
+    synth.speak(utterThis);
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-var recognition = new SpeechRecognition();
-recognition.lang = speechRecognitionLang
-recognition.maxAlternatives = 1;
-recognition.interimResults = true;
-// recognition.continuous = true;
-let voiceRecorder
+var recognition1 = new SpeechRecognition();
+var recognition2 = new SpeechRecognition();
+let exchangeFinal = {}
+let lowScoreList = {}
+let chunks = []
+let startTime
+let startPt
+let isNeedStoreCheck = {}
 
-function startSpeechRecognition() {
-  recognition.start();
+async function startSpeechRecognition() {
+  recognition1.lang = speechRecognitionNativeLang
+  recognition1.maxAlternatives = 1;
+  recognition1.interimResults = false;
 
-  recognition.onstart = async function (event) {
-    console.log('[SpeechRecognition] recognition start');
+  recognition2.lang = speechRecognitionLearningLang
+  recognition2.maxAlternatives = 1;
+  recognition2.interimResults = false;
 
-    const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  const audioConstraints = {
+    audio: { sampleRate: 16000 }
+  }
 
-    voiceRecorder = new MediaRecorder(voiceStream)
-    voiceRecorder.start()
+  if (!cacheStream) {
+    console.log("create new stream")
+    await getUserStream(audioConstraints)
+  } else if (cacheStream.active === false) {
+    console.log("stream inactive, create new one")
+    await getUserStream(audioConstraints)
+  } else if (cacheStream.getAudioTracks().length === 0) {
+    console.log("audio stream does not exist, create now one")
+    await getUserStream(audioConstraints)
+  }
+  console.log(cacheStream)
 
-    let chunks = []
-    mediaRecorder.ondataavailable = function (e) {
-      chunks.push(e.data)
+  voiceRecorder = new MediaRecorder(cacheStream)
+
+  voiceRecorder.start()
+
+  let ondataavailableCounter = 0
+  voiceRecorder.ondataavailable = async function (e) {
+    ondataavailableCounter++
+    console.log('ondataavailableCounter: ' + ondataavailableCounter)
+    if (isNeedStoreCheck[ondataavailableCounter] === true) {
+      const blob = new Blob([e.data], { type: 'audio/ogg codecs=opus' })
+      arrayBuffer = await new Response(blob).arrayBuffer()
+      const audioBlob = new Blob([arrayBuffer], { type: 'audio/ogg' })
+      const audioUrl = window.URL.createObjectURL(audioBlob)
+
+      lowScoreList[ondataavailableCounter].audioUrl = audioUrl
+      console.log('Attach ' + ondataavailableCounter + 'th' + ' recored')
+      delete blob
+      delete audioBlob
+      delete audioUrl
     }
+  }
 
-    mediaRecorder.onstop = function (e) {
-      const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
-      console.log(blob)
-      sendMessage('audio', blob)
-      chunks = []
+  voiceRecorder.onstop = function (e) {
+    const localVideo = document.getElementById('localVideo')
+    if (localVideo && !localVideo.srcObject) {
+      cacheStream.getTracks().forEach((track) => {
+        track.stop()
+      })
+    }
+  }
+  // recognition1.start();
+  recognition2.start();
 
-      const localVideo = document.getElementById('localVideo')
-      if (localVideo && !localVideo.srcObject) {
-        cacheStream.getTracks().forEach((track) => {
-          track.stop()
-        })
+  // recognition1.onstart = async function (event) {
+  //   console.log('[SpeechRecognition1] recognition start');
+  // }
+
+  // recognition1.onaudiostart = function (event) {
+  //   console.log('[SpeechRecognition1] audio start');
+  // }
+
+  // recognition1.onsoundstart = function (event) {
+  //   console.log('[SpeechRecognition1] sound start');
+  // }
+
+  // recognition1.onspeechstart = function (event) {
+  //   console.log('[SpeechRecognition1] speechs tart');
+  // }
+
+  // recognition1.onresult = function (event) {
+  //   const resultList = event.results
+  //   const lastIndex = resultList.length - 1
+  //   const lastResult = resultList[lastIndex][0]
+  //   console.log(event.results)
+  //   console.log('Confidence: ' + lastResult.confidence + '\n' + lastResult.transcript.toLowerCase());
+
+  //   if (lastResult.confidence > 0.92) {
+  //     console.log('over the threshold')
+  //     const warn = document.getElementById("warn")
+  //     warn.textContent = `Please use ${speechRecognitionLearningLang}`
+  //     window.setTimeout(() => {
+  //       const warn = document.getElementById("warn")
+  //       warn.textContent = ''
+  //     }, 2 * 1000)
+  //   }
+  // }
+
+  // recognition1.onnomatch = function (event) {
+  //   console.log('[SpeechRecognition1] no match');
+  // }
+
+  // recognition1.onspeechend = function () {
+  //   console.log('[SpeechRecognition1] speech end');
+  // }
+
+  // recognition1.onsoundend = function (event) {
+  //   console.log('[SpeechRecognition1] sound end');
+  // }
+
+  // recognition1.onaudioend = function (event) {
+  //   console.log('[SpeechRecognition1] audio end');
+  // }
+
+  // recognition1.onend = function (event) {
+  //   console.log('[SpeechRecognition1] recognition end');
+  //   recognition1.start();
+  // }
+
+  // recognition1.onerror = function (event) {
+  //   console.log('[SpeechRecognition1] error occurred: ' + event.error);
+  // }
+
+  recognition2.onstart = async function (event) {
+    console.log('[SpeechRecognition2] recognition start');
+  }
+
+  recognition2.onaudiostart = function (event) {
+    console.log('[SpeechRecognition2] audio start');
+  }
+
+  recognition2.onsoundstart = function (event) {
+    console.log('[SpeechRecognition2] sound start');
+  }
+
+  recognition2.onspeechstart = function (event) {
+    console.log('[SpeechRecognition2] speechs tart');
+  }
+
+  let onresultCounter = 0
+  recognition2.onresult = async function (event) {
+    const resultList = event.results
+    const lastIndex = resultList.length - 1
+    const lastResult = resultList[lastIndex]
+    const alternative = lastResult[0]
+    console.log(event.results)
+    console.log('Confidence: ' + alternative.confidence + '\n' + alternative.transcript.toLowerCase());
+
+    if (lastResult.isFinal === true) {
+      voiceRecorder.requestData()
+      onresultCounter++
+      if (alternative.confidence < 1) {
+        isNeedStoreCheck[onresultCounter] = true
+        const millisToMinutesAndSeconds = (millis) => {
+          var minutes = Math.floor(millis / 60000);
+          var seconds = ((millis % 60000) / 1000).toFixed(0);
+          return `${minutes}:${(seconds < 10 ? "0" : "")}${seconds}`;
+        }
+
+        let endTime = Date.now()
+        const timing = millisToMinutesAndSeconds(endTime - startTime)
+
+        const transcript = alternative.transcript
+        const confidence = alternative.confidence
+        const data = {
+          timing,
+          transcript,
+          confidence,
+        }
+        lowScoreList[onresultCounter] = data
+        console.log('Store ' + onresultCounter + 'th' + ' transcript')
       }
     }
   }
 
-  recognition.onaudiostart = function (event) {
-    console.log('[SpeechRecognition] audio start');
+  recognition2.onnomatch = function (event) {
+    console.log('[SpeechRecognition2] no match');
   }
 
-  recognition.onsoundstart = function (event) {
-    console.log('[SpeechRecognition] sound start');
+  recognition2.onspeechend = function () {
+    console.log('[SpeechRecognition2] speech end');
   }
 
-  recognition.onspeechstart = function (event) {
-    console.log('[SpeechRecognition] speechs tart');
+  recognition2.onsoundend = function (event) {
+    console.log('[SpeechRecognition2] sound end');
   }
 
-  recognition.onresult = function (event) {
-    const resultList = event.results
-    const lastIndex = resultList.length - 1
-    const lastResult = resultList[lastIndex][0]
-    console.log(event.results)
-    console.log('Confidence: ' + lastResult.confidence + '\n' + lastResult.transcript.toLowerCase());
+  recognition2.onaudioend = function (event) {
+    console.log('[SpeechRecognition2] audio end');
+  }
 
-    if (lastResult.confidence > 0.925) {
-      console.log('over the threshold')
-      const warn = document.getElementById("warn")
-      warn.textContent = 'Please use English'
-      window.setTimeout(() => {
-        const warn = document.getElementById("warn")
-        warn.textContent = ''
-      }, 2 * 1000)
+  recognition2.onend = function (event) {
+    console.log('[SpeechRecognition2] recognition end');
+    if (cacheStream) {
+      if (cacheStream.active === true) {
+        if (cacheStream.getTracks().length > 0) {
+          recognition2.lang = speechRecognitionLearningLang
+          recognition2.start();
+        }
+      }
     }
   }
-
-  recognition.onnomatch = function (event) {
-    console.log('[SpeechRecognition] no match');
-  }
-
-  recognition.onspeechend = function () {
-    console.log('[SpeechRecognition] speech end');
-  }
-
-  recognition.onsoundend = function (event) {
-    console.log('[SpeechRecognition] sound end');
-  }
-
-  recognition.onaudioend = function (event) {
-    console.log('[SpeechRecognition] audio end');
-  }
-
-  recognition.onend = function (event) {
-    console.log('[SpeechRecognition] recognition end');
-    recognition.start();
-  }
-
-  recognition.onerror = function (event) {
-    console.log('[SpeechRecognition] error occurred: ' + event.error);
+  recognition2.onerror = function (event) {
+    console.log('[SpeechRecognition2] error occurred: ' + event.error);
   }
 }
 
 function stopSpeechRecognition() {
-  recognition.stop();
+  // recognition1.stop();
+  voiceRecorder.stop()
+  recognition2.stop();
 
+  // lowScoreList = Object.values(lowScoreList).map(item => {
+  //   console.log(item.audioBlob)
+  //   const audioBlob = new Blob(item.audioBlob, { type: 'audio/ogg' })
+  //   console.log(audioBlob)
+  //   const audioUrl = window.URL.createObjectURL(audioBlob)
+  //   console.log(audioUrl)
+  //   item.audioUrl = audioUrl
+  //   delete item.audioBlob
+  //   return item
+  // })
+  // exchangeFinal.lowScoreList = lowScoreList
+  Object.values(lowScoreList).map(item => {
+    fetch(`/demoGoogleSpeechToTest`, {
+      method: "POST",
+      body: item.audioBlob,
+      headers: {
+        'targetLang': `${audioTranlateLang}`,
+      }
+    })
+    // .then(res => console.log(res.text()))
+  })
+
+
+  console.log(lowScoreList)
+  lowScoreList = {}
 }
 
 function openForm() {
@@ -921,4 +1109,53 @@ function bookingExchange(e) {
         console.log("===========wait built===========")
       })
   })
+}
+
+const duration = 15 * 60 * 1000
+const ratio = 50
+let time = duration * ratio / 100;
+let step = 1
+let main = document.querySelector('main')
+let currentLang = document.querySelector('#currentLang')
+let timer = document.querySelector('#timer')
+function startexchangeDemo() {
+  startTime = Date.now();
+  startSpeechRecognition()
+  main.style = 'background:red'
+  currentLang.textContent = `${speechRecognitionLearningLang} Time`
+  MyCounter()
+}
+
+function MyCounter() {
+  if (time <= 0) {
+    if (step === 1) {
+      swap()
+    } else {
+      stopexchangeDemo()
+    }
+  } else {
+    timer.textContent = Math.floor(time / 1000 / 60) + " : " + time / 1000 % 60
+    setTimeout(MyCounter, 1000);
+  }
+  time -= 1000;
+}
+
+function swap() {
+  const langBuffer = speechRecognitionLearningLang
+  speechRecognitionLearningLang = speechRecognitionNativeLang
+  speechRecognitionNativeLang = langBuffer
+  currentLang.textContent = `${speechRecognitionLearningLang} Time`
+  main.style = 'background:blue'
+  time = duration * (100 - ratio) / 100;
+  recognition2.stop()
+  MyCounter()
+  step = 2
+}
+
+function stopexchangeDemo() {
+  timer.textContent = ''
+  stopSpeechRecognition()
+  main.style = ''
+  currentLang.textContent = ''
+  timer.textContent = ''
 }

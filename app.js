@@ -35,45 +35,70 @@ app.post('/demoGoogleTranslate', async (req, res) => {
 })
 
 app.post('/demoGoogleSpeechToTest', async (req, res) => {
-  console.log(req.body)
+  var body = Buffer.from([]); // create a buffer
+  req.on('data', function (data) {
+    body = Buffer.concat([body, data]);
+  });
+  req.on('end', async function () {
 
+    var pathname = `${Date.now()}.ogg`;
+    fs.writeFileSync(pathname, body);
 
-  var buffer = Buffer.from([]); // create a buffer
-  buffer = Buffer.concat([buffer, req.body]);
-  var pathname = "test.ogg";
-  fs.writeFileSync(pathname, buffer);
+    const encoding = 'LINEAR16';
+    const sampleRateHertz = 16000;
+    const languageCode = 'en-US';
+    const audio = {
+      content: fs.readFileSync(pathname).toString('base64'),
+    }
 
+    // const config = {
+    //   encoding: encoding,
+    //   // sampleRateHertz: sampleRateHertz,
+    //   languageCode: languageCode,
+    // };
 
-  // var buffer = Buffer.from([]); // create a buffer
-  // req.on('data', function (data) {
-  //   buffer = Buffer.concat([buffer, data]);
-  // });
-  // req.on('end', async function () {
+    // const request = {
+    //   config: config,
+    //   audio: audio,
+    // };
 
-  //   var pathname = "test.ogg";
-  //   fs.writeFileSync(pathname, body);
+    // const translateResult = await Google.translateAudio(request)
+    // console.log(`Transcription: ${translateResult}`)
 
-  //   const encoding = 'LINEAR16';
-  //   const sampleRateHertz = 16000;
-  //   const languageCode = 'en-US';
-  //   const audio = {
-  //     content: fs.readFileSync(pathname).toString('base64'),
-  //   }
+    // var pathname = "test.ogg";
+    // const speech = require('@google-cloud/speech');
+    // const client = new speech.SpeechClient();
 
-  //   const config = {
-  //     encoding: encoding,
-  //     // sampleRateHertz: sampleRateHertz,
-  //     languageCode: languageCode,
-  //   };
+    // async function transcribeContextClasses() {
+    //   const audio = {
+    //     content: fs.readFileSync(pathname).toString('base64'),
+    //   }
 
-  //   const request = {
-  //     config: config,
-  //     audio: audio,
-  //   };
+    //   const config = {
+    //     encoding: 'LINEAR16',
+    //     languageCode: 'en-US',
+    //     speechContexts: [speechContext],
+    //   };
 
-  //   const translateResult = await Google.translateAudio(request)
-  //   console.log(`Transcription: ${translateResult}`)
-  // });
+    //   const request = {
+    //     config: config,
+    //     audio: audio,
+    //   };
+
+    //   // Detects speech in the audio file.
+    //   const [response] = await client.recognize(request);
+    //   console.log(response)
+
+    //   response.results.forEach((result, index) => {
+    //     const transcript = result.alternatives[0].transcript;
+    //     console.log('-'.repeat(20));
+    //     console.log(`First alternative of result ${index}`);
+    //     console.log(`Transcript: ${transcript}`);
+    //     res.send(transcript)
+    //   });
+    // }
+    // transcribeContextClasses();
+  });
 
 })
 

@@ -22,7 +22,7 @@ body {
 }
 
 header {
-  height: 70px;
+  height: 10vh;
   padding: 10px 25px 10px 10px;
   display: flex;
   align-items: flex-end;
