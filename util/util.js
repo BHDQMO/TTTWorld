@@ -6,6 +6,7 @@ const aws = require('aws-sdk')
 const multerS3 = require('multer-s3')
 
 const User = require('../server/models/user_model');
+const Socket = require("./socket")
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET
 
@@ -79,12 +80,52 @@ const calAge = (date) => {
   const thisYear = new Date()
   const age = new Date(thisYear - birthYear).getFullYear() - 1970
   return age
+}
 
+const serverNotice = async (io) => {
+  //get the 1min ahead the ahead notice list
+  let waitingNoticeExchange = await User.getWaitingNoticeExchange()
+  if (waitingNoticeExchange.length > 0) {
+    // const exchangeList = {}
+    // waitingNoticeExchange.map(exchange => exchangeList[exchange.room_id] = exchange)
+
+    let roomList = waitingNoticeExchange.map(exchange => exchange.room_id)
+    roomList = [...new Set(roomList)]
+    let userListByRoom = await User.getUserListByRoom(roomList)
+
+    const roomUserList = {}
+    userListByRoom.map(room => roomUserList[room.id] = [room.user_a, room.user_b])
+
+    waitingNoticeExchange = waitingNoticeExchange.map(exchange => {
+      exchange.user = roomUserList[exchange.room_id]
+      return exchange
+    })
+    console.log(waitingNoticeExchange)
+    waitingNoticeExchange.map(exchange => {
+      console.log(exchange)
+      const timeDiff = new Date(exchange.start_time) - Date.now()
+      console.log(timeDiff)
+      const ahead = exchange.ahead_time * 60 * 1000
+      console.log(ahead)
+      if (timeDiff > 0) {
+        console.log('set aheadExchangeNotice timer')
+        setTimeout(() => Socket.aheadExchangeNotice({ io, exchange }), timeDiff)
+      }
+      if (timeDiff + ahead > 0) {
+        console.log('set exchangeStartNotice timer')
+        setTimeout(() => Socket.exchangeStartNotice({ io, exchange }), timeDiff + ahead)
+      }
+
+    })
+  } else {
+    console.log('there is no exchange need to be notice')
+  }
 }
 
 module.exports = {
   upload,
   wrapAsync,
   authentication,
-  calAge
+  calAge,
+  serverNotice
 }

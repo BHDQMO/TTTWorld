@@ -139,49 +139,76 @@ const getFavorite = async (user_id) => {
     return data
   } catch (error) {
     await rollback()
-    return error
+    return { error }
   }
 };
 
 const getExchange = async (user_id) => {
-  let queryString = `
-  SELECT * FROM \`exchange\` AS exchangetable
-  LEFT JOIN
-  (
-    SELECT id AS room_id FROM room WHERE user_a = ?
-    UNION
-    SELECT id AS room_id FROM room WHERE user_b = ?
-    ) AS roomlist
-    ON roomlist.room_id = exchangetable.room_id
-  `
-  const exchangeData = await query(queryString, [user_id, user_id])
-  const roomList = []
-  exchangeData.map(item => {
-    if (roomList.includes(item.room_id) === false) {
-      roomList.push(item.room_id)
+  await transaction()
+  try {
+    let queryString = `
+    SELECT * FROM \`exchange\` AS exchangetable
+    LEFT JOIN
+    (
+      SELECT id AS room_id FROM room WHERE user_a = ?
+      UNION
+      SELECT id AS room_id FROM room WHERE user_b = ?
+      ) AS roomlist
+      ON roomlist.room_id = exchangetable.room_id
+    `
+    const exchangeData = await query(queryString, [user_id, user_id])
+    const roomList = []
+    exchangeData.map(item => {
+      if (roomList.includes(item.room_id) === false) {
+        roomList.push(item.room_id)
+      }
     }
-  }
-  )
-  queryString = `
-  SELECT user.user_id, name, picture, room_id FROM 
-  (SELECT user_a AS user_id, id AS room_id FROM room WHERE id IN ?
-  UNION
-  SELECT user_b AS user_id, id AS room_id FROM room WHERE id IN ?
-  ) AS roommatelist
-  LEFT JOIN user
-  ON roommatelist.user_id = user.user_id
-  WHERE user.user_id <> ?
-  `
+    )
+    queryString = `
+    SELECT user.user_id, name, picture, room_id FROM 
+    (SELECT user_a AS user_id, id AS room_id FROM room WHERE id IN ?
+    UNION
+    SELECT user_b AS user_id, id AS room_id FROM room WHERE id IN ?
+    ) AS roommatelist
+    LEFT JOIN user
+    ON roommatelist.user_id = user.user_id
+    WHERE user.user_id <> ?
+    `
 
-  const roommateResult = await query(queryString, [[roomList], [roomList], user_id])
-  const roommateData = {}
-  roommateResult.map(item => { roommateData[item.room_id] = item })
-  const data = {
-    exchangeData,
-    roommateData
+    const roommateResult = await query(queryString, [[roomList], [roomList], user_id])
+    const roommateData = {}
+    roommateResult.map(item => { roommateData[item.room_id] = item })
+    const data = {
+      exchangeData,
+      roommateData
+    }
+    await commit()
+    return data
+  } catch (error) {
+    await rollback()
+    return { error }
   }
-  return data
+
 };
+
+async function getWaitingNoticeExchange(currentTime) {
+  const queryString = `
+  SELECT * FROM exchange
+  LEFT JOIN
+  (SELECT id, TIMESTAMPDIFF(MINUTE,CURRENT_TIMESTAMP,start_time) AS remainTime FROM exchange) AS waitNoticeList
+  ON exchange.id = waitNoticeList.id WHERE remainTime = ahead_time
+  `
+  const result = await query(queryString)
+  return result
+}
+
+async function getUserListByRoom(roomList) {
+  const queryString = `
+    SELECT * FROM room WHERE id IN ?    
+  `
+  const result = await query(queryString, [[roomList]])
+  return result
+}
 
 module.exports = {
   isEmailExist,
@@ -189,5 +216,7 @@ module.exports = {
   nativeSignIn,
   getUserDetail,
   getFavorite,
-  getExchange
+  getExchange,
+  getWaitingNoticeExchange,
+  getUserListByRoom
 }

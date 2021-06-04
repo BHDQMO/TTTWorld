@@ -2,27 +2,34 @@ let socket
 let friendData
 let exchange
 let favorite
+let user_id // don't move it. notice need this variable
 
 fetch('/user/profile', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
-    console.log(res)
+    user_id = res.data.user.user_id // don't move it. notice need this variable
     socket = io({
       auth: {
-        user_id: res.data.user.user_id
+        user_id: user_id
       }
     })
 
     socket.on('friend_online', online_notice)
+    socket.on('aheadExchangeNotice', aheadExchangeNotice)
     socket.on('waitingInvite', renderWaitingIvite)
 
     exchange = res.data.exchange
     favorite = res.data.favorite
+
     renderProfile(res.data.user)
-    renderExchange()
-    renderFavorite()
+    if (exchange.length > 0) {
+      renderExchange()
+    }
+    if (favorite.length > 0) {
+      renderFavorite()
+    }
   })
 
 const renderProfile = (user) => {
@@ -48,12 +55,12 @@ const renderProfile = (user) => {
 
 const renderFavorite = () => {
   const favoriteData = favorite.favoriteData
+  console.log(favorite)
   favoriteData.map(item => renderMessage(item))
 
 }
 
 const renderExchange = () => {
-  console.log(exchange)
   exchange.exchangeData.map(item => {
     const template = document.querySelector('#exchange_template').content
     const clone = document.importNode(template, true)
@@ -78,6 +85,7 @@ function logout() {
 }
 
 async function renderMessage(msg) {
+  console.log(msg)
   const sender = msg.sender
   const template = document.querySelector('#messageTemplate')
   const clone = document.importNode(template, true).content
@@ -134,6 +142,7 @@ async function renderMessage(msg) {
             }
           })
           const replyMsg = clone.querySelector('#replyMsg')
+          console.log(replyMsg)
           replyMsg.append(markedWrongSpans)
         }
         break

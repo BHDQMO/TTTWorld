@@ -22,8 +22,23 @@ const io = new Server(server)
 
 const Google = require('./util/google')
 const Socket = require("./util/socket")
+const { serverNotice } = require("./util/util")
 
 const port = process.env.PORT
+
+// do {
+//   if (Date.now() % 1000 === 0) {
+//     setInterval(() => serverNotice(io), 60 * 1000)
+//     break
+//   }
+// } while (true)
+
+
+// while (Date.now() % 1000 !== 0) {
+//   console.log(Date.now())
+// }
+
+// setInterval(() => serverNotice(io), 5 * 1000)
 
 app.post('/demoGoogleTranslate', async (req, res) => {
   text = req.body.text
@@ -137,6 +152,8 @@ const onConnect = (socket, next) => {
   socket.on("offer", Socket.offer(socket, io));
   socket.on("answer", Socket.answer(socket, io));
   socket.on("icecandidate", Socket.icecandidate(socket, io));
+  socket.on("hangup", Socket.hangup(socket, io));
+  socket.on("callend", Socket.callend(socket, io));
 
   socket.on('message', Socket.message(socket, io))
   socket.on('readMessage', Socket.readMessage(socket, io))
@@ -155,3 +172,4 @@ server.listen(port, () => {
 })
 
 module.exports = app
+

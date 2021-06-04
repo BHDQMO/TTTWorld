@@ -127,14 +127,25 @@ const signIn = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   const user_id = req.user.user_id
-  const favoriteData = await User.getFavorite(user_id)
-  const exchangeData = await User.getExchange(user_id)
-  const data = {
-    user: req.user,
-    favorite: favoriteData,
-    exchange: exchangeData
+  try {
+    let favoriteData = await User.getFavorite(user_id)
+    if (favoriteData.error) {
+      favoriteData = []
+    }
+    let exchangeData = await User.getExchange(user_id)
+    if (exchangeData.error) {
+      exchangeData = []
+    }
+    const data = {
+      user: req.user,
+      favorite: favoriteData,
+      exchange: exchangeData
+    }
+    res.status(200).send({ data });
+  } catch (error) {
+    // console.log(error)
+    res.status(501).send({ error })
   }
-  res.status(200).send({ data });
 };
 
 module.exports = {

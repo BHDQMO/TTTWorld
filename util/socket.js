@@ -80,7 +80,6 @@ const message = (socket, io) => async (data) => {
   } catch (e) {
     console.log("can't find the room num in sever list")
   }
-
 }
 
 const readMessage = (socket, io) => async (data) => {
@@ -122,6 +121,16 @@ const icecandidate = (socket, io) => ({ room, candidate }) => {
   socket.to(room).emit('icecandidate', { room, candidate });
 }
 
+const hangup = (socket, io) => (data) => {
+  console.log('hang up the phone')
+  socket.to(data.room).emit('hangup', data);
+}
+
+const callend = (socket, io) => (room_id) => {
+  console.log('call end')
+  socket.to(room_id).emit('callend');
+}
+
 const offer = (socket, io) => (data) => {
   const room = data.room
   console.log('switch offer')
@@ -131,6 +140,25 @@ const offer = (socket, io) => (data) => {
 const answer = (socket, io) => (data) => {
   console.log('switch answer')
   socket.to(data.room).emit('answer', data);
+}
+
+const aheadExchangeNotice = ({ io, exchangeList }) => {
+  console.log(exchangeList)
+  Object.entries(exchangeList).map(exchange => {
+    exchange[1].userList.map(user => {
+      console.log('emit aheadExchangeNotice event')
+      io.to(socket_ids[user]).emit('aheadExchangeNotice', exchange[1]);
+    })
+  })
+}
+
+const exchangeStartNotice = ({ io, exchangeList }) => {
+  Object.entries(exchangeList).map(exchange => {
+    exchange[1].userList.map(user => {
+      console.log('emit exchangeStartNotice event')
+      io.to(socket_ids[user]).emit('exchangeStartNotice', exchange[1]);
+    })
+  })
 }
 
 module.exports = {
@@ -143,12 +171,16 @@ module.exports = {
   offer,
   answer,
   icecandidate,
+  hangup,
+  callend,
   message,
   favorite,
   readMessage,
   invite,
   accept,
   reject,
+  aheadExchangeNotice,
+  exchangeStartNotice
 }
 
 

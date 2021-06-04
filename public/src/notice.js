@@ -25,7 +25,6 @@ const renderWaitingIvite = (data) => {
     document.querySelector(".count").textContent = data.unreadNum
     document.querySelector(".dropdown").addEventListener("mouseenter", () => {
       document.querySelector(".count").textContent = 0
-      console.log(isNoticeRead)
       if (isNoticeRead === 0) {
         socket.emit("readInvite", user_id)
         isNoticeRead++
@@ -78,4 +77,11 @@ const noticeAction = function (element) {
       break;
     }
   }
+}
+
+const aheadExchangeNotice = (exchange) => {
+  console.log(exchange)
+  const userList = exchange.userList
+  const talkTo = userList.filter(user => user !== user_id)
+  alert(`your exchange with ${talkTo} will begin in ${exchange.ahead} minutes`)
 }

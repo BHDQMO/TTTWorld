@@ -35,7 +35,7 @@ const getFriendList = async (user_id) => {
   ) AS friend_list
   LEFT JOIN 
   ( 
-    SELECT user_id,name,native,learning,picture,interest FROM user
+    SELECT user_id,name,native,learning,picture,interest,email,introduction FROM user
   ) AS user_data
   ON friend_list.user_id = user_data.user_id 
   `

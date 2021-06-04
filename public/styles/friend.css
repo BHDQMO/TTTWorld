@@ -1,34 +1,100 @@
 main {
   height: 90vh;
   flex-grow: 1;
-  background: rgba(0, 75, 255, 0.5);
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  justify-content: space-between
+  justify-content: space-between;
 }
 
-.friend {
-  padding: 10px;
-  min-width: 300px;
+#friendBox {
+  margin-left: 20px;
+}
+
+#friendDetailBox {
+  margin-right: 20px;
+}
+
+#friendDetail {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 10px;
+}
+
+#friendDetail label {
+  color: rgb(99, 102, 107);
+  font-weight: 550;
+  font-size: medium;
+}
+
+#friendDetail span {
+  color: rgb(54, 52, 48);
+  font-weight: 600;
+  font-size: large;
+}
+
+#friendDetail span+label {
+  margin-top: 10px;
+}
+
+.bothSite {
+  width: 170px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
 }
 
-.chat-box {
+.profileBox {
+  position: relative;
+  height: 144px;
+  width: 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bothSiteItem {
+  background: rgb(246, 249, 252);
+  border: 1px solid rgb(239, 242, 247);
+  border-radius: 10px;
+}
+
+.bothSiteItem+.bothSiteItem {
+  margin-top: 20px;
+}
+
+.bothSiteFillerItem {
+  flex: 1
+}
+
+.profilePic {
+  height: 50%;
+}
+
+#chatBox {
   flex-grow: 1;
-  padding: 10px 10px 10px 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
-  height: 90vh;
+  background: rgb(243, 246, 252);
+  border-radius: 10px;
+  padding: 15px 10px;
+  position: relative
+}
+
+.mainItem {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.mainItem+.mainItem {
+  margin-left: 20px;
 }
 
 .video-box {
-  padding: 0 10px 0 0;
   display: none;
   flex-direction: column;
   align-content: center;
@@ -37,7 +103,6 @@ main {
 }
 
 .friend-list-title {
-  background: white;
   border-radius: 10px;
   text-align: center;
   font-size: x-large;
@@ -45,10 +110,7 @@ main {
 
 .friend-list {
   flex-grow: 1;
-  margin-top: 10px;
-  background: white;
   border-radius: 10px;
-  text-align: center
 }
 
 #warn {
@@ -59,7 +121,6 @@ main {
 #chat-box-head {
   border-radius: 10px;
   padding: 5px;
-  background: white;
   margin: 0 0 10px;
   height: 50px;
   display: flex;
@@ -193,14 +254,29 @@ audio {
   background-color: rgb(147, 172, 180);
 }
 
-#remoteVideo {
+#mainVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
   object-fit: cover;
-  height: auto;
-  width: -webkit-fill-available;
+  height: 100%;
+  width: 100%;
+  border-radius: 10px;
+  z-index: -1;
+}
+
+.subVideo {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
   border-radius: 10px;
 }
 
-#localVideo {
+#remoteVideo {
   object-fit: cover;
   height: auto;
   width: -webkit-fill-available;
@@ -209,9 +285,7 @@ audio {
 
 .message-box {
   flex: 1;
-  background: white;
   border-radius: 10px;
-  padding: 10px;
   display: flex;
   align-items: flex-start;
 }
@@ -232,11 +306,24 @@ li {
   justify-content: space-between
 }
 
-.contral>div>button {
+.contral button {
   padding: 5px 10px;
-  border: 2px solid yellow;
   border-radius: 5px;
-  background: yellowgreen;
+  background: rgb(2, 77, 252);
+  color: rgb(227, 246, 253);
+  font-weight: 450;
+}
+
+.optionBtn {
+  display: none;
+}
+
+.optionBtn svg {
+  display: none;
+}
+
+.videoContral path {
+  color: rgb(227, 246, 253);
 }
 
 #replyTo {
@@ -310,12 +397,24 @@ li {
 
 .user_box {
   position: relative;
-  margin: 10px;
-  border: 1px solid lightgreen;
+  margin: 5px 0;
+  padding: 0 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 50px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.user_box img {
+  height: 80%;
+}
+
+.user_box p {
+  margin-left: 5px;
+}
+
+.user_box[checked] {
+  background: rgb(243, 246, 252);
 }
 
 .user_box:hover {
@@ -324,8 +423,8 @@ li {
 
 img {
   border-radius: 50%;
-  max-width: 30%;
-  height: 80%;
+  object-fit: cover;
+  height: 100%
 }
 
 /* Pupop Form  */
@@ -341,7 +440,6 @@ img {
   padding: 16px 20px;
   border: none;
   cursor: pointer;
-  opacity: 0.8;
 }
 
 /* The popup form - hidden by default */
@@ -462,4 +560,67 @@ b {
   color: white;
   font-weight: bold;
   font-size: 15px;
+}
+
+div#listContainer {}
+
+.listItem {
+  padding-top: 5px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.listItem+.listItem {
+  border-top: 1px solid lightgray;
+}
+
+.contentBox {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+}
+
+.contentBox span {
+  text-align: left;
+}
+
+.contentBox audio {
+  width: -webkit-fill-available;
+}
+
+.timeBox {
+  padding: 0 10px;
+}
+
+.scoreBox {
+  width: 75px;
+  padding: 0 10px;
+}
+
+.checkBox {
+  width: 75px;
+  height: 1rem;
+  margin-top: 5px;
+}
+
+div#titleContainer {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid;
+  padding: 10px 0;
+}
+
+span.titleItem {
+  padding: 0 10px;
+}
+
+span#contentTitle {
+  flex-grow: 1;
+  text-align: left;
+}
+
+span#scoreTitle, span#collectTitle {
+  width: 75px;
 }

@@ -51,8 +51,8 @@ const getHistory = async (req, res) => {
 };
 
 const createExchange = async (req, res) => {
-  const exchange = req.body
-  const result = await Chat.createExchange(exchange)
+  const exchangeData = req.body
+  const result = await Chat.createExchange(exchangeData)
 }
 
 module.exports = {
