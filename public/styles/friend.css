@@ -174,7 +174,11 @@ main {
 
 #message[from="myself"] #messageBody {
   align-items: flex-end;
-  background: rgb(147, 172, 180)
+  background: rgb(25, 35, 59);
+}
+
+#message[from="myself"] #messageBody span {
+  color: white;
 }
 
 #message[from="other"] #messageBody {
@@ -192,7 +196,7 @@ main {
 }
 
 #message[from="myself"] #replyMsg {
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: -webkit-fill-available;
   border-bottom: 1px solid rgb(127, 170, 185)
 }
@@ -217,6 +221,7 @@ main {
   font-size: 25%;
   font-weight: bold;
   color: gray;
+  margin: 0 10px;
 }
 
 #message button {
@@ -231,7 +236,7 @@ main {
   display: none;
   position: absolute;
   top: 2rem;
-  z-index: 10;
+  z-index: 1;
   background: rgb(239, 239, 239);
   border-radius: 10px;
   padding: 3px;
@@ -246,12 +251,26 @@ audio {
   width: 7rem;
 }
 
-#message[from="other"] audio::-webkit-media-controls-panel {
-  background-color: rgb(168, 210, 252);
+.messageItem {
+  height: 2rem;
+  line-height: 2rem;
 }
 
+#message[from="other"] audio::-webkit-media-controls-panel {
+  background-color: rgb(168, 210, 252);
+  border: none
+}
+
+::-webkit-media-controls-enclosure {
+  border: none
+}
+
+/* ::-webkit-media-controls-overlay-enclosure {
+  border: 10px solid red;
+} */
+
 #message[from="myself"] audio::-webkit-media-controls-panel {
-  background-color: rgb(147, 172, 180);
+  background-color: rgb(25, 35, 59);
 }
 
 #mainVideo {
@@ -293,7 +312,8 @@ audio {
 #messages {
   flex-grow: 1;
   max-height: 69vh;
-  overflow: auto;
+  overflow-y: auto;
+  padding-bottom: 40px;
 }
 
 li {
@@ -386,13 +406,19 @@ li {
 }
 
 #recordVoiceMsgBtn {
+  height: 2rem;
+  width: 2rem;
   background: rgba(45, 58, 56, 0.74);
-  padding: 0 1rem;
-  border-radius: 10px;
+  border-radius: 50%;
   color: #fff;
   display: inline-block;
+  text-align: center;
   line-height: 2rem;
   margin-right: 10px;
+}
+
+#recordVoiceMsgBtn path {
+  color: #fff;
 }
 
 .user_box {
@@ -562,8 +588,6 @@ b {
   font-size: 15px;
 }
 
-div#listContainer {}
-
 .listItem {
   padding-top: 5px;
   margin-top: 10px;
@@ -623,4 +647,8 @@ span#contentTitle {
 
 span#scoreTitle, span#collectTitle {
   width: 75px;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
 }

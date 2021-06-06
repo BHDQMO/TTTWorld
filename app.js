@@ -20,7 +20,6 @@ const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server)
 
-const Google = require('./util/google')
 const Socket = require("./util/socket")
 const { serverNotice } = require("./util/util")
 
@@ -40,16 +39,9 @@ const port = process.env.PORT
 
 // setInterval(() => serverNotice(io), 5 * 1000)
 
-app.post('/demoGoogleTranslate', async (req, res) => {
-  text = req.body.text
-  target = req.body.target
-  console.log(typeof req.body)
-  console.log(req.body)
-  const translateResult = await Google.translateText(text, target)
-  res.send({ data: translateResult })
-})
 
-app.post('/demoGoogleSpeechToTest', async (req, res) => {
+
+app.post('/google/transcript', async (req, res) => {
   var body = Buffer.from([]); // create a buffer
   req.on('data', function (data) {
     body = Buffer.concat([body, data]);
@@ -122,7 +114,8 @@ app.use('/',
   [
     require('./server/routes/user_route'),
     require('./server/routes/chat_route'),
-    require('./server/routes/explore_route')
+    require('./server/routes/explore_route'),
+    require('./server/routes/google_route')
   ]
 )
 
@@ -158,6 +151,10 @@ const onConnect = (socket, next) => {
   socket.on('message', Socket.message(socket, io))
   socket.on('readMessage', Socket.readMessage(socket, io))
   socket.on('favorite', Socket.favorite(socket, io))
+  socket.on('exchangeInvite', Socket.exchangeInvite(socket, io))
+  socket.on('acceptExchangeInvite', Socket.acceptExchangeInvite(socket, io))
+  socket.on('rejectExchangeInvite', Socket.rejectExchangeInvite(socket, io))
+  socket.on('readExchangeInviteAnswer', Socket.readExchangeInviteAnswer(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))
   socket.on('accept', Socket.accept(socket, io))

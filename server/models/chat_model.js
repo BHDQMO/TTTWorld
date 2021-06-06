@@ -94,17 +94,33 @@ const saveMessage = async (msg) => {
 
 const readMessage = async (data) => {
   console.log(data)
-  const querySrting = `
+  const queryString = `
   UPDATE history SET \`read\` = 1 WHERE sender = ? AND room = ? AND \`read\` = 0
   `
-  const result = await query(querySrting, data)
+  const result = await query(queryString, data)
   return result
 }
 
 const createExchange = async (exchange) => {
   const result = await query(`INSERT INTO exchange SET ?`, exchange)
-  console.log(result)
   return result.insertId
+}
+const updateExchangeStatus = async (exchange_id, status) => {
+  const queryString = `UPDATE exchange SET status = ? WHERE id = ?`
+  const result = await query(queryString, [status, exchange_id])
+  return result
+}
+
+const updateExchangeRead = async (exchange_id) => {
+  const queryString = `UPDATE exchange SET \`read\` = 1 WHERE id = ?`
+  const result = await query(queryString, [exchange_id])
+  return result
+}
+
+
+const removeExchange = async (exchange_id) => {
+  const result = await query(`DELETE FROM exchange WHERE id = ?`, [exchange_id])
+  return result
 }
 
 const getUnreadMsgNum = async (roomList) => {
@@ -115,6 +131,14 @@ const getUnreadMsgNum = async (roomList) => {
   GROUP BY sender
   `
   const result = await query(queryString, roomList)
+  return result
+}
+
+const updateTranslate = async (historyId, translateResult) => {
+  const queryString = `
+  UPDATE history SET translate = ? WHERE id = ?
+  `
+  const result = await query(queryString, [translateResult, historyId])
   return result
 }
 
@@ -129,7 +153,11 @@ module.exports = {
   saveMessage,
   readMessage,
   createExchange,
+  updateExchangeStatus,
+  updateExchangeRead,
+  removeExchange,
   getUnreadMsgNum,
+  updateTranslate
 }
 
 // function () {

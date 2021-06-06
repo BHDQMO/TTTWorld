@@ -39,23 +39,24 @@ async function renderMessage(msg) {
     } else {
       from = 'myself'
     }
-
     const msgReplyBtn = document.querySelector(`button[historyId ='${msg.reply}']`)
     let replyContent
 
     if (msg.reply !== null) {
       replyType = msgReplyBtn.getAttribute('contentType')
+
       switch (replyType) {
         case 'text': {
           const textElement = msgReplyBtn.parentNode.parentNode.children[0]
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
+            console.log(msg.correct)
             let wrongString = replyContent.textContent.split('')
             let rightString = msg.content.split('')
             const result = patienceDiff(wrongString, rightString).lines
             let tempString = ''
             let isDetected = false
-            const markedWrongSpans = document.createElement('div')
+            const markedWrongSpans = document.createElement('span')
             markedWrongSpans.setAttribute('id', 'spanContainer')
             result.map((char, i) => {
               if (char.aIndex !== -1) {
@@ -78,19 +79,18 @@ async function renderMessage(msg) {
                   tempString = '' + char.line
                   isDetected = false
                 }
-                if (i === result.length - 1) {
-                  const tempElement = document.createElement('span')
-                  tempElement.textContent = tempString
-                  if (isDetected === false) {
-                    tempElement.setAttribute('class', 'pass')
-                  } else {
-                    tempElement.setAttribute('class', 'fix')
-                  }
-                  markedWrongSpans.appendChild(tempElement)
+              }
+              if (i === result.length - 1) {
+                const tempElement = document.createElement('span')
+                tempElement.textContent = tempString
+                if (isDetected === false) {
+                  tempElement.setAttribute('class', 'pass')
+                } else {
+                  tempElement.setAttribute('class', 'fix')
                 }
+                markedWrongSpans.appendChild(tempElement)
               }
             })
-
             replyContent = markedWrongSpans
           }
           break
@@ -118,7 +118,6 @@ async function renderMessage(msg) {
 
     switch (msg.type) {
       case 'text': {
-
         //render correction
         if (msg.correct === 1) {
           let wrongString = replyContent.textContent.split('')
@@ -127,19 +126,24 @@ async function renderMessage(msg) {
 
           let tempString = ''
           let isDetected = false
-          let markedRightSpans = document.createElement('div')
-          markedRightSpans.setAttribute('id', 'spanContainer')
-          markedRightSpans.setAttribute('id', 'content')
+          let markedRightSpans = document.createElement('span')
+          markedRightSpans.setAttribute('id', 'spanContainer content')
+          console.log(markedRightSpans)
+          console.log(result)
 
           result.map((char, i) => {
+
             if (char.bIndex !== -1) {
               if (char.aIndex !== -1 && isDetected === false) {
+
                 tempString += char.line
+                console.log(tempString)
               } else if (char.aIndex === -1 && isDetected === false) {
                 const tempElement = document.createElement('span')
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'pass')
                 markedRightSpans.appendChild(tempElement)
+                console.log(markedRightSpans)
                 tempString = '' + char.line
                 isDetected = true
               } else if (char.aIndex === -1 && isDetected === true) {
@@ -149,28 +153,31 @@ async function renderMessage(msg) {
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'correction')
                 markedRightSpans.appendChild(tempElement)
+                console.log(markedRightSpans)
                 tempString = '' + char.line
                 isDetected = false
               }
-              if (i === result.length - 1) {
-                const tempElement = document.createElement('span')
-                tempElement.textContent = tempString
-                if (isDetected === false) {
-                  tempElement.setAttribute('class', 'pass')
-                } else {
-                  tempElement.setAttribute('class', 'correction')
-                }
-                markedRightSpans.appendChild(tempElement)
-              }
             }
-
+            if (i === result.length - 1) {
+              const tempElement = document.createElement('span')
+              tempElement.textContent = tempString
+              if (isDetected === false) {
+                tempElement.setAttribute('class', 'pass')
+              } else {
+                tempElement.setAttribute('class', 'correction')
+              }
+              markedRightSpans.appendChild(tempElement)
+              console.log(markedRightSpans)
+            }
           })
 
           const originMsg = clone.querySelector('#originMsg')
           const textSpan = clone.querySelector('#content')
           textSpan.remove()
           const audio = clone.querySelector('#originMsg audio')
+          console.log(markedRightSpans)
           markedRightSpans = originMsg.insertBefore(markedRightSpans, audio)
+
         } else {
           const sourceSpan = clone.querySelector('#originMsg #content')
           sourceSpan.removeAttribute('hidden')
@@ -554,6 +561,10 @@ fetch('/chat/friend', {
       socket.on('friend_online', online_notice)
       socket.on('waitingInvite', renderWaitingIvite)
 
+      socket.on('exchangeInvite', handleExchangeInvite)
+      socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
+      socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
+
       socket.on('offer', handleSDPOffer)
       socket.on('answer', handleSDPAnswer)
       socket.on('icecandidate', handleNewIceCandidate)
@@ -561,6 +572,67 @@ fetch('/chat/friend', {
       socket.on('callend', handleCallEnd)
     }
   })
+
+let waitingAnswerExchangeInvite = {}
+const handleExchangeInvite = (data) => {
+  data.map(invite => {
+    const exchangeInvite = invite.exchangeInvite
+    waitingAnswerExchangeInvite[exchangeInvite.exchange_id] = exchangeInvite
+  })
+  const bufferMsg = document.querySelector('#bufferMsg')
+  if (data.length > 0 && bufferMsg) {
+    bufferMsg.remove()
+  }
+  data.map(invite => {
+    const template = document.querySelector('#exchangeNoticeTemplate').content
+    const clone = document.importNode(template, true)
+    clone.querySelector('.starting').textContent = 'You have a new exchange invite'
+    clone.querySelector('.exchangeItem').append(builtExchangeBox(invite))
+
+    const exchange_id = invite.exchangeInvite.exchange_id
+    clone.querySelector('.exchangeNoticeItem').setAttribute('exchange_id', `${exchange_id}`)
+    clone.querySelector('.acceptExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
+    clone.querySelector('.rejectExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
+
+    document.querySelector('.dropdown-content').append(clone)
+  })
+}
+
+const handleExchangeInviteAccepted = (data) => {
+  const starting = 'Your exchange invitation has been accepted'
+  createExchangeInviteAnswerNotice(data, starting)
+}
+
+
+const handleExchangeInviteRejected = (data) => {
+  const starting = 'Your exchange invitation has been rejected'
+  createExchangeInviteAnswerNotice(data, starting)
+}
+
+const createExchangeInviteAnswerNotice = (data, starting) => {
+  const bufferMsg = document.querySelector('#bufferMsg')
+  if (bufferMsg) { bufferMsg.remove() }
+  const template = document.querySelector('#exchangeNoticeTemplate').content
+  const clone = document.importNode(template, true)
+  clone.querySelector('.starting').textContent = starting
+  clone.querySelector('.exchangeItem').append(builtExchangeBox(data))
+
+  const exchange_id = data.exchangeInvite.exchange_id
+  const checkBtn = document.createElement('button')
+  checkBtn.setAttribute('exchange_id', `${exchange_id}`)
+  checkBtn.textContent = 'OK'
+  checkBtn.addEventListener('click', (event) => {
+    event.target.parentNode.parentNode.remove()
+    socket.emit('readExchangeInviteAnswer', exchange_id)
+  })
+  clone.querySelector('.acceptExchangeInvite').remove()
+  clone.querySelector('.rejectExchangeInvite').remove()
+  clone.querySelector('.btnBox').append(checkBtn)
+  document.querySelector('.dropdown-content').append(clone)
+}
+
+
+
 
 async function micBtn(element) {
   const activeIcon = element.querySelector('svg[style]').id
@@ -967,12 +1039,15 @@ async function settingVideoConstraints() {
 
 // translate text
 function translateMsg(element) {
+  const historyId = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyId'))
   const text = element.parentNode.parentNode.querySelector('#content').innerText
   const target = textTranslatelang //need change follow the user's native zh-TWen-US
   const data = {
+    historyId,
     text, target
   }
-  fetch(`/demoGoogleTranslate`, {
+  console.log(data)
+  fetch(`/google/translate`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/JSON'
@@ -1153,6 +1228,14 @@ async function startSpeechRecognition() {
   }
 }
 
+window.onclick = function (event) {
+  const form_popup = document.querySelector('.form-popup')
+  const open_button = document.querySelector('.open-button')
+  if (!form_popup.contains(event.target) && event.target !== open_button) {
+    form_popup.style.display = "none";
+  }
+}
+
 function openForm() {
   document.querySelector(".form-popup").style.display = "block";
 }
@@ -1161,32 +1244,41 @@ function closeForm() {
   document.querySelector(".form-popup").style.display = "none";
 }
 
-function bookingExchange(e) {
-  let exchangeForm = document.forms.namedItem('exchangeForm');
-  exchangeForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(exchangeForm);
-    formData.append('room_id', talkTo.room_id);
-    formData.append('publisher_id', user_id);
-    formData.append('first_lang', user.native);
-    formData.append('second_lang', user.learning);
-    const checkBox = document.getElementById("noticing");
-    if (formData.get('notice') === 'on') {
-      formData.set('notice', 1);
-    } else {
-      formData.set('notice', 0);
-    }
+let exchangeForm = document.forms.namedItem('exchangeForm');
+exchangeForm.addEventListener('submit', (e) => {
+  document.querySelector('.form-popup').style.display = "none";
+  e.preventDefault();
+  const formData = new FormData(exchangeForm);
+  formData.append('room_id', talkTo.room_id);
+  formData.append('publisher_id', user_id);
+  formData.append('first_lang', user.native);
+  formData.append('second_lang', user.learning);
+  const checkBox = document.getElementById("noticing");
+  if (formData.get('notice') === 'on') {
+    formData.set('notice', 1);
+  } else {
+    formData.set('notice', 0);
+  }
 
-    fetch('/chat/exchange', {
-      method: 'POST',
-      body: formData,
-    })
-      .then(res => res.json())
-      .then(res => {
-        console.log("===========wait built===========")
-      })
-  })
-}
+  const exchangeInvite = {}
+  for (let data of formData.entries()) {
+    exchangeInvite[data[0]] = data[1]
+  }
+
+  const package = {
+    receiver: talkTo.user_id,
+    data: {
+      exchangeInvite,
+      sender: {
+        user_id: user.user_id,
+        name: user.name,
+        picture: user.picture
+      }
+    }
+  }
+  socket.emit('exchangeInvite', package)
+
+})
 
 const duration = 15 * 60 * 1000
 const ratio = 50
@@ -1326,7 +1418,6 @@ async function stopexchangeDemo() {
     }
   }
 
-
   timer.textContent = ''
   main.style = ''
   currentLang.textContent = ''
@@ -1339,3 +1430,4 @@ async function stopexchangeDemo() {
     })
   }
 }
+

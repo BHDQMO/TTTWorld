@@ -1,5 +1,6 @@
 const Explore = require('../server/models/explore_model')
 const Chat = require('../server/models/chat_model')
+const { constant } = require('lodash')
 
 let socket_ids = {}
 
@@ -73,6 +74,7 @@ const message = (socket, io) => async (data) => {
   msg.id = result.historyId
   console.log(msg)
   io.to(msg.room).emit('message', msg)
+  console.log(io.sockets.adapter.rooms)
   try {
     if (!io.sockets.adapter.rooms.get(msg.room).has(socket_ids[data.receiver])) {
       io.to(socket_ids[data.receiver]).emit('message', msg)
@@ -161,6 +163,39 @@ const exchangeStartNotice = ({ io, exchangeList }) => {
   })
 }
 
+const exchangeInvite = (socket, io) => async (package) => {
+  // console.log(package)
+  const receiver = package.receiver
+  const data = package.data
+  const exchange_id = await Chat.createExchange(data.exchangeInvite)
+  data.exchangeInvite.exchange_id = exchange_id
+  if (socket_ids[receiver]) {
+    io.to(socket_ids[receiver]).emit('exchangeInvite', [data])
+  }
+}
+
+const acceptExchangeInvite = (socket, io) => async (answer) => {
+  const result = await Chat.updateExchangeStatus(answer.exchange_id, 1)
+  const publisherSocketId = socket_ids[answer.exchangeInvite.publisher_id]
+  console.log(publisherSocketId)
+  console.log(answer)
+  if (publisherSocketId) {
+    io.to(publisherSocketId).emit('exchangeInviteAccepted', answer)
+  }
+}
+
+const rejectExchangeInvite = (socket, io) => async (answer) => {
+  const result = await Chat.updateExchangeStatus(answer.exchange_id, 1)
+  const publisherSocketId = socket_ids[answer.exchangeInvite.publisher_id]
+  if (publisherSocketId) {
+    io.to(publisherSocketId).emit('exchangeInviteRejected', answer)
+  }
+}
+
+const readExchangeInviteAnswer = (socket, io) => async (exchange_id) => {
+  const result = await Chat.updateExchangeRead(exchange_id)
+}
+
 module.exports = {
   login,
   sendWaitingInvite,
@@ -180,7 +215,11 @@ module.exports = {
   accept,
   reject,
   aheadExchangeNotice,
-  exchangeStartNotice
+  exchangeStartNotice,
+  exchangeInvite,
+  acceptExchangeInvite,
+  rejectExchangeInvite,
+  readExchangeInviteAnswer
 }
 
 

@@ -38,7 +38,6 @@ header {
 
 .tags {
   height: 35px;
-  line-height: 35px;
   font-size: 35px;
   color: #3f3a3a;
   display: flex;
@@ -92,11 +91,16 @@ a {
   right: 0px;
   top: 40px;
   background-color: #f1f1f1;
-  /* width: 250px; */
   font-size: 1rem;
   align-items: center;
   justify-content: space-around;
-  padding: 5px
+  padding: 10px;
+  z-index: 2;
+  border-radius: 10px;
+}
+
+.noticeItem+.noticeItem {
+  margin-top: 10px;
 }
 
 /* Links inside the dropdown */
@@ -127,7 +131,6 @@ a {
   border: 1px solid darkolivegreen;
   border-radius: 5px;
   padding: 0 5px;
-  margin: 0 5px;
 }
 
 .dropdown-content span {
@@ -139,6 +142,93 @@ a {
 
 .dropdown:hover .dropdown-content {
   display: flex;
+}
+
+.exchangeNoticeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgb(199, 215, 253);
+}
+
+.exchangeNoticeItem:hover {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.19);
+}
+
+.exchangeNoticeItem .starting {
+  margin-bottom: 10px;
+}
+
+.exchangeItem {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  padding-left: 15px;
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  background-image: linear-gradient(rgb(2, 77, 252), rgb(2, 77, 252));
+  background-position: left;
+  background-size: 5px;
+  background-repeat: no-repeat;
+}
+
+.exchangeItem+.exchangeItem {
+  margin-top: 10px;
+}
+
+.exchangeItem img {
+  height: 40px
+}
+
+.exchangeItem .time {
+  color: rgb(189, 189, 191);
+  font-weight: 500;
+  font-size: small;
+  align-self: flex-start;
+}
+
+.exchangeItem .infoBox {
+  display: flex;
+  align-items: center;
+}
+
+.exchangeItem .name {
+  color: rgb(130, 131, 136);
+  font-size: large;
+  font-weight: 500;
+}
+
+.infoItem+.infoItem {
+  margin-left: 10px;
+}
+
+.exchangeItem .langInfoBox {
+  display: flex;
+  align-items: center;
+}
+
+.exchangeItem .langInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20px;
+}
+
+.exchangeItem .duration {
+  color: rgb(130, 131, 136);
+  font-size: small;
+  font-weight: 500;
+}
+
+.exchangeItem path {
+  color: rgb(2, 77, 252)
+}
+
+.exchangeNoticeItem .btnBox {
+  align-self: flex-end;
+  margin-top: 10px;
 }
 
 .tool_box {

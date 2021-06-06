@@ -355,3 +355,5 @@ function showTime(time) {
     return year + ',' + month + '' + date + ',' + hour + ':' + min
   }
 }
+
+function fillZero(num) { return num < 10 ? '0' + num : num }

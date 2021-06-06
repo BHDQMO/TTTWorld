@@ -27,7 +27,7 @@ router.route('/chat/friend')
 router.route('/chat/history')
   .get(authentication(), wrapAsync(getHistory))
 
-router.route('/chat/exchange')
-  .post(cpUpload, wrapAsync(createExchange))
+// router.route('/chat/exchange')
+//   .post(cpUpload, wrapAsync(createExchange))
 
 module.exports = router;
