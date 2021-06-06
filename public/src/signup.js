@@ -8,6 +8,7 @@ signUpForm.addEventListener('submit', (e) => {
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       const data = JSON.parse(xhr.responseText)
+      console.log(data)
       if (data.data.error) {
         alert(data.data.error);
       } else {

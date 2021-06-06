@@ -16,130 +16,132 @@
     <h1 class="web-name">TTT World</h1>
   </header>
   <main>
-    <h1 class="title">Sign Up</h1>
-    <form id="signUpForm" name="signUpForm">
-      <div class="mb-3 form_group">
-        <label for="email" class="form-label">Email address</label>
-        <input type="email" class="form-control" name="email" aria-describedby="emailHelp">
-      </div>
-      <div class="mb-3 form_group">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" name="password">
-      </div>
-      <div class="mb-3 form_group">
-        <label for="name" class="form-label">Name</label>
-        <input type="name" class="form-control" name="name" aria-describedby="emailHelp">
-      </div>
-      <div class="mb-3 form_group">
-        <label for="formFile" class="form-label">Head shot</label>
-        <input class="form-control" type="file" id="formFile" name="picture">
-      </div>
-      <div class="mb-3 form_group">
-        <label for="birthday" class="form-label">Birthday</label>
-        <div class="input-group">
-          <input type="date" name="birthday">
-          <div class="gender">
-            <div class="col-2 form-check  form_group">
-              <input class="form-check-input" type="radio" name="gender" value='Male' checked>
-              <label class="form-check-label" for="flexRadioDefault1">
-                Male
-              </label>
-            </div>
-            <div class="col-2 form-check  form_group">
-              <input class="form-check-input" type="radio" name="gender" value="Female">
-              <label class="form-check-label" for="flexRadioDefault2">
-                Female
-              </label>
-            </div>
-            <div class="col-2 form-check form_group">
-              <input class="form-check-input" type="radio" name="gender" value="Other">
-              <label class="form-check-label" for="flexRadioDefault3">
-                Other
-              </label>
+    <div id='formContainer'>
+      <form id="signUpForm" name="signUpForm">
+        <div class="mb-3 form_group">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" class="form-control" name="email" aria-describedby="emailHelp" required>
+        </div>
+        <div class="mb-3 form_group">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" name="password" required>
+        </div>
+        <div class="mb-3 form_group">
+          <label for="name" class="form-label">Name</label>
+          <input type="name" class="form-control" name="name" required>
+        </div>
+        <div class="mb-3 form_group">
+          <label for="formFile" class="form-label">Head shot</label>
+          <input class="form-control" type="file" id="formFile" name="picture">
+        </div>
+        <div class="mb-3 form_group">
+          <label for="birthday" class="form-label">Birthday</label>
+          <div class="input-group">
+            <input type="date" name="birthday">
+            <div class="gender">
+              <div class="col-2 form-check  form_group">
+                <input class="form-check-input" type="radio" name="gender" value='Male' checked>
+                <label class="form-check-label" for="flexRadioDefault1">
+                  Male
+                </label>
+              </div>
+              <div class="col-2 form-check  form_group">
+                <input class="form-check-input" type="radio" name="gender" value="Female">
+                <label class="form-check-label" for="flexRadioDefault2">
+                  Female
+                </label>
+              </div>
+              <div class="col-2 form-check form_group">
+                <input class="form-check-input" type="radio" name="gender" value="Other">
+                <label class="form-check-label" for="flexRadioDefault3">
+                  Other
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="mb-3  form_group">
-        <label for="address" class="form-label">Address</label>
-        <div class="input-group">
-          <input type="name" class="form-control" name="address">
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <div class="row">
-          <div class="col-6 form_group">
-            <label for="native" class="form-label">Native</label>
-            <select class="form-select" aria-label="Default select example" name="native">
-              <option value="English">English</option>
-              <option value="Korean">한국어</option>
-              <option value="Chinese">中文</option>
-              <option value="Japanese">日本語</option>
-            </select>
-          </div>
-          <div class="col-6  form_group">
-            <label for="learning" class="form-label">Learning</label>
-            <select class="form-select" aria-label="Default select example" name="learning">
-              <option value="English">English</option>
-              <option value="Korean">한국어</option>
-              <option value="Chinese">中文</option>
-              <option value="Japanese">日本語</option>
-            </select>
+        <div class="mb-3  form_group">
+          <label for="address" class="form-label">Address</label>
+          <div class="input-group">
+            <input type="name" class="form-control" name="address">
           </div>
         </div>
-      </div>
 
-      <div class="mb-3  form_group">
-        <label for="introduction" class="form-label">Introduction</label>
-        <div class="input-group">
-          <textarea class="form-control" aria-label="With textarea" name="introduction"></textarea>
+        <div class="mb-3">
+          <div class="row">
+            <div class="col-6 form_group">
+              <label for="native" class="form-label">Native</label>
+              <select class="form-select" aria-label="Default select example" name="native">
+                <option value="English">English</option>
+                <option value="Korean">한국어</option>
+                <option value="Chinese">中文</option>
+                <option value="Japanese">日本語</option>
+              </select>
+            </div>
+            <div class="col-6  form_group">
+              <label for="learning" class="form-label">Learning</label>
+              <select class="form-select" aria-label="Default select example" name="learning">
+                <option value="English">English</option>
+                <option value="Korean">한국어</option>
+                <option value="Chinese">中文</option>
+                <option value="Japanese">日本語</option>
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="mb-3  form_group">
-        <label for="interest" class="form-label">Interest</label>
-        <div class="list-group" id='interest-list'>
-          <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="Cycling" name="interest">
-            Cycling
-          </label>
-          <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="Coding" name="interest">
-            Coding
-          </label>
-          <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="Jogging" name="interest">
-            Jogging
-          </label>
-          <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="Singing" name="interest">
-            Singing
-          </label>
-          <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="Diving" name="interest">
-            Diving
-          </label>
-          <template id="newInterest">
+        <div class="mb-3  form_group">
+          <label for="introduction" class="form-label">Introduction</label>
+          <div class="input-group">
+            <textarea class="form-control" aria-label="With textarea" name="introduction"></textarea>
+          </div>
+        </div>
+
+        <div class="mb-3  form_group">
+          <label for="interest" class="form-label">Interest</label>
+          <div class="list-group" id='interest-list'>
             <label class="list-group-item">
-              <input class="form-check-input me-1" type="checkbox" value="" name="interest">
+              <input class="form-check-input me-1" type="checkbox" value="Cycling" name="interest">
+              Cycling
             </label>
-          </template>
+            <label class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="Coding" name="interest">
+              Coding
+            </label>
+            <label class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="Jogging" name="interest">
+              Jogging
+            </label>
+            <label class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="Singing" name="interest">
+              Singing
+            </label>
+            <label class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="Diving" name="interest">
+              Diving
+            </label>
+            <template id="newInterest">
+              <label class="list-group-item">
+                <input class="form-check-input me-1" type="checkbox" value="" name="interest">
+              </label>
+            </template>
 
-          <div class="input-group mb-3" id="insert-point">
-            <input type="text" class="form-control" placeholder="Add yours" id="userInput">
-            <div class="btn btn-outline-secondary" type="button" onclick="addInterest(this)">Add
+            <div class="input-group mb-3" id="insert-point">
+              <input type="text" class="form-control" placeholder="Add yours" id="userInput">
+              <div class="btn btn-outline-secondary" type="button" onclick="addInterest(this)">Add
+              </div>
             </div>
-          </div>
 
+          </div>
         </div>
-      </div>
-      <div class="buttons">
-        <input type="submit" class="btn btn-primary" value="Sign up">
-        <div type="button" class="btn btn-primary" id='signin' onclick="signin()">Sign In</div>
-      </div>
-    </form>
+        <button class="btn btn-primary" id='signup'>Sign Up</button>
+        <div class="btn btn-primary" id='signin' onclick="signin()">Sign In</div>
+      </form>
+
+
+    </div>
+
   </main>
   <script src="./src/signup.js"></script>
 </body>

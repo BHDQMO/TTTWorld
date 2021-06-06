@@ -16,24 +16,26 @@
     <h1 class="web-name">TTT World</h1>
   </header>
   <main>
-    <h1 class="title">Sign In</h1>
-    <form name="signInForm">
-      <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">Email address</label>
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email">
-      </div>
-      <div class="mb-3">
-        <label for="exampleInputPassword1" class="form-label">Password</label>
-        <input type="password" class="form-control" id="exampleInputPassword1" name="password">
-      </div>
-      <input type="submit" class="btn btn-primary" value="Sign In"></div>
-      <div type="button" class="btn btn-primary" id='signup' onclick="signup()">Sign Up</div>
-    </form>
-
-
+    <div id='formContainer'>
+      <form name="signInForm">
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Email</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email"
+            required>
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Password</label>
+          <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+        </div>
+        <button class="btn btn-primary" id='signin'>Sign In</button>
+      </form>
+      <button class="btn btn-primary" id='signup' onclick="signup()">Sign Up</button>
+    </div>
   </main>
+  <a href="http://www.freepik.com">Designed by Freepik</a>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./src/signin.js"></script>
 </body>
+
 
 </html>
