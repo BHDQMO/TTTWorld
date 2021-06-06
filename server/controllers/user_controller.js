@@ -34,32 +34,38 @@ const signUp = async (req, res) => {
     return
   }
 
-  let user = req.body
-  let interests = await Google.translateText(user.interest, 'en')
-  interests = interests.map(interest => _.startCase(interest))
-  user.password = bcrypt.hashSync(user.password, salt)
-  user.picture = S3_OBJECT_URL + '/' + user.picture
-  user.geocode = `ST_PointFromText('POINT(${await Google.geocoding(user.address)})',3857)`
-  user.interest = interests.toString()
-  user.token = jwt.sign({
-    provider: user.provider,
-    name: user.name,
-    email: user.email,
-    picture: user.picture
-  }, TOKEN_SECRET)
-  user = await User.signUp(user, interests)
-  res.status(200).send({
-    data: {
-      token: user.token,
-      user: {
-        user_id: user.user_id,
-        provider: user.provider,
-        name: user.name,
-        email: user.email,
-        picture: user.picture
+  try {
+    let user = req.body
+    let interests = await Google.translateText(user.interest, 'en')
+    interests = interests.map(interest => _.startCase(interest))
+    user.password = bcrypt.hashSync(user.password, salt)
+    user.picture = S3_OBJECT_URL + '/' + user.picture
+    user.geocode = `ST_PointFromText('POINT(${await Google.geocoding(user.address)})',3857)`
+    user.interest = interests.toString()
+    user.token = jwt.sign({
+      provider: user.provider,
+      name: user.name,
+      email: user.email,
+      picture: user.picture
+    }, TOKEN_SECRET)
+    user = await User.signUp(user, interests)
+    console.log(user)
+    res.status(200).send({
+      data: {
+        token: user.token,
+        user: {
+          user_id: user.user_id,
+          provider: user.provider,
+          name: user.name,
+          email: user.email,
+          picture: user.picture
+        }
       }
-    }
-  })
+    })
+  } catch (error) {
+    res.send(error)
+  }
+
 }
 
 const nativeSignIn = async (email, password) => {

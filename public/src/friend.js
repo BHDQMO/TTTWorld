@@ -57,7 +57,7 @@ async function renderMessage(msg) {
             let tempString = ''
             let isDetected = false
             const markedWrongSpans = document.createElement('span')
-            markedWrongSpans.setAttribute('id', 'spanContainer')
+            markedWrongSpans.setAttribute('id', 'content')
             result.map((char, i) => {
               if (char.aIndex !== -1) {
                 if (char.bIndex !== -1 && isDetected === false) {
@@ -127,7 +127,7 @@ async function renderMessage(msg) {
           let tempString = ''
           let isDetected = false
           let markedRightSpans = document.createElement('span')
-          markedRightSpans.setAttribute('id', 'spanContainer content')
+          markedRightSpans.setAttribute('id', 'content')
           console.log(markedRightSpans)
           console.log(result)
 
@@ -172,7 +172,7 @@ async function renderMessage(msg) {
           })
 
           const originMsg = clone.querySelector('#originMsg')
-          const textSpan = clone.querySelector('#content')
+          const textSpan = clone.querySelector('#originMsg #content')
           textSpan.remove()
           const audio = clone.querySelector('#originMsg audio')
           console.log(markedRightSpans)
@@ -1284,14 +1284,15 @@ const duration = 15 * 60 * 1000
 const ratio = 50
 let time = duration * ratio / 100;
 let step = 1 //exchange step
-let main = document.querySelector('main')
+let chatBoxHead = document.querySelector('#chat-box-head')
 let currentLang = document.querySelector('#currentLang')
 let timer = document.querySelector('#timer')
 function startexchangeDemo() {
   startTime = Date.now();
   startSpeechRecognition()
-  main.style = 'background:red'
-  currentLang.textContent = `${speechRecognitionLearningLang} Time`
+  chatBoxHead.setAttribute('part', 'I')
+  chatBoxHead.style = 'display:flex'
+  currentLang.textContent = `Part I : ${user.learning}`
   MyCounter()
 }
 
@@ -1303,18 +1304,21 @@ function MyCounter() {
       stopexchangeDemo()
     }
   } else {
-    timer.textContent = Math.floor(time / 1000 / 60) + " : " + time / 1000 % 60
-    setTimeout(MyCounter, 1000);
+    let min = fillZero(Math.floor(time / 1000 / 60))
+    let sec = fillZero(time / 1000 % 60)
+    timer.textContent = min + " : " + sec
   }
   time -= 1000;
+  setTimeout(MyCounter, 1000);
 }
 
 function swap() {
   const langBuffer = speechRecognitionLearningLang
   speechRecognitionLearningLang = speechRecognitionNativeLang
   speechRecognitionNativeLang = langBuffer
-  currentLang.textContent = `${speechRecognitionLearningLang} Time`
-  main.style = 'background:blue'
+
+  chatBoxHead.setAttribute('part', 'II')
+  currentLang.textContent = `Part II : ${user.native}`
   time = duration * (100 - ratio) / 100;
   recognition.stop()
   MyCounter()
@@ -1322,9 +1326,9 @@ function swap() {
 }
 
 async function stopexchangeDemo() {
-
   voiceRecorder.stop()
   recognition.stop();
+  chatBoxHead.removeAttribute('style')
 
   const lowScoreArray = Object.values(lowScoreList)
   if (lowScoreArray.length > 0) {

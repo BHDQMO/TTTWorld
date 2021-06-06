@@ -60,6 +60,10 @@ main {
   justify-content: space-between;
 }
 
+#myDetailBox .email {
+  font-size: xx-small;
+}
+
 .profileItem+.profileItem {
   margin-top: 20px;
 }
@@ -359,6 +363,10 @@ main {
   justify-content: space-between;
   white-space: normal;
   word-break: break-all;
+}
+
+#userDetailBox #userEmail {
+  font-size: xx-small;
 }
 
 #userDetail {

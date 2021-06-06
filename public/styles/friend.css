@@ -92,11 +92,11 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: flex-end;
   background: rgb(243, 246, 252);
   border-radius: 10px;
   padding: 15px 10px;
-  position: relative
+  position: relative;
 }
 
 .mainItem {
@@ -133,17 +133,41 @@ main {
 }
 
 #chat-box-head {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
   border-radius: 10px;
-  padding: 5px;
-  margin: 0 0 10px;
-  height: 50px;
-  display: flex;
-  align-items: center;
+  width: 150px;
+  position: absolute;
+  top: -25px;
+  left: calc(50% - 50px);
+  font-weight: 500;
+}
+
+#chat-box-head[part='I'] {
+  background: rgb(255, 248, 252);
+  border: 3px solid rgb(211, 70, 157);
+}
+
+#chat-box-head[part='II'] {
+  background: rgb(246, 249, 252);
+  border: 3px solid rgb(122, 163, 213)
+}
+
+#chat-box-head #timer {
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  background: white;
+  color: rgb(154, 228, 95)
 }
 
 #chat-box-main {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 #message {
@@ -163,6 +187,7 @@ main {
   flex-direction: column;
   align-items: stretch;
   border-radius: 10px;
+  max-width: 40%;
 }
 
 #replyMsg .fix {
@@ -179,16 +204,16 @@ main {
   color: limegreen;
 }
 
-#content, #spanContainer {
-  height: 2rem;
+#content {
   border-radius: 1rem;
   padding: 0 10px;
-  line-height: 2rem;
+  word-break: break-all;
+  white-space: normal;
 }
 
 #message[from="myself"] #messageBody {
   align-items: flex-end;
-  background: rgb(25, 35, 59);
+  background: rgb(126, 160, 252)
 }
 
 #message[from="myself"] #messageBody span {
@@ -196,7 +221,7 @@ main {
 }
 
 #message[from="other"] #messageBody {
-  background: rgb(168, 210, 252);
+  background: white;
 }
 
 #message[from="myself"] {
@@ -249,11 +274,11 @@ main {
 #toolbar {
   display: none;
   position: absolute;
-  top: 2rem;
+  bottom: -2rem;
   z-index: 1;
   background: rgb(239, 239, 239);
   border-radius: 10px;
-  padding: 3px;
+  padding: 0 3px;
 }
 
 #toolbar button+button {
@@ -266,12 +291,11 @@ audio {
 }
 
 .messageItem {
-  height: 2rem;
   line-height: 2rem;
 }
 
 #message[from="other"] audio::-webkit-media-controls-panel {
-  background-color: rgb(168, 210, 252);
+  background-color: white;
   border: none
 }
 
@@ -284,7 +308,7 @@ audio {
 } */
 
 #message[from="myself"] audio::-webkit-media-controls-panel {
-  background-color: rgb(25, 35, 59);
+  background-color: rgb(126, 160, 252)
 }
 
 #mainVideo {
@@ -314,13 +338,6 @@ audio {
   height: auto;
   width: -webkit-fill-available;
   border-radius: 10px;
-}
-
-.message-box {
-  flex: 1;
-  border-radius: 10px;
-  display: flex;
-  align-items: flex-start;
 }
 
 #messages {

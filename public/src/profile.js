@@ -11,6 +11,7 @@ fetch('/user/profile', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
+    console.log(res)
     user_id = res.data.user.user_id // don't move it. notice need this variable
     socket = io({
       auth: {
