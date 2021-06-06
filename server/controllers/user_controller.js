@@ -130,11 +130,17 @@ const getUserProfile = async (req, res) => {
   try {
     let favoriteData = await User.getFavorite(user_id)
     if (favoriteData.error) {
-      favoriteData = []
+      favoriteData = {
+        favoriteData: []
+      }
     }
+
+    console.log(user_id)
     let exchangeData = await User.getExchange(user_id)
     if (exchangeData.error) {
-      exchangeData = []
+      exchangeData = {
+        exchangeData: []
+      }
     }
     const data = {
       user: req.user,

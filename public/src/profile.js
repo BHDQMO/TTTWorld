@@ -23,17 +23,25 @@ fetch('/user/profile', {
     socket.on('waitingInvite', renderWaitingIvite)
 
     exchange = res.data.exchange
+    console.log(exchange)
 
     favorite = res.data.favorite
     replyData = favorite.replyData
     senderData = favorite.senderData
     renderProfile(res.data.user)
 
+    console.log(favorite.favoriteData.length > 0)
     if (exchange.exchangeData.length > 0) {
       renderExchange()
+    } else {
+      document.querySelector('#exchange .emptyInfo').style = 'display:flex'
     }
+
     if (favorite.favoriteData.length > 0) {
+      console.log('ok')
       renderFavorite()
+    } else {
+      document.querySelector('#favorite .emptyInfo').style = 'display:flex'
     }
   })
 

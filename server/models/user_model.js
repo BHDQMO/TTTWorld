@@ -147,16 +147,19 @@ const getExchange = async (user_id) => {
   await transaction()
   try {
     let queryString = `
-    SELECT * FROM \`exchange\` AS exchangetable
-    LEFT JOIN
+    SELECT * FROM 
     (
-      SELECT id AS room_id FROM room WHERE user_a = ?
-      UNION
-      SELECT id AS room_id FROM room WHERE user_b = ?
-      ) AS roomlist
-      ON roomlist.room_id = exchangetable.room_id
+    SELECT id AS roomid FROM room WHERE user_a = ?
+    UNION
+    SELECT id AS roomid FROM room WHERE user_b = ?
+    ) AS roomlist
+    LEFT JOIN
+    \`exchange\` AS exchangetable
+    ON roomlist.roomid = exchangetable.room_id
     `
+    console.log(user_id)
     const exchangeData = await query(queryString, [user_id, user_id])
+    console.log(exchangeData)
     const roomList = []
     exchangeData.map(item => {
       if (roomList.includes(item.room_id) === false) {
