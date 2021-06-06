@@ -13,7 +13,7 @@
     <a class="web-name" href="/explore.html">TTT World</a>
     <div class="tags">
       <a href="/friend.html" class="tag">Friend</a>
-      <a href="/explore.html" class="tag">Explore</a>
+      <!-- <a href="/explore.html" class="tag">Explore</a> -->
       <a href="/profile.html" class="tag">Profile</a>
       <div class="dropdown">
         <div class="tag">Notice</div>
@@ -36,68 +36,136 @@
     </div>
   </header>
   <main>
-    <div class="container">
-      <img id="picture">
-      <div type="button" class="btn btn-primary" id='logout' onclick="logout()">Log out</div>
+    <div id="myDetailBox" class="mainItem">
+      <div id="myProfile" class="profileHead profileItem cube">
+        <img class="picture">
+        <div class="name"></div>
+        <div class="email"></div>
+      </div>
+      <div id="myDetail" class="profileBody profileItem cube">
+        <div id="profileContent">
+          <label for="birthday">Birthday</label>
+          <span id="birthday" class="birthday"></span>
+          <label for="gender">Gender</label>
+          <span id="gender" class="gender"></span>
+          <label for="introduction">Introduction</label>
+          <span id="introduction" class="introduction"></span>
+          <label for="native">Native</label>
+          <span id="native" class="native"></span>
+          <label for="learning">Learning</label>
+          <span id="learning" class="learning"></span>
+          <label for="address">Address</label>
+          <span id="address" class="address"></span>
+        </div>
+        <button class="btn btn-primary" id='logout' onclick="logout()">Log out</button>
+      </div>
     </div>
-    <div class="detail">
-      <div id="name"></div>
-      <div id="email"></div>
-      <div id="birthday"></div>
-      <div id="gender"></div>
-      <div id="introduction"></div>
-      <div id="native"></div>
-      <div id="learning"></div>
-      <div id="address"></div>
-    </div>
-    <div class="tool_box">
-      <div id="favorite">
-        <label for="favorite">favorite</label>
-        <template id='messageTemplate'>
-          <div id='message' from="">
-            <img id='headIcon'>
-            <span id='name'></span>
-            <div id='messageBody'>
-              <div class="messageItem" id='replyMsg' hidden>
-                <span id='content' hidden></span>
+    <div id="favorite" class="mainItem cube">
+      <div id="favoriteContainer">
+        <template id='favoriteTemplate'>
+          <div class='favoriteItem'>
+            <div class="favoriteItemHead">
+              <img class='headIcon'>
+              <span class='name'></span>
+              <span class='sendTime'></span>
+            </div>
+            <div class='favoriteItemBody'>
+              <div class="messageItem" id='replyMsg'>
+                <span id='content'></span>
                 <audio controls src="" style="display: none"></audio>
               </div>
               <div class="messageItem" id='originMsg'>
-                <span id='content' hidden></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-reply-fill" id="replyIcon" viewBox="0 0 16 16">
+                  <path
+                    d="M5.921 11.9 1.353 8.62a.719.719 0 0 1 0-1.238L5.921 4.1A.716.716 0 0 1 7 4.719V6c1.5 0 6 0 7 8-2.5-4.5-7-4-7-4v1.281c0 .56-.606.898-1.079.62z" />
+                </svg>
+                <span id='content'></span>
                 <audio controls src="" style="display: none"></audio>
               </div>
-              <div class="messageItem" id='translateMsg' hidden>
+              <div class="messageItem" id='translateMsg'>
                 <span id='content'></span>
               </div>
+
             </div>
-            <span id='sendTime'></span>
           </div>
         </template>
       </div>
-      <div id="exchange">
-        <label for="exchange">Exchange</label>
-        <table>
-          <tr>
-            <th>Host</th>
-            <th>With</th>
-            <th>Time</th>
-            <th>Duration</th>
-            <th>1st Language</th>
-            <th>2st Language</th>
-            <th>Ratio</th>
-          </tr>
-          <template id="exchange_template">
-            <tr>
-              <td id='host'>Host</td>
-              <td id='with'>With</td>
-              <td id='time'>Time</td>
-              <td id='duration'>Duration</td>
-              <td id='first_lang'>1st Language</td>
-              <td id='second_lang'>2st Language</td>
-              <td id='ratio'>Ratio</td>
-            </tr>
-          </template>
-        </table>
+
+    </div>
+    <div id="exchange" class="mainItem cube">
+      <div id="exchangeContainer">
+        <template id='exchangeTemplate'>
+          <div class="exchangeItem">
+            <span class='time'></span>
+            <div class="infoBox">
+              <img class="infoItem headIcon">
+              <span class="infoItem name"></span>
+              <div class="infoItem langInfoBox">
+                <div class="langInfo">
+                  <span class="firstDuration duration"></span>
+                  <span class="firstLang"></span>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd"
+                    d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z" />
+                </svg>
+                <div class="langInfo">
+                  <span class="secondDuration duration"></span>
+                  <span class="secondLang"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+
+    </div>
+    <div id="people" class="mainItem cube">
+      <div id="personContainer">
+        <template id='personTemplate'>
+          <div class="person" onclick="renderUserDetail(this)">
+            <img class="headIcon">
+            <div class="personInfo">
+              <span class="name"></span>
+              <div class="langInfo">
+                <span class="native"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor"
+                  class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd"
+                    d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z" />
+                </svg>
+                <span class="learning"></span>
+              </div>
+            </div>
+            <span class="distance"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div id="userDetailBox" class="mainItem">
+      <div id='userProfile' class="profileHead profileItem cube">
+        <img id='userPicture' class="picture">
+        <span id='userEmail' class="email"></span>
+        <span id='userName' class="name"></span>
+      </div>
+      <div id="userDetail" class="profileBody profileItem cube">
+        <div id="userDetailContainer">
+          <label for="userNative">Native:</label>
+          <span id='userNative' class="native"></span>
+          <label for="userLearning">Learning:</label>
+          <span id='userLearning' class="learning"></span>
+          <label for="userInterest">Interest:</label>
+          <span id='userInterest' class="interest"></span>
+          <label for="userIntroduction">Introduction:</label>
+          <span id='userIntroduction' class="introduction"></span>
+        </div>
+        <button class="invite btn btn-primary" id="" onclick="action(this)">Invite</button>
+        <template class="rejectBtn">
+          <button class="reject btn btn-primary" id="" onclick="action(this)">Reject</button>
+        </template>
       </div>
     </div>
   </main>
