@@ -1,5 +1,5 @@
 main {
-  height: 90vh;
+  height: calc(100vh - 100px);
   flex-grow: 1;
   display: flex;
   flex-direction: row;
@@ -15,10 +15,18 @@ main {
   margin-right: 20px;
 }
 
+#friendDetailBox span {
+  white-space: normal;
+  word-break: break-all;
+}
+
 #friendDetail {
   display: flex;
   flex-direction: column;
+  height: calc(100% - 164px);
   padding: 5px 10px;
+  white-space: normal;
+  word-break: break-all;
 }
 
 #friendDetail label {
@@ -35,6 +43,12 @@ main {
 
 #friendDetail span+label {
   margin-top: 10px;
+}
+
+#friendDetailContailner {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .bothSite {

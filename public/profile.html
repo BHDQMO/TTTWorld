@@ -10,7 +10,7 @@
 
 <body>
   <header>
-    <a class="web-name" href="/explore.html">TTT World</a>
+    <img src="/images/mainLogo.png" alt="">
     <div class="tags">
       <a href="/friend.html" class="tag">Friend</a>
       <!-- <a href="/explore.html" class="tag">Explore</a> -->
@@ -61,7 +61,12 @@
       </div>
     </div>
     <div id="favorite" class="mainItem cube">
+      <span class="mainItemHead">Collection</span>
       <div id="favoriteContainer">
+        <div class="emptyInfo">
+          <img src="/images/favoriteEmpty.png" alt="">
+          <span>Add some message to here</span>
+        </div>
         <template id='favoriteTemplate'>
           <div class='favoriteItem'>
             <div class="favoriteItemHead">
@@ -94,7 +99,12 @@
 
     </div>
     <div id="exchange" class="mainItem cube">
+      <span class="mainItemHead">Exchange</span>
       <div id="exchangeContainer">
+        <div class="emptyInfo">
+          <img src="/images/exchangeEmpty .png" alt="">
+          <span>Booking language Exchange with friend</span>
+        </div>
         <template id='exchangeTemplate'>
           <div class="exchangeItem">
             <span class='time'></span>
@@ -124,6 +134,7 @@
 
     </div>
     <div id="people" class="mainItem cube">
+      <span class="mainItemHead">People</span>
       <div id="personContainer">
         <template id='personTemplate'>
           <div class="person" onclick="renderUserDetail(this)">

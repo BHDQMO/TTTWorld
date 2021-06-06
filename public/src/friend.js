@@ -469,7 +469,7 @@ fetch('/chat/friend', {
       }).then(res => {
         if (res.isConfirmed) {
           console.log("OK")
-          window.location = '/explore.html'
+          window.location = '/profile.html'
         }
       })
     } else {

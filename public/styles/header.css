@@ -23,11 +23,16 @@ body {
 }
 
 header {
-  height: 10vh;
+  height: 100px;
   padding: 10px 25px 10px 10px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+}
+
+header img {
+  border-radius: 0px;
+  height: 100%;
 }
 
 .web-name {

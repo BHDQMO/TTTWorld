@@ -9,11 +9,15 @@ body {
 }
 
 header {
-  height: 70px;
-  padding: 10px 25px 10px 10px;
+  height: 100px;
+  padding: 10px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+}
+
+header img {
+  height: 100%;
 }
 
 .web-name {

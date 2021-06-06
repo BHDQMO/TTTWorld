@@ -4,7 +4,7 @@ main {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  height: 90vh
+  height: calc(100vh - 100px)
 }
 
 .mainItem {
@@ -23,9 +23,37 @@ main {
   margin-left: 20px;
 }
 
+.mainItemHead {
+  font-size: x-large;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 10px;
+  line-height: 3rem;
+}
+
+.emptyInfo {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+.emptyInfo img {
+  border-radius: 0px;
+  height: 200px;
+  width: 200px;
+}
+
+.emptyInfo span {
+  text-align: center;
+  font-size: x-large;
+  white-space: normal;
+}
+
 #myDetailBox {
   margin-left: 20px;
-  max-width: 170px;
+  width: 170px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -91,9 +119,14 @@ main {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  background-image: linear-gradient(rgb(126, 200, 233), rgb(126, 200, 233));
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 58px;
 }
 
 #favoriteContainer {
+  flex-grow: 1;
   width: 340px;
   display: flex;
   flex-direction: column;
@@ -170,9 +203,17 @@ main {
   display: flex;
   flex-direction: column;
   padding-right: 0px;
+  background-image: linear-gradient(rgb(254, 192, 40), rgb(254, 192, 40));
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 58px;
 }
 
 #exchangeContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   overflow-y: auto;
 }
 
@@ -188,10 +229,6 @@ main {
   background-size: 5px;
   background-repeat: no-repeat;
   margin-right: 10px;
-}
-
-.exchangeItem:hover {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.19);
 }
 
 .exchangeItem+.exchangeItem {
@@ -254,6 +291,10 @@ main {
   display: flex;
   flex-direction: column;
   padding-right: 0px;
+  background-image: linear-gradient(rgb(121, 111, 253), rgb(121, 111, 253));
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 58px;
 }
 
 #personContainer {
@@ -311,7 +352,7 @@ main {
 
 #userDetailBox {
   margin-right: 20px;
-  max-width: 170px;
+  width: 170px;
   display: flex;
   flex-direction: column;
   align-items: stretch;

@@ -1,9 +1,13 @@
 header {
-  height: 70px;
-  padding: 10px 25px 10px 10px;
+  height: 100px;
+  padding: 10px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+}
+
+header img {
+  height: 100%;
 }
 
 .web-name {
@@ -20,7 +24,7 @@ main {
   background-image: url('/images/signup_background.jpg');
   background-repeat: repeat;
   background-position: top;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 100px);
 }
 
 #formContainer {
