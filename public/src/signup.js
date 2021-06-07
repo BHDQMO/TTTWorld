@@ -1,3 +1,4 @@
+const socket = io()
 let signUpForm = document.forms.namedItem('signUpForm');
 signUpForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -47,3 +48,38 @@ function signin() {
   window.location = '/signin.html'
 }
 
+let deviceLocation
+function getPosition(element) {
+  if (element.checked === true) {
+    if (!deviceLocation) {
+      async function success(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+          method: "GET"
+        }).then(res => res.json())
+          .then(res => {
+            deviceLocation = res.display_name
+            document.querySelector('input[name=address]').value = deviceLocation
+          })
+      }
+
+      function error() {
+        status.textContent = 'Unable to retrieve your location';
+      }
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Geolocation is not supported by your browser';
+      } else {
+        status.textContent = 'Locating…';
+        navigator.geolocation.getCurrentPosition(success, error);
+      }
+    } else {
+      document.querySelector('input[name=address]').value = deviceLocation
+    }
+
+  } else {
+    document.querySelector('input[name=address]').value = ''
+  }
+}

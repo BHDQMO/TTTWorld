@@ -112,3 +112,14 @@ input[type="date"] {
   color: rgb(2, 77, 252);
   border: 2px solid rgb(2, 77, 252);
 }
+
+#addressBox {
+  display: flex;
+  flex-direction: column;
+}
+
+#addressBox label[for="useDevicePositionCheckbox"] {
+  margin-top: 5px;
+  margin-right: 5px;
+  align-self: flex-end;
+}

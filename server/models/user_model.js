@@ -94,6 +94,7 @@ const getFavorite = async (user_id) => {
     ON favorite_list.history_id = history.id
     `
     let favoriteData = await query(queryString, [user_id])
+
     favoriteData = favoriteData.map(item => {
       if (item.type === 'text') {
         item.content = item.content.toString()
@@ -114,20 +115,23 @@ const getFavorite = async (user_id) => {
     SELECT user_id,name,picture FROM user WHERE user_id IN (?)
     `
     const senderResult = await query(queryString, [sender])
+
+
     const senderData = {}
     senderResult.map(result => senderData[result.user_id] = result)
-    queryString = `
-    SELECT * FROM history WHERE id IN (?)
-    `
-    let replyResult = await query(queryString, [reply])
-    replyResult = replyResult.map(item => {
-      if (item.type === 'text') {
-        item.content = item.content.toString()
-      }
-      return item
-    })
+
     const replyData = {}
-    replyResult.map(result => replyData[result.id] = result)
+    if (reply.length > 0) {
+      queryString = `SELECT * FROM history WHERE id IN (?)`
+      const replyResult = await query(queryString, [reply])
+      replyResult = replyResult.map(item => {
+        if (item.type === 'text') {
+          item.content = item.content.toString()
+        }
+        return item
+      })
+      replyResult.map(result => replyData[result.id] = result)
+    }
     await commit()
 
     const data = {
@@ -135,6 +139,7 @@ const getFavorite = async (user_id) => {
       senderData,
       replyData
     }
+
 
     return data
   } catch (error) {
@@ -157,9 +162,7 @@ const getExchange = async (user_id) => {
     \`exchange\` AS exchangetable
     ON roomlist.roomid = exchangetable.room_id
     `
-    console.log(user_id)
     const exchangeData = await query(queryString, [user_id, user_id])
-    console.log(exchangeData)
     const roomList = []
     exchangeData.map(item => {
       if (roomList.includes(item.room_id) === false) {

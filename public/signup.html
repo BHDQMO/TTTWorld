@@ -61,11 +61,15 @@
           </div>
         </div>
 
-        <div class="mb-3  form_group">
+        <div class="mb-3  form_group" id='addressBox'>
           <label for="address" class="form-label">Address</label>
           <div class="input-group">
             <input type="name" class="form-control" name="address">
           </div>
+          <label for="useDevicePositionCheckbox">
+            User Device Position
+            <input type="checkbox" class="form-check-input" onclick="getPosition(this)">
+          </label>
         </div>
 
         <div class="mb-3">
@@ -73,19 +77,23 @@
             <div class="col-6 form_group">
               <label for="native" class="form-label">Native</label>
               <select class="form-select" aria-label="Default select example" name="native">
-                <option value="English">English</option>
-                <option value="Korean">한국어</option>
-                <option value="Chinese">中文</option>
-                <option value="Japanese">日本語</option>
+                <option value="zh-TW">中文</option>
+                <option value="en-US">English</option>
+                <option value="ko-KR">한국어</option>
+                <option value="ja-JP">日本語</option>
+                <option value="fr-FR">français</option>
+                <option value="es-ES">Español</option>
               </select>
             </div>
             <div class="col-6  form_group">
               <label for="learning" class="form-label">Learning</label>
               <select class="form-select" aria-label="Default select example" name="learning">
-                <option value="English">English</option>
-                <option value="Korean">한국어</option>
-                <option value="Chinese">中文</option>
-                <option value="Japanese">日本語</option>
+                <option value="en-US">English</option>
+                <option value="zh-TW">中文</option>
+                <option value="ko-KR">한국어</option>
+                <option value="ja-JP">日本語</option>
+                <option value="fr-FR">français</option>
+                <option value="es-ES">Español</option>
               </select>
             </div>
           </div>
@@ -143,6 +151,7 @@
     </div>
 
   </main>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="./src/signup.js"></script>
 </body>
 

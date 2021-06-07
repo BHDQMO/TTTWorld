@@ -159,6 +159,7 @@ const onConnect = (socket, next) => {
   socket.on('invite', Socket.invite(socket, io))
   socket.on('accept', Socket.accept(socket, io))
   socket.on('reject', Socket.reject(socket, io))
+
 };
 
 io.use(Socket.login)

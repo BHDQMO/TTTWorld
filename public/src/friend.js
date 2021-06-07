@@ -424,8 +424,8 @@ async function renderHistory(element) {
   document.querySelector('#friendPicture').setAttribute('src', talkTo.picture)
   document.querySelector('#friendEmail').textContent = talkTo.email
   document.querySelector('#friendName').textContent = talkTo.name
-  document.querySelector('#friendNative').textContent = talkTo.native
-  document.querySelector('#friendLearning').textContent = talkTo.learning
+  document.querySelector('#friendNative').textContent = langCodePair[talkTo.native]
+  document.querySelector('#friendLearning').textContent = langCodePair[talkTo.learning]
   document.querySelector('#friendInterest').textContent = talkTo.interest
   document.querySelector('#friendIntroduction').textContent = talkTo.introduction
 
@@ -460,6 +460,13 @@ fetch('/chat/friend', {
   .then(res => {
     user = res.user
     user_id = res.user.user_id
+
+    textTranslatelang = user.native
+    audioTranlateLang = user.native
+    speechSynthesisLang = user.learning
+    speechRecognitionLearningLang = user.learning
+    speechRecognitionNativeLang = user.native
+
     if (res.data.length === 0) {
       Swal.fire({
         icon: 'info',
@@ -492,7 +499,7 @@ fetch('/chat/friend', {
         clone.querySelector('.user_box').id = user.user_id
         clone.querySelector('img').setAttribute('src', user.picture)
         clone.querySelector('#name').textContent = user.name
-        const exchange = user.native + '<->' + user.learning
+        const exchange = langCodePair[user.native] + '<->' + langCodePair[user.learning]
         clone.querySelector('#exchange').textContent = exchange
         const unread = user.unread
         if (unread > 0) {
@@ -520,8 +527,8 @@ fetch('/chat/friend', {
       }
 
       //render popup form
-      document.querySelector('#first-lang').textContent = user.native
-      document.querySelector('#first-lang').textContent = user.native
+      document.querySelector('#first-lang').textContent = langCodePair[user.native]
+      document.querySelector('#first-lang').textContent = langCodePair[user.native]
       // const timezoneInput = document.querySelector('#timezoneInput')
       // const timeZone = new Date().getTimezoneOffset() / 60
       // timezoneInput.value = timeZone
@@ -1087,14 +1094,23 @@ async function translateAudio(element) {
 }
 
 // speechSynthesis
-function speakMsg(element) {
+async function speakMsg(element) {
   const msgContent = element.parentNode.parentNode.children[0].innerText
   const targetLang = speechSynthesisLang //need change follow the Lang of this msg
   try {
     var synth = window.speechSynthesis
     var utterThis = new SpeechSynthesisUtterance(msgContent);
-    utterThis.voice = synth.getVoices().find(voice => voice.lang === targetLang)
-    console.log(synth.getVoices())
+
+    const getSpeechSynthesisVoice = (targetLang) => {
+      return new Promise((resolve, rejects) => {
+        const SpeechSynthesisVoice = synth.getVoices().find(voice => voice.lang === targetLang)
+        resolve(SpeechSynthesisVoice)
+      })
+    }
+
+    utterThis.voice = await getSpeechSynthesisVoice(targetLang)
+
+    console.log(utterThis.voice)
     synth.speak(utterThis);
   } catch (e) {
     console.log(e)
@@ -1139,6 +1155,7 @@ async function startSpeechRecognition() {
   recognition.maxAlternatives = 1;
   recognition.interimResults = false;
 
+  console.log(recognition.lang)
   recognition.start();
 
   recognition.onstart = async function (event) {
@@ -1213,14 +1230,15 @@ async function startSpeechRecognition() {
 
   recognition.onend = function (event) {
     console.log('[SpeechRecognition2] recognition end');
-    if (localStream) {
-      if (localStream.active === true) {
-        if (localStream.getTracks().length > 0) {
-          recognition.lang = speechRecognitionLearningLang
-          recognition.start();
-        }
-      }
-    }
+    recognition.start();
+    // if (localStream) {
+    //   if (localStream.active === true) {
+    //     if (localStream.getTracks().length > 0) {
+    //       recognition.lang = speechRecognitionLearningLang
+    //       recognition.start();
+    //     }
+    //   }
+    // }
   }
 
   recognition.onerror = function (event) {
@@ -1251,8 +1269,8 @@ exchangeForm.addEventListener('submit', (e) => {
   const formData = new FormData(exchangeForm);
   formData.append('room_id', talkTo.room_id);
   formData.append('publisher_id', user_id);
-  formData.append('first_lang', user.native);
-  formData.append('second_lang', user.learning);
+  formData.append('first_lang', langCodePair[user.native]);
+  formData.append('second_lang', langCodePair[user.learning]);
   const checkBox = document.getElementById("noticing");
   if (formData.get('notice') === 'on') {
     formData.set('notice', 1);
@@ -1292,7 +1310,7 @@ function startexchangeDemo() {
   startSpeechRecognition()
   chatBoxHead.setAttribute('part', 'I')
   chatBoxHead.style = 'display:flex'
-  currentLang.textContent = `Part I : ${user.learning}`
+  currentLang.textContent = `Part I : ${langCodePair[user.learning]}`
   MyCounter()
 }
 
@@ -1318,7 +1336,7 @@ function swap() {
   speechRecognitionNativeLang = langBuffer
 
   chatBoxHead.setAttribute('part', 'II')
-  currentLang.textContent = `Part II : ${user.native}`
+  currentLang.textContent = `Part II : ${langCodePair[user.native]}`
   time = duration * (100 - ratio) / 100;
   recognition.stop()
   MyCounter()
@@ -1410,6 +1428,7 @@ async function stopexchangeDemo() {
 
     if (formValues) {
       console.log(formValues)
+      lowScoreList = {}
     }
 
   } else {

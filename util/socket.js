@@ -1,5 +1,7 @@
 const Explore = require('../server/models/explore_model')
 const Chat = require('../server/models/chat_model')
+const fetch = require('node-fetch');
+const { XMLHttpRequest } = require('xmlhttprequest')
 const { constant } = require('lodash')
 
 let socket_ids = {}
@@ -219,7 +221,7 @@ module.exports = {
   exchangeInvite,
   acceptExchangeInvite,
   rejectExchangeInvite,
-  readExchangeInviteAnswer
+  readExchangeInviteAnswer,
 }
 
 

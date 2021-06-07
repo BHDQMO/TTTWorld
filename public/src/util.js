@@ -1,4 +1,11 @@
-
+const langCodePair = {
+  "zh-TW": 'Chinese',
+  "en-US": 'English',
+  "ko-KR": 'Korean',
+  "ja-JP": 'Japanese',
+  "fr-FR": 'French',
+  "es-ES": 'Spanish'
+}
 /**
  * program: "patienceDiff" algorithm implemented in javascript.
  * author: Jonathan Trent

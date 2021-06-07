@@ -11,7 +11,6 @@ fetch('/user/profile', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
-    console.log(res)
     user_id = res.data.user.user_id // don't move it. notice need this variable
     socket = io({
       auth: {
@@ -24,22 +23,19 @@ fetch('/user/profile', {
     socket.on('waitingInvite', renderWaitingIvite)
 
     exchange = res.data.exchange
-    console.log(exchange)
 
     favorite = res.data.favorite
     replyData = favorite.replyData
     senderData = favorite.senderData
     renderProfile(res.data.user)
 
-    console.log(favorite.favoriteData.length > 0)
-    if (exchange.exchangeData.length > 0) {
+    if (exchange.exchangeData.length > 0 && Object.keys(exchange.roommateData).length > 0) {
       renderExchange()
     } else {
       document.querySelector('#exchange .emptyInfo').style = 'display:flex'
     }
 
     if (favorite.favoriteData.length > 0) {
-      console.log('ok')
       renderFavorite()
     } else {
       document.querySelector('#favorite .emptyInfo').style = 'display:flex'
@@ -60,9 +56,9 @@ const renderProfile = (user) => {
   const introduction = document.querySelector('#myDetailBox .introduction')
   introduction.innerHTML = user.introduction
   const native = document.querySelector('#myDetailBox .native')
-  native.innerHTML = user.native
+  native.innerHTML = langCodePair[user.native]
   const learning = document.querySelector('#myDetailBox .learning')
-  learning.innerHTML = user.learning
+  learning.innerHTML = langCodePair[user.learning]
   const address = document.querySelector('#myDetailBox .address')
   address.innerHTML = user.address
 }
@@ -249,7 +245,6 @@ const renderExchange = () => {
     const startTime = new Date(item.start_time)
 
     const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
-    console.log(month)
     const date = fillZero(startTime.getDate())
     const startHours = fillZero(startTime.getHours())
     const startMin = fillZero(startTime.getMinutes())
@@ -305,7 +300,6 @@ fetch('/explore/user_list', {
     userArr = res.data
     userData = {}
     userArr.map(item => userData[item.user_id] = item.data)
-    console.log(userData)
     renderUserList()
   })
 
@@ -318,8 +312,8 @@ const renderUserList = function () {
     clone.querySelector('.person').setAttribute('id', user.user_id)
     clone.querySelector('.headIcon').src = data.picture
     clone.querySelector('.name').textContent = data.name
-    clone.querySelector('.native').textContent = data.native
-    clone.querySelector('.learning').textContent = data.learning
+    clone.querySelector('.native').textContent = langCodePair[data.native]
+    clone.querySelector('.learning').textContent = langCodePair[data.learning]
     clone.querySelector('.distance').textContent = Math.round(data.distance) + 'km'
     personContainer.append(clone)
   })
@@ -338,15 +332,14 @@ const renderUserDetail = function (element) {
   detail.querySelector('.picture').setAttribute('src', data.picture)
   detail.querySelector('.name').textContent = data.name
   detail.querySelector('.email').textContent = data.email
-  detail.querySelector('.native').textContent = data.native
-  detail.querySelector('.learning').textContent = data.learning
+  detail.querySelector('.native').textContent = langCodePair[data.native]
+  detail.querySelector('.learning').textContent = langCodePair[data.learning]
   detail.querySelector('.interest').textContent = data.interest
   detail.querySelector('.introduction').textContent = data.introduction
 
 
   const button = document.querySelector('.invite')
   button.setAttribute('id', userId)
-  console.log(data)
   button.setAttribute('room', data.room)
 
   if (data.receivedInvite === 'Waiting') {
