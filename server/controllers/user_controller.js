@@ -135,7 +135,6 @@ const getUserProfile = async (req, res) => {
   const user_id = req.user.user_id
   try {
     let favoriteData = await User.getFavorite(user_id)
-    console.log(favoriteData)
     if (favoriteData.error) {
       favoriteData = {
         favoriteData: []
@@ -148,8 +147,6 @@ const getUserProfile = async (req, res) => {
         exchangeData: []
       }
     }
-
-
 
     const data = {
       user: req.user,

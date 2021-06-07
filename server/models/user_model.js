@@ -103,22 +103,23 @@ const getFavorite = async (user_id) => {
     })
     let sender = []
     let reply = []
-    favoriteData.map(item => {
-      if (sender.includes(item.sender) === false) {
-        sender.push(item.sender)
-      }
-      if (item.reply) {
-        reply.push(item.reply)
-      }
-    })
-    queryString = `
-    SELECT user_id,name,picture FROM user WHERE user_id IN (?)
-    `
-    const senderResult = await query(queryString, [sender])
-
-
     const senderData = {}
-    senderResult.map(result => senderData[result.user_id] = result)
+
+    if (sender.length > 0) {
+      favoriteData.map(item => {
+        if (sender.includes(item.sender) === false) {
+          sender.push(item.sender)
+        }
+        if (item.reply) {
+          reply.push(item.reply)
+        }
+      })
+      queryString = `
+      SELECT user_id,name,picture FROM user WHERE user_id IN (?)
+      `
+      const senderResult = await query(queryString, [sender])
+      senderResult.map(result => senderData[result.user_id] = result)
+    }
 
     const replyData = {}
     if (reply.length > 0) {
@@ -139,7 +140,6 @@ const getFavorite = async (user_id) => {
       senderData,
       replyData
     }
-
 
     return data
   } catch (error) {
