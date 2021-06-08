@@ -21,7 +21,7 @@ let speechSynthesisLang = 'en-US' //text lang
 let speechRecognitionLearningLang = 'en-US' //target Lang when exchange 'zh-TW''en-US'
 let speechRecognitionNativeLang = 'zh-TW'
 
-const confidenceThreshold = 1
+const confidenceThreshold = 0.70
 const voiceMsgLimit = 10 * 1000
 
 async function renderMessage(msg) {
@@ -672,7 +672,6 @@ const renderSetting = (videoConstraints) => {
 }
 
 function swapVideo(element) {
-  console.log('swapVideo')
   const clickedOne = element.id
   const mainVideo = document.querySelector('#mainVideo')
   if (clickedOne === 'myVideo') {
@@ -1035,23 +1034,28 @@ function translateMsg(element) {
 
 // translate audio
 async function translateAudio(element) {
-  const audio = element.parentNode.parentNode.children[1].getAttribute('src');
-  console.log(audio)
+  Swal.fire({
+    icon: 'error',
+    title: 'Oops...',
+    text: 'Something went wrong!',
+  })
+  // const audio = element.parentNode.parentNode.children[1].getAttribute('src');
+  // console.log(audio)
 
-  fetch(audio)
-    .then(res => res.blob()) // mixin takes a Response stream and reads it to completion.
-    .then(blob => {
-      console.log(blob)
+  // fetch(audio)
+  //   .then(res => res.blob()) // mixin takes a Response stream and reads it to completion.
+  //   .then(blob => {
+  //     console.log(blob)
 
-      fetch(`/demoGoogleSpeechToTest`, {
-        method: "POST",
-        body: blob,
-        headers: {
-          'targetLang': `${audioTranlateLang}`,
-        }
-      })
-        .then(res => console.log(res.text()))
-    })
+  //     fetch(`/demoGoogleSpeechToTest`, {
+  //       method: "POST",
+  //       body: blob,
+  //       headers: {
+  //         'targetLang': `${audioTranlateLang}`,
+  //       }
+  //     })
+  //       .then(res => console.log(res.text()))
+  //   })
 }
 
 // speechSynthesis
@@ -1069,10 +1073,11 @@ async function speakMsg(element) {
       })
     }
 
-    utterThis.voice = await getSpeechSynthesisVoice(targetLang)
+    utterThis.voice = await getSpeechSynthesisVoice(targetLang).then(() => {
+      console.log(utterThis.voice)
+      synth.speak(utterThis);
+    })
 
-    console.log(utterThis.voice)
-    synth.speak(utterThis);
   } catch (e) {
     console.log(e)
   }
