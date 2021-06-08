@@ -123,3 +123,16 @@ input[type="date"] {
   margin-right: 5px;
   align-self: flex-end;
 }
+
+#genderBox {
+  display: flex;
+  justify-content: space-between;
+}
+
+#signUpForm {
+  padding: 5px;
+}
+
+textarea {
+  height: 250px;
+}

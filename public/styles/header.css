@@ -42,14 +42,14 @@ header img {
 }
 
 .tags {
-  height: 35px;
-  font-size: 35px;
-  color: #3f3a3a;
   display: flex;
   justify-content: space-between;
-  flex-wrap: nowrap;
-  text-align: center;
+  align-items: baseline;
+  font-size: 35px;
+  color: #3f3a3a;
   text-decoration: none;
+  margin-top: auto;
+  margin-bottom: 10px;
 }
 
 a {
@@ -58,19 +58,27 @@ a {
 }
 
 .tag {
-  padding: 0 3px;
+  line-height: 2rem;
+  /* margin-top: auto; */
+  padding: 0 10px;
+  cursor: pointer;
+  /* margin: 0 10px; */
 }
 
-.tag+.tag, .tag+.dropdown {
-  border-left: 2px solid #3f3a3a;
+#noticeHolder img {
+  height: 4rem;
 }
 
 .count-circle {
+  position: absolute;
   display: flex;
   border-radius: 17.5px;
   min-width: 35px;
+  height: 35px;
   background: red;
   justify-content: center;
+  top: 25px;
+  right: 25px;
 }
 
 .count {
@@ -80,21 +88,12 @@ a {
   font-size: 25px;
 }
 
-/* The container <div> - needed to position the dropdown content */
-
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-/* Dropdown Content (Hidden by Default) */
-
 .dropdown-content {
   position: absolute;
   display: none;
   flex-direction: column;
-  right: 0px;
-  top: 40px;
+  right: 10px;
+  top: 90px;
   background-color: #f1f1f1;
   font-size: 1rem;
   align-items: center;
@@ -102,6 +101,7 @@ a {
   padding: 10px;
   z-index: 2;
   border-radius: 10px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.19);
 }
 
 .noticeItem+.noticeItem {
@@ -138,15 +138,60 @@ a {
   padding: 0 5px;
 }
 
-.dropdown-content span {
+/* .dropdown-content span {
   padding: 0 5px;
   margin: 0 5px;
-}
+} */
 
 /* Show the dropdown menu on hover */
 
 .dropdown:hover .dropdown-content {
   display: flex;
+}
+
+.friendInviteBox {
+  display: flex;
+  flex-direction: column;
+  /* align-items: stretch; */
+  padding: 10px;
+  background: rgb(255, 242, 240);
+  border-radius: 10px;
+}
+
+.friendInviteBox:hover {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.19);
+}
+
+.friendInviteBox .starting {
+  margin: 0px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.friendInviteBox .inviteInfo {
+  display: flex;
+  align-items: center;
+}
+
+.friendInviteBox .headIcon {
+  height: 40px;
+  margin: 0px;
+}
+
+.friendInviteBox .name {
+  margin: 0px;
+}
+
+.friendInviteBox button {
+  justify-self: flex-end;
+}
+
+.friendInviteBox button+button {
+  margin-left: 10px;
+}
+
+.exchangeNoticeItem .starting {
+  margin-bottom: 10px;
 }
 
 .exchangeNoticeItem {
@@ -254,4 +299,10 @@ a {
   padding: 5px;
   border: 1px solid darkolivegreen;
   margin: 10px;
+}
+
+#bufferMsg {
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
 }

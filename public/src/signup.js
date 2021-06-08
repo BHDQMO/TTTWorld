@@ -3,20 +3,28 @@ let signUpForm = document.forms.namedItem('signUpForm');
 signUpForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const formData = new FormData(signUpForm);
-  console.log(formData.get('name'))
   let xhr = new XMLHttpRequest();
   xhr.open('POST', '/user/signup');
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       const data = JSON.parse(xhr.responseText)
-      console.log(data)
-      if (data.data.error) {
-        alert(data.data.error);
+      if (!data.data) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: `${data.error}`,
+        })
       } else {
-        alert('signIn completed!');
-        console.log(data.data)
         window.localStorage.setItem('JWT', data.data.token)
-        window.location.assign('/profile.html')
+        Swal.fire(
+          'Wlecome to join us!',
+          "Let' go to find some learning partners",
+          'success'
+        ).then((result) => {
+          if (result.isConfirmed) {
+            window.location.assign('/profile.html')
+          }
+        })
       }
     }
   };
@@ -42,6 +50,7 @@ function addInterest() {
   const interestList = document.querySelector('#interest-list')
   const insertPoint = document.querySelector('#insert-point')
   interestList.insertBefore(clone, insertPoint)
+  userInput.value = ""
 }
 
 function signin() {
@@ -50,6 +59,9 @@ function signin() {
 
 let deviceLocation
 function getPosition(element) {
+  const inputbox = document.querySelector('input[name=address]')
+  inputbox.value = 'Getting location from your device ...'
+  inputbox.style = 'color: gray'
   if (element.checked === true) {
     if (!deviceLocation) {
       async function success(position) {
@@ -61,7 +73,8 @@ function getPosition(element) {
         }).then(res => res.json())
           .then(res => {
             deviceLocation = res.display_name
-            document.querySelector('input[name=address]').value = deviceLocation
+            inputbox.style = 'color: #212529;'
+            inputbox.value = deviceLocation
           })
       }
 

@@ -5,6 +5,7 @@ let favorite
 let replyData
 let senderData
 let user_id // don't move it. notice need this variable
+let user
 
 fetch('/user/profile', {
   method: 'GET',
@@ -12,21 +13,29 @@ fetch('/user/profile', {
 }).then(res => res.json())
   .then(res => {
     user_id = res.data.user.user_id // don't move it. notice need this variable
-    socket = io({
-      auth: {
-        user_id: user_id
-      }
-    })
+
+    if (!socket) {
+      socket = io({
+        auth: {
+          user_id: user_id
+        }
+      })
+    }
 
     socket.on('friend_online', online_notice)
-    socket.on('aheadExchangeNotice', aheadExchangeNotice)
     socket.on('waitingInvite', renderWaitingIvite)
+    socket.on('aheadExchangeNotice', aheadExchangeNotice)
+
+    socket.on('exchangeInvite', handleExchangeInvite)
+    socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
+    socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
 
     exchange = res.data.exchange
 
     favorite = res.data.favorite
     replyData = favorite.replyData
     senderData = favorite.senderData
+    user = res.data.user
     renderProfile(res.data.user)
 
     if (exchange.exchangeData.length > 0 && Object.keys(exchange.roommateData).length > 0) {
@@ -41,6 +50,7 @@ fetch('/user/profile', {
       document.querySelector('#favorite .emptyInfo').style = 'display:flex'
     }
   })
+
 
 const renderProfile = (user) => {
   const picture = document.querySelector('#myDetailBox .picture')
@@ -301,6 +311,65 @@ fetch('/explore/user_list', {
     userData = {}
     userArr.map(item => userData[item.user_id] = item.data)
     renderUserList()
+
+    if (!socket) {
+      socket = io({
+        auth: {
+          user_id: user_id
+        }
+      })
+    }
+
+    socket.on('reject', (user_id) => {
+      userData[user_id].sentInvite = null
+      const inviteBtn = document.querySelector('.invite')
+      if (parseInt(inviteBtn.id) === user_id) {
+        inviteBtn.textContent = 'Invite'
+      }
+    })
+
+    socket.on('invite', (user_id) => {
+      userData[user_id].sentInvite = 'Waiting'
+      const inviteBtn = document.querySelector('.invite')
+      if (parseInt(inviteBtn.id) === user_id) {
+        inviteBtn.textContent = 'Waiting'
+      }
+    })
+
+    socket.on('inviteAccepted', ({ user, room }) => {
+      if (userData[user.user_id]) {
+        userData[user.user_id].sentInvite = "Let's Chat"
+      }
+
+      const inviteBtn = document.querySelector('.invite')
+      if (parseInt(inviteBtn.id) === user.user_id) {
+        inviteBtn.setAttribute('room', room)
+        inviteBtn.textContent = "Let's Chat"
+      }
+
+      const count = document.querySelector(".count")
+      count.textContent = parseInt(count.textContent) + 1
+      document.querySelector('#bufferMsg').style.display = 'none'
+
+      const dropdownContent = document.querySelector('.dropdown-content')
+      const tempalte = document.querySelector('#notice_dropdown_template').content
+      const clone = document.importNode(tempalte, true)
+      clone.querySelector('.starting').textContent = 'Your invitation has been accepted'
+      clone.querySelector('.friendInviteBox').setAttribute('userId', user.user_id)
+      clone.querySelector('.headIcon').src = user.picture
+      clone.querySelector('.name').textContent = user.name
+
+      const acceptInvite = clone.querySelector('.acceptInvite')
+      console.log(room)
+      acceptInvite.setAttribute('room', `${room}`)
+      acceptInvite.textContent = "Let's Chat"
+
+      //wait fix, ther dropdown content box just disapear after click ok
+      const rejectInvite = clone.querySelector('.rejectInvite')
+      rejectInvite.textContent = 'OK'
+
+      dropdownContent.append(clone)
+    })
   })
 
 const renderUserList = function () {
@@ -357,27 +426,21 @@ const action = function (element) {
   switch (element.textContent) {
     case 'Invite': {
       socket.emit('invite', [user_id, parseInt(element.id)])
-      socket.on('invite', (user_id) => {
-        userData[user_id].sentInvite = 'Waiting'
-        element.textContent = 'Waiting'
-      })
+      //send to server to create invite
+      //after receive server feedback, update own data
       break
     }
     case "Accept": {
       userData[element.id].receivedInvite = "Let's Chat"
       socket.emit('accept', [user_id, parseInt(element.id)])
-      socket.on('accept', (room) => {
-        console.log(room)
-        document.querySelector('.reject').remove()
-        element.setAttribute('room', room)
-        element.textContent = "Let's Chat"
-      })
+
       break
     }
     case "Reject": {
       element.remove()
       document.querySelector('.invite').textContent = 'Invite'
       socket.emit('reject', [user_id, parseInt(element.id)])
+
       break;
     }
     case "Let's Chat": {

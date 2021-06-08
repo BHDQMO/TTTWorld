@@ -19,11 +19,14 @@ const signUp = async (user, interests) => {
     const userQueryStr = 'INSERT INTO user SET ?'
     const userResult = await query(userQueryStr, user)
     await query(`UPDATE user SET geocode = ${geocode} WHERE email = '${user.email}'`)
-    interests.map(async (interest) => {
-      const binding = [interest, interest]
-      const interestQueryStr = `INSERT INTO interest (name) SELECT * FROM (SELECT ?) AS temp WHERE NOT EXISTS ( SELECT name FROM interest WHERE name = ?)`
-      await query(interestQueryStr, binding)
-    })
+    if (interests.length > 0) {
+      interests.map(async (interest) => {
+        const binding = [interest, interest]
+        const interestQueryStr = `INSERT INTO interest (name) SELECT * FROM (SELECT ?) AS temp WHERE NOT EXISTS ( SELECT name FROM interest WHERE name = ?)`
+        await query(interestQueryStr, binding)
+      })
+    }
+
     await commit()
     user.userId = userResult.insertId
     return user
@@ -45,6 +48,12 @@ const nativeSignIn = async (email, password) => {
     await transaction();
 
     const users = await query('SELECT * FROM user WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return {
+        error: 'This Email has not been registered'
+      };
+    }
+
     const user = users[0];
     if (!bcrypt.compareSync(password, user.password)) {
       await commit();
@@ -103,20 +112,18 @@ const getFavorite = async (user_id) => {
     })
     let sender = []
     let reply = []
-    const senderData = {}
+    favoriteData.map(item => {
+      if (sender.includes(item.sender) === false) {
+        sender.push(item.sender)
+      }
+      if (item.reply) {
+        reply.push(item.reply)
+      }
+    })
 
+    const senderData = {}
     if (sender.length > 0) {
-      favoriteData.map(item => {
-        if (sender.includes(item.sender) === false) {
-          sender.push(item.sender)
-        }
-        if (item.reply) {
-          reply.push(item.reply)
-        }
-      })
-      queryString = `
-      SELECT user_id,name,picture FROM user WHERE user_id IN (?)
-      `
+      queryString = `SELECT user_id,name,picture FROM user WHERE user_id IN (?)`
       const senderResult = await query(queryString, [sender])
       senderResult.map(result => senderData[result.user_id] = result)
     }
@@ -124,7 +131,7 @@ const getFavorite = async (user_id) => {
     const replyData = {}
     if (reply.length > 0) {
       queryString = `SELECT * FROM history WHERE id IN (?)`
-      const replyResult = await query(queryString, [reply])
+      let replyResult = await query(queryString, [reply])
       replyResult = replyResult.map(item => {
         if (item.type === 'text') {
           item.content = item.content.toString()
@@ -133,7 +140,6 @@ const getFavorite = async (user_id) => {
       })
       replyResult.map(result => replyData[result.id] = result)
     }
-    await commit()
 
     const data = {
       favoriteData,
@@ -141,6 +147,7 @@ const getFavorite = async (user_id) => {
       replyData
     }
 
+    await commit()
     return data
   } catch (error) {
     await rollback()

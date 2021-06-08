@@ -9,41 +9,49 @@ const online_notice = (user) => {
   clone.querySelector('#name').textContent = user.name
   online_notice.append(clone)
 
-  window.setTimeout(() => {
-    document.querySelector(`div[name='${user.user_id}'`).remove()
-    if (!online_notice.hasChildNodes()) {
-      online_notice.style = 'display:none'
-    }
-  }, 3000)
+  // window.setTimeout(() => {
+  //   document.querySelector(`div[name='${user.user_id}'`).remove()
+  //   if (!online_notice.hasChildNodes()) {
+  //     online_notice.style = 'display:none'
+  //   }
+  // }, 10 * 1000)
 }
 
-let isNoticeRead = 0
+function showNotice() {
+  const dropdownContent = document.querySelector('.dropdown-content')
+  dropdownContent.style = 'display:flex'
+}
+
+window.onclick = function (event) {
+  const dropdownContent = document.querySelector('.dropdown-content')
+  const noticeTag = document.querySelector('#noticeTag')
+  const count = document.querySelector('.count')
+  const accept = document.querySelector('.acceptInvite')
+  const reject = document.querySelector('.rejectInvite')
+  if (!dropdownContent.contains(event.target) && event.target !== noticeTag && event.target !== count && event.target !== accept && event.target !== reject) {
+    dropdownContent.style.display = "none";
+  }
+}
+
 const renderWaitingIvite = (data) => {
-  if (data.unreadNum !== 0) {
-    console.log('render waiting invite')
-    document.querySelector('#bufferMsg').remove()
+  const waitingNum = data.waitingInvite.length
+  document.querySelector(".count").textContent = waitingNum
+  if (waitingNum > 0) {
+    const bufferMsg = document.querySelector('#bufferMsg')
+    if (bufferMsg) {
+      bufferMsg.style.display = 'none'
+    }
 
-    document.querySelector(".count").textContent = data.unreadNum
-    document.querySelector(".dropdown").addEventListener("mouseenter", () => {
-      document.querySelector(".count").textContent = 0
-      if (isNoticeRead === 0) {
-        socket.emit("readInvite", user_id)
-        isNoticeRead++
-      }
-    })
-
+    const dropdownContent = document.querySelector('.dropdown-content')
     data.waitingInvite.map(invite => {
       const tempalte = document.querySelector('#notice_dropdown_template').content
       const clone = document.importNode(tempalte, true)
-      clone.querySelector('img').src = invite.picture
-      const someoneName = clone.querySelector('#someoneName')
-      someoneName.innerHTML = invite.name
-      const lang = clone.querySelector('#lang')
-      lang.innerHTML = invite.native + '<->' + invite.learning
-      clone.querySelector('.invite').id = invite.user_id
-      clone.querySelector('.reject').id = invite.user_id
-      const dropdown = document.querySelector('.dropdown-content')
-      dropdown.append(clone)
+      clone.querySelector('.friendInviteBox').setAttribute('userId', invite.user_id)
+      clone.querySelector('.headIcon').src = invite.picture
+      clone.querySelector('.name').textContent = invite.name
+      clone.querySelector('.acceptInvite').id = invite.user_id
+      clone.querySelector('.rejectInvite').id = invite.user_id
+      dropdownContent.append(clone)
     })
   }
 }
@@ -79,31 +87,57 @@ const builtExchangeBox = (invite) => {
 
 const noticeAction = function (element) {
   switch (element.textContent) {
-    case 'Invite': {
-      socket.emit('invite', [user_id, parseInt(element.id)])
-      socket.on('invite', (user_id) => {
-        element.textContent = 'Waiting'
-      })
-      break
-    }
     case "Accept": {
-      socket.emit('accept', [user_id, parseInt(element.id)])
+      const count = document.querySelector(".count")
+      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+      socket.emit('accept', { user, sender_Id: parseInt(element.id) })
+      //accept the invitation
+      //receive the room number from server
       socket.on('accept', (room) => {
-        document.querySelector('.reject').remove()
+        document.querySelector('.rejectInvite').remove()
         element.setAttribute('room', room)
         element.textContent = "Let's Chat"
       })
       break
     }
+      querySelectorAll
     case "Reject": {
-      element.remove()
-      document.querySelector('.invite').textContent = 'Invite'
+      const count = document.querySelector(".count")
+      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+      element.textContent = 'Rejected'
+      document.querySelector('.acceptInvite').remove()
       socket.emit('reject', [user_id, parseInt(element.id)])
+      const waitRemoveId = element.id
+      setTimeout(() => {
+        const inviteItem = document.querySelector(`.friendInviteBox[userId='${waitRemoveId}']`)
+        inviteItem.remove()
+        checkDropbox()
+      }, 5 * 1000)
       break;
     }
     case "Let's Chat": {
+      const count = document.querySelector(".count")
+      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
       const room = element.getAttribute('room')
       window.location = `/friend.html?room=${room}`
+      break;
+    }
+    case "OK": {
+      const count = document.querySelector(".count")
+      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+
+      const friendInviteBoxs = document.querySelectorAll('.friendInviteBox')
+      friendInviteBoxs.forEach(box => {
+        if (box.contains(element)) {
+          box.remove()
+        }
+      })
+      const dropdownContent = document.querySelector('.dropdown-content')
+      console.log(friendInviteBoxs)
+      if (friendInviteBoxs.length === 1) {
+        dropdownContent.style.display = 'flex'
+        document.querySelector('#bufferMsg').style.display = 'flex'
+      }
       break;
     }
   }
@@ -132,7 +166,11 @@ function acceptExchangeInvite(element) {
   element.textContent = 'Accepted'
   setTimeout(() => {
     document.querySelector(`.exchangeNoticeItem[exchange_id='${exchange_id}']`).remove()
+    checkDropbox()
   }, 5 * 1000)
+  const count = document.querySelector(".count")
+  count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+  checkDropbox()
 }
 
 function rejectExchangeInvite(element) {
@@ -151,5 +189,9 @@ function rejectExchangeInvite(element) {
   element.textContent = 'Rejected'
   setTimeout(() => {
     document.querySelector(`.exchangeNoticeItem[exchange_id='${exchange_id}']`).remove()
+    checkDropbox()
   }, 5 * 1000)
+  const count = document.querySelector(".count")
+  count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+  checkDropbox()
 }

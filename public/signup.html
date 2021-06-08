@@ -32,39 +32,48 @@
         </div>
         <div class="mb-3 form_group">
           <label for="formFile" class="form-label">Head shot</label>
-          <input class="form-control" type="file" id="formFile" name="picture">
+          <input class="form-control" type="file" id="formFile" name="picture" required>
         </div>
+
         <div class="mb-3 form_group">
           <label for="birthday" class="form-label">Birthday</label>
           <div class="input-group">
-            <input type="date" name="birthday">
-            <div class="gender">
+            <input type="date" name="birthday" required>
+          </div>
+        </div>
+
+        <div class="mb-3 form_group">
+          <label for="genderBox">
+            Gender
+            <div id="genderBox">
               <div class="col-2 form-check  form_group">
-                <input class="form-check-input" type="radio" name="gender" value='Male' checked>
                 <label class="form-check-label" for="flexRadioDefault1">
+                  <input class="form-check-input" id="flexRadioDefault1" type="radio" name="gender" value='Male'
+                    checked>
                   Male
                 </label>
               </div>
               <div class="col-2 form-check  form_group">
-                <input class="form-check-input" type="radio" name="gender" value="Female">
                 <label class="form-check-label" for="flexRadioDefault2">
+                  <input class="form-check-input" id="flexRadioDefault2" type="radio" name="gender" value="Female">
                   Female
                 </label>
               </div>
               <div class="col-2 form-check form_group">
-                <input class="form-check-input" type="radio" name="gender" value="Other">
                 <label class="form-check-label" for="flexRadioDefault3">
                   Other
+                  <input class="form-check-input" id="flexRadioDefault3" type="radio" name="gender" value="Other">
                 </label>
               </div>
             </div>
-          </div>
+          </label>
+
         </div>
 
         <div class="mb-3  form_group" id='addressBox'>
           <label for="address" class="form-label">Address</label>
           <div class="input-group">
-            <input type="name" class="form-control" name="address">
+            <input type="name" class="form-control" name="address" required>
           </div>
           <label for="useDevicePositionCheckbox">
             User Device Position
@@ -102,7 +111,7 @@
         <div class="mb-3  form_group">
           <label for="introduction" class="form-label">Introduction</label>
           <div class="input-group">
-            <textarea class="form-control" aria-label="With textarea" name="introduction"></textarea>
+            <textarea class="form-control" aria-label="With textarea" name="introduction" required></textarea>
           </div>
         </div>
 
@@ -131,7 +140,7 @@
             </label>
             <template id="newInterest">
               <label class="list-group-item">
-                <input class="form-check-input me-1" type="checkbox" value="" name="interest">
+                <input class="form-check-input me-1" type="checkbox" value="" name="interest" checked>
               </label>
             </template>
 
@@ -146,11 +155,9 @@
         <button class="btn btn-primary" id='signup'>Sign Up</button>
         <div class="btn btn-primary" id='signin' onclick="signin()">Sign In</div>
       </form>
-
-
     </div>
-
   </main>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./src/signup.js"></script>
 </body>

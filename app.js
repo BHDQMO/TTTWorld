@@ -131,8 +131,6 @@ app.use(function (err, req, res, next) {
 })
 
 const onConnect = (socket, next) => {
-
-  console.log('Socket server connected')
   Socket.sendWaitingInvite(socket, io)
   socket.on("signin", Socket.onlineNotice(socket, io));
   socket.on("readInvite", Socket.readInvite(socket, io));

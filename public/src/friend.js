@@ -50,7 +50,6 @@ async function renderMessage(msg) {
           const textElement = msgReplyBtn.parentNode.parentNode.children[0]
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
-            console.log(msg.correct)
             let wrongString = replyContent.textContent.split('')
             let rightString = msg.content.split('')
             const result = patienceDiff(wrongString, rightString).lines
@@ -128,8 +127,6 @@ async function renderMessage(msg) {
           let isDetected = false
           let markedRightSpans = document.createElement('span')
           markedRightSpans.setAttribute('id', 'content')
-          console.log(markedRightSpans)
-          console.log(result)
 
           result.map((char, i) => {
 
@@ -137,13 +134,11 @@ async function renderMessage(msg) {
               if (char.aIndex !== -1 && isDetected === false) {
 
                 tempString += char.line
-                console.log(tempString)
               } else if (char.aIndex === -1 && isDetected === false) {
                 const tempElement = document.createElement('span')
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'pass')
                 markedRightSpans.appendChild(tempElement)
-                console.log(markedRightSpans)
                 tempString = '' + char.line
                 isDetected = true
               } else if (char.aIndex === -1 && isDetected === true) {
@@ -153,7 +148,6 @@ async function renderMessage(msg) {
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'correction')
                 markedRightSpans.appendChild(tempElement)
-                console.log(markedRightSpans)
                 tempString = '' + char.line
                 isDetected = false
               }
@@ -167,7 +161,6 @@ async function renderMessage(msg) {
                 tempElement.setAttribute('class', 'correction')
               }
               markedRightSpans.appendChild(tempElement)
-              console.log(markedRightSpans)
             }
           })
 
@@ -175,7 +168,6 @@ async function renderMessage(msg) {
           const textSpan = clone.querySelector('#originMsg #content')
           textSpan.remove()
           const audio = clone.querySelector('#originMsg audio')
-          console.log(markedRightSpans)
           markedRightSpans = originMsg.insertBefore(markedRightSpans, audio)
 
         } else {
@@ -390,12 +382,16 @@ const startAudioRecord = async function () {
 const recordVoiceMsgBtn = document.querySelector('#recordVoiceMsgBtn')
 recordVoiceMsgBtn.addEventListener('mousedown', (event) => {
   startAudioRecord()
-  event.target.style = 'background: lightgrey'
+  event.target.style = `
+  background: rgb(57, 70, 77);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.19)`
 })
 
 recordVoiceMsgBtn.addEventListener('mouseup', (event) => {
   stopAudioRecord()
-  event.target.style = 'background: rgba(45, 58, 56, 0.74)'
+  event.target.style = `
+  background: rgba(45, 58, 56, 0.74)
+  box-shadow: none`
 })
 
 async function renderHistory(element) {
@@ -528,7 +524,7 @@ fetch('/chat/friend', {
 
       //render popup form
       document.querySelector('#first-lang').textContent = langCodePair[user.native]
-      document.querySelector('#first-lang').textContent = langCodePair[user.native]
+      document.querySelector('#second-lang').textContent = langCodePair[user.learning]
       // const timezoneInput = document.querySelector('#timezoneInput')
       // const timeZone = new Date().getTimezoneOffset() / 60
       // timezoneInput.value = timeZone
@@ -565,81 +561,46 @@ fetch('/chat/friend', {
         renderMessage(msg)
       })
 
-      socket.on('friend_online', online_notice)
-      socket.on('waitingInvite', renderWaitingIvite)
-
-      socket.on('exchangeInvite', handleExchangeInvite)
-      socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
-      socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
-
       socket.on('offer', handleSDPOffer)
       socket.on('answer', handleSDPAnswer)
       socket.on('icecandidate', handleNewIceCandidate)
       socket.on('hangup', handleHangup)
       socket.on('callend', handleCallEnd)
+
+      socket.on('friend_online', online_notice)
+      socket.on('waitingInvite', renderWaitingIvite)
+      socket.on('aheadExchangeNotice', aheadExchangeNotice)
+
+      socket.on('exchangeInvite', handleExchangeInvite)
+      socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
+      socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
+
+
+      socket.on('inviteAccepted', ({ user, room }) => {
+        const count = document.querySelector(".count")
+        count.textContent = parseInt(count.textContent) + 1
+        document.querySelector('#bufferMsg').style.display = 'none'
+
+        const dropdownContent = document.querySelector('.dropdown-content')
+        const tempalte = document.querySelector('#notice_dropdown_template').content
+        const clone = document.importNode(tempalte, true)
+        clone.querySelector('.starting').textContent = 'Your invitation has been accepted'
+        clone.querySelector('.friendInviteBox').setAttribute('userId', user.user_id)
+        clone.querySelector('.headIcon').src = user.picture
+        clone.querySelector('.name').textContent = user.name
+
+        const acceptInvite = clone.querySelector('.acceptInvite')
+        acceptInvite.setAttribute('room', `${room}`)
+        acceptInvite.textContent = "Let's Chat"
+
+        //wait fix, ther dropdown content box just disapear after click ok
+        const rejectInvite = clone.querySelector('.rejectInvite')
+        rejectInvite.textContent = 'OK'
+
+        dropdownContent.append(clone)
+      })
     }
   })
-
-let waitingAnswerExchangeInvite = {}
-const handleExchangeInvite = (data) => {
-  data.map(invite => {
-    const exchangeInvite = invite.exchangeInvite
-    waitingAnswerExchangeInvite[exchangeInvite.exchange_id] = exchangeInvite
-  })
-  const bufferMsg = document.querySelector('#bufferMsg')
-  if (data.length > 0 && bufferMsg) {
-    bufferMsg.remove()
-  }
-  data.map(invite => {
-    const template = document.querySelector('#exchangeNoticeTemplate').content
-    const clone = document.importNode(template, true)
-    clone.querySelector('.starting').textContent = 'You have a new exchange invite'
-    clone.querySelector('.exchangeItem').append(builtExchangeBox(invite))
-
-    const exchange_id = invite.exchangeInvite.exchange_id
-    clone.querySelector('.exchangeNoticeItem').setAttribute('exchange_id', `${exchange_id}`)
-    clone.querySelector('.acceptExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
-    clone.querySelector('.rejectExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
-
-    document.querySelector('.dropdown-content').append(clone)
-  })
-}
-
-const handleExchangeInviteAccepted = (data) => {
-  const starting = 'Your exchange invitation has been accepted'
-  createExchangeInviteAnswerNotice(data, starting)
-}
-
-
-const handleExchangeInviteRejected = (data) => {
-  const starting = 'Your exchange invitation has been rejected'
-  createExchangeInviteAnswerNotice(data, starting)
-}
-
-const createExchangeInviteAnswerNotice = (data, starting) => {
-  const bufferMsg = document.querySelector('#bufferMsg')
-  if (bufferMsg) { bufferMsg.remove() }
-  const template = document.querySelector('#exchangeNoticeTemplate').content
-  const clone = document.importNode(template, true)
-  clone.querySelector('.starting').textContent = starting
-  clone.querySelector('.exchangeItem').append(builtExchangeBox(data))
-
-  const exchange_id = data.exchangeInvite.exchange_id
-  const checkBtn = document.createElement('button')
-  checkBtn.setAttribute('exchange_id', `${exchange_id}`)
-  checkBtn.textContent = 'OK'
-  checkBtn.addEventListener('click', (event) => {
-    event.target.parentNode.parentNode.remove()
-    socket.emit('readExchangeInviteAnswer', exchange_id)
-  })
-  clone.querySelector('.acceptExchangeInvite').remove()
-  clone.querySelector('.rejectExchangeInvite').remove()
-  clone.querySelector('.btnBox').append(checkBtn)
-  document.querySelector('.dropdown-content').append(clone)
-}
-
-
-
 
 async function micBtn(element) {
   const activeIcon = element.querySelector('svg[style]').id
@@ -1295,7 +1256,6 @@ exchangeForm.addEventListener('submit', (e) => {
     }
   }
   socket.emit('exchangeInvite', package)
-
 })
 
 const duration = 15 * 60 * 1000

@@ -20,6 +20,10 @@ main {
   word-break: break-all;
 }
 
+#friendDetailBox #friendEmail {
+  font-size: xx-small;
+}
+
 #friendDetail {
   display: flex;
   flex-direction: column;
@@ -100,7 +104,7 @@ main {
 }
 
 .mainItem {
-  margin-top: 20px;
+  /* margin-top: 20px; */
   margin-bottom: 20px;
 }
 
@@ -200,7 +204,7 @@ main {
   position: relative;
 }
 
-#originMsg .correction {
+#message[from="myself"] #originMsg span.correction, #message[from="other"] #originMsg span.correction {
   color: limegreen;
 }
 
@@ -237,7 +241,7 @@ main {
 #message[from="myself"] #replyMsg {
   justify-content: flex-start;
   width: -webkit-fill-available;
-  border-bottom: 1px solid rgb(127, 170, 185)
+  border-bottom: 1px solid white
 }
 
 #message[from="other"] #replyMsg {
@@ -248,7 +252,7 @@ main {
 #message[from="myself"] #translateMsg {
   justify-content: flex-end;
   width: -webkit-fill-available;
-  border-top: 1px solid rgb(127, 170, 185)
+  border-top: 1px solid white
 }
 
 #message[from="other"] #translateMsg {
@@ -439,18 +443,20 @@ li {
 #recordVoiceMsgBtn {
   height: 2rem;
   width: 2rem;
-  background: rgba(45, 58, 56, 0.74);
+  padding: 5px;
+  background: #fff;
   border-radius: 50%;
-  color: #fff;
+  /* color: #fff; */
+  border: 1px solid rgb(57, 70, 77);
   display: inline-block;
   text-align: center;
   line-height: 2rem;
   margin-right: 10px;
 }
 
-#recordVoiceMsgBtn path {
+/* #recordVoiceMsgBtn path {
   color: #fff;
-}
+} */
 
 .user_box {
   position: relative;
@@ -534,6 +540,55 @@ img {
 
 .form-container input[type=text]:focus, .form-container input[type=password]:focus {
   outline: none;
+}
+
+.form-container .container+.title {
+  margin-top: 10px;
+}
+
+#start_time_input {
+  width: 220px;
+}
+
+#datetimeLocalWrap {
+  display: flex;
+  padding: 5px;
+}
+
+#setTime {
+  flex-grow: 1;
+  margin-left: auto;
+  text-align: center;
+  border-radius: 5px;
+  background: rgb(2, 77, 252);
+  color: rgb(227, 246, 253);
+  font-weight: 450;
+  cursor: auto;
+  padding: 0 10px;
+  margin-left: 5px;
+}
+
+#setTime:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+#notify {
+  display: inline-block;
+  font-size: smaller;
+  text-align: end;
+}
+
+#notifyCheckbox {
+  margin: 5px
+}
+
+#ratio-box {
+  display: flex;
+  flex-direction: column;
+}
+
+#ratioBody {
+  align-self: flex-end;
 }
 
 /* Set a style for the submit/login button */
@@ -682,4 +737,8 @@ span#scoreTitle, span#collectTitle {
 
 ::-webkit-scrollbar {
   width: 0px;
+}
+
+#replyIcon {
+  display: none;
 }

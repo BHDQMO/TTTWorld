@@ -1,7 +1,5 @@
 const Explore = require('../server/models/explore_model')
 const Chat = require('../server/models/chat_model')
-const fetch = require('node-fetch');
-const { XMLHttpRequest } = require('xmlhttprequest')
 const { constant } = require('lodash')
 
 let socket_ids = {}
@@ -21,6 +19,7 @@ const login = (socket, next) => {
   next()
 }
 
+//once user online, send waiting invite to them
 const sendWaitingInvite = async (socket, io) => {
   const waitingInvite = await Explore.getWaitingInvite(socket.user_id)
   let unreadNum = 0
@@ -51,7 +50,6 @@ const onlineNotice = (socket, io) => async (user) => {
       io.to(friend_socket_id).emit('friend_online', user);
     }
   })
-  io.to(socket.id).emit('signin');
 }
 
 // socket_ids[socket_ids.handshack.auth.user_id] = socket.id
@@ -97,7 +95,9 @@ const favorite = (socket, io) => async (data) => {
 const invite = (socket, io) => async (invite) => {
   await Explore.createInvite(invite)
   io.to(socket_ids[invite[0]]).emit('invite', invite[1])
+  //send back to sender
 
+  //get the receiver's waiting invite and calc. unread number
   const waitingInvite = await Explore.getWaitingInvite(invite[1])
   let unreadNum = 0
   waitingInvite.map(invite => {
@@ -107,17 +107,22 @@ const invite = (socket, io) => async (invite) => {
     unreadNum,
     waitingInvite
   }
+  //inform to receiver 
   io.to(socket_ids[invite[1]]).emit('waitingInvite', data)
 };
 
-const accept = (socket, io) => async (invite) => {
-  await Explore.acceptInvite(invite)
-  const room = await Chat.createRoom(invite)
-  socket.emit('accept', room)
+const accept = (socket, io) => async ({ user, sender_Id }) => {
+  console.log([user.user_id, sender_Id])
+  await Explore.acceptInvite([user.user_id, sender_Id])
+  const room = await Chat.createRoom([user.user_id, sender_Id])
+  console.log(room)
+  io.to(socket_ids[user.user_id]).emit('accept', room)
+  io.to(socket_ids[sender_Id]).emit('inviteAccepted', { user, room })
 };
 
 const reject = (socket, io) => async (invite) => {
   await Explore.rejectInvite(invite)
+  io.to(socket_ids[invite[1]]).emit('reject', invite[0])
 };
 
 const icecandidate = (socket, io) => ({ room, candidate }) => {
@@ -166,7 +171,7 @@ const exchangeStartNotice = ({ io, exchangeList }) => {
 }
 
 const exchangeInvite = (socket, io) => async (package) => {
-  // console.log(package)
+  console.log(package)
   const receiver = package.receiver
   const data = package.data
   const exchange_id = await Chat.createExchange(data.exchangeInvite)

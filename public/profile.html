@@ -10,29 +10,64 @@
 
 <body>
   <header>
-    <img src="/images/mainLogo.png" alt="">
+    <a href="/profile.html">
+      <img src="/images/mainLogo.png">
+    </a>
     <div class="tags">
       <a href="/friend.html" class="tag">Friend</a>
-      <!-- <a href="/explore.html" class="tag">Explore</a> -->
-      <a href="/profile.html" class="tag">Profile</a>
-      <div class="dropdown">
-        <div class="tag">Notice</div>
-        <div class="dropdown-content">
-          <span id="bufferMsg">There is no news</span>
-          <template id="notice_dropdown_template">
-            <a href="#">
-              <img src="" alt="">
-              <span id="someoneName"></span>
-              <span id="lang"></span>
-              <button class="invite" id="" onclick="noticeAction(this)">Accept</button>
-              <button class="reject" id="" onclick="noticeAction(this)">Reject</button>
-            </a>
-          </template>
-        </div>
+      <div class="tag" id="noticeHolder" onclick='showNotice(this)'>
+        <img src="/images/bell.png" id='noticeTag'>
+        <sapn class="count-circle" onclick='showNotice(this)'>
+          <sapn class="count">0</sapn>
+        </sapn>
       </div>
-      <sapn class="count-circle">
-        <sapn class="count">0</sapn>
-      </sapn>
+    </div>
+    <div class="dropdown-content">
+      <span id="bufferMsg">There is no news</span>
+      <template id="notice_dropdown_template">
+        <div class="friendInviteBox .noticeItem" userId=''>
+          <span class="starting">You have a invitation from</span>
+          <div class="inviteInfo">
+            <img class="headIcon" src="" alt="">
+            <span class="name"></span>
+            <button class="acceptInvite" id="" onclick="noticeAction(this)">Accept</button>
+            <button class="rejectInvite" id="" onclick="noticeAction(this)">Reject</button>
+          </div>
+        </div>
+      </template>
+      <template id='exchangeNoticeTemplate'>
+        <div class='exchangeNoticeItem noticeItem'>
+          <span class="starting"></span>
+          <div class="exchangeItem">
+          </div>
+          <div class="btnBox">
+            <button class="acceptExchangeInvite" exchange_id="" onclick="acceptExchangeInvite(this)">Accept</button>
+            <button class="rejectExchangeInvite" exchange_id="" onclick="rejectExchangeInvite(this)">Reject</button>
+          </div>
+        </div>
+      </template>
+      <template id='exchangeItemTemplate'>
+        <span class='time'></span>
+        <div class="infoBox">
+          <img class="infoItem headIcon">
+          <span class="infoItem name"></span>
+          <div class="infoItem langInfoBox">
+            <div class="langInfo">
+              <span class="firstDuration duration"></span>
+              <span class="firstLang"></span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+              class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd"
+                d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z" />
+            </svg>
+            <div class="langInfo">
+              <span class="secondDuration duration"></span>
+              <span class="secondLang"></span>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
   </header>
   <main>
@@ -103,7 +138,7 @@
       <div id="exchangeContainer">
         <div class="emptyInfo">
           <img src="/images/exchangeEmpty .png" alt="">
-          <span>Booking language Exchange with friend</span>
+          <span>Booking language exchange with friend</span>
         </div>
         <template id='exchangeTemplate'>
           <div class="exchangeItem">
@@ -194,8 +229,8 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="./src/util.js"></script>
-  <script src="./src/profile.js"></script>
   <script src="./src/notice.js"></script>
+  <script src="./src/profile.js"></script>
 </body>
 
 </html>

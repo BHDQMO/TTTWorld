@@ -91,7 +91,7 @@ async function getRooms(user, friendList) {
 }
 
 async function createInvite(invite) {
-  console.log(invite)
+  // console.log(invite)
   queryString = `INSERT INTO friend 
   (sender_id,receiver_id) SELECT * FROM (SELECT ?) AS temp 
   WHERE NOT EXISTS ( SELECT * FROM friend WHERE sender_id = ? AND receiver_id = ?)`

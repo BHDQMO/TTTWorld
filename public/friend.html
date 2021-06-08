@@ -11,63 +11,64 @@
 
 <body>
   <header>
-    <img src="/images/mainLogo.png" alt="">
+    <a href="/profile.html">
+      <img src="/images/mainLogo.png">
+    </a>
     <div class="tags">
       <a href="/friend.html" class="tag">Friend</a>
-      <!-- <a href="/explore.html" class="tag">Explore</a> -->
-      <a href="/profile.html" class="tag">Profile</a>
-      <div class="dropdown">
-        <div class="tag">Notice</div>
-        <div class="dropdown-content">
-          <span id="bufferMsg">There is no news</span>
-          <template id="notice_dropdown_template">
-            <a href="#" class="noticeItem">
-              <img src="" alt="">
-              <span id="someoneName"></span>
-              <span id="lang"></span>
-              <button class="invite" id="" onclick="noticeAction(this)">Accept</button>
-              <button class="reject" id="" onclick="noticeAction(this)">Reject</button>
-            </a>
-          </template>
-          <template id='exchangeNoticeTemplate'>
-            <div class='exchangeNoticeItem noticeItem'>
-              <span class="starting"></span>
-              <div class="exchangeItem">
-              </div>
-              <div class="btnBox">
-                <button class="acceptExchangeInvite" exchange_id="" onclick="acceptExchangeInvite(this)">Accept</button>
-                <button class="rejectExchangeInvite" exchange_id="" onclick="rejectExchangeInvite(this)">Reject</button>
-              </div>
-            </div>
-          </template>
-          <template id='exchangeItemTemplate'>
-            <span class='time'></span>
-            <div class="infoBox">
-              <img class="infoItem headIcon">
-              <span class="infoItem name"></span>
-              <div class="infoItem langInfoBox">
-                <div class="langInfo">
-                  <span class="firstDuration duration"></span>
-                  <span class="firstLang"></span>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                  class="bi bi-arrow-left-right" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd"
-                    d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z" />
-                </svg>
-                <div class="langInfo">
-                  <span class="secondDuration duration"></span>
-                  <span class="secondLang"></span>
-                </div>
-              </div>
-            </div>
-          </template>
-
-        </div>
+      <div class="tag" id="noticeHolder" onclick='showNotice(this)'>
+        <img src="/images/bell.png" id='noticeTag'>
+        <sapn class="count-circle" onclick='showNotice(this)'>
+          <sapn class="count">0</sapn>
+        </sapn>
       </div>
-      <span class="count-circle">
-        <span class="count">0</span>
-      </span>
+    </div>
+    <div class="dropdown-content">
+      <span id="bufferMsg">There is no news</span>
+      <template id="notice_dropdown_template">
+        <div class="friendInviteBox .noticeItem" userId=''>
+          <span class="starting">You have a invitation from</span>
+          <div class="inviteInfo">
+            <img class="headIcon" src="" alt="">
+            <span class="name"></span>
+            <button class="acceptInvite" id="" onclick="noticeAction(this)">Accept</button>
+            <button class="rejectInvite" id="" onclick="noticeAction(this)">Reject</button>
+          </div>
+        </div>
+      </template>
+      <template id='exchangeNoticeTemplate'>
+        <div class='exchangeNoticeItem noticeItem'>
+          <span class="starting"></span>
+          <div class="exchangeItem">
+          </div>
+          <div class="btnBox">
+            <button class="acceptExchangeInvite" exchange_id="" onclick="acceptExchangeInvite(this)">Accept</button>
+            <button class="rejectExchangeInvite" exchange_id="" onclick="rejectExchangeInvite(this)">Reject</button>
+          </div>
+        </div>
+      </template>
+      <template id='exchangeItemTemplate'>
+        <span class='time'></span>
+        <div class="infoBox">
+          <img class="infoItem headIcon">
+          <span class="infoItem name"></span>
+          <div class="infoItem langInfoBox">
+            <div class="langInfo">
+              <span class="firstDuration duration"></span>
+              <span class="firstLang"></span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+              class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd"
+                d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z" />
+            </svg>
+            <div class="langInfo">
+              <span class="secondDuration duration"></span>
+              <span class="secondLang"></span>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
   </header>
   <main>
@@ -109,6 +110,7 @@
               <div class="messageItem" id='replyMsg' hidden>
               </div>
               <div class="messageItem" id='originMsg'>
+
                 <span id='content' hidden></span>
                 <audio controls src="" style="display: none"></audio>
                 <div id='toolbar'>
@@ -137,10 +139,13 @@
             <button onclick="swap()">Swap</button>
             <button onclick="stopexchangeDemo()">Time up</button>
             <div class="form-popup">
-              <form class="form-container" oninput="result.value=parseInt(ratio.value)" name="exchangeForm">
-                <label for="start_time"><b>Time</b></label>
-                <!-- <input type="hidden" id="timezoneInput" name="timezone"> -->
-                <input type="datetime-local" name="start_time" id="start_time_input" required>
+              <form class="form-container"
+                oninput="result.value=parseInt(duration.value)*(100-parseInt(ratio.value))/100" name="exchangeForm">
+                <label class="title" for="start_time"><b>Time</b></label>
+                <div class="container" id="datetimeLocalWrap">
+                  <input type="datetime-local" name="start_time" id="start_time_input" required>
+                  <span id="setTime">OK</span>
+                </div>
 
                 <label class="title" for="duration"><b>Duration</b></label>
                 <div class="container" id="duration-box">
@@ -149,20 +154,20 @@
 
                 <label class="title" for="ratio"><b>Ratio</b></label>
                 <div class="container" id="ratio-box">
-                  <label for="ratio" id="first-lang"></label>
-                  <div id="ratio-bar">
-                    <input type="range" name="ratio" id="ratio" value="50" step="10" />
-                    <output name="result" for="ratio">50</output>
+                  <input type="range" name="ratio" id="ratio" value="50" step="10" />
+                  <div id="ratioBody">
+                    <output name="result" for="ratio duration">50</output>
+                    <span> mins for</span>
+                    <label for="ratio" id="first-lang"></label>
+                    <span>, rest for</span>
+                    <label for="ratio" id="second-lang"></label>
                   </div>
-                  <label for="ratio" id="second-lang"></label>
                 </div>
 
-                <label class="title" for="noticing"><b>Noticing</b></label>
-                <div class="form-container container" id="noticing-box">
-                  <input type="checkbox" name='notice' id='noticing' checked>
-                  <input type="text" name='ahead_time' id='notice-time' placeholder="10" value="10">
-                  <b>mins</b>
-                </div>
+                <label class="title" id='notify' for="noticing">
+                  Notify me 10 mins before the start<input type="checkbox" name='notice' id='notifyCheckbox' checked>
+                </label>
+
                 <button type="submit" class="btn">Send</button>
                 <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
               </form>
@@ -223,14 +228,15 @@
           </div>
           <form id="form" name='textInput'>
             <input id="input" autocomplete="off" />
-            <div id='recordVoiceMsgBtn'>
+            <img src="/images/recordMic.png" id='recordVoiceMsgBtn'>
+            <!-- <div id='recordVoiceMsgBtn'>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic"
                 viewBox="0 0 16 16">
                 <path
                   d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z" />
                 <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z" />
               </svg>
-            </div>
+            </div> -->
             <button>Send</button>
           </form>
         </div>

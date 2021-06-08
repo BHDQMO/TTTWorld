@@ -10,6 +10,7 @@ const {
 } = require('./mysqlcon');
 
 async function createRoom(invite) {
+  console.log(invite)
   queryString = `
   INSERT INTO room (user_a, user_b)
   SELECT * FROM (SELECT ?) AS temp
@@ -21,7 +22,9 @@ async function createRoom(invite) {
   `
   binding = [invite]
   invite.concat(invite).flat().map(i => binding.push(i))
+  console.log(binding)
   const result = await query(queryString, binding)
+  console.log(result)
   return result.insertId
 }
 

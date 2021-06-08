@@ -8,7 +8,7 @@ main {
 }
 
 .mainItem {
-  margin-top: 20px;
+  /* margin-top: 20px; */
   margin-bottom: 20px;
 }
 
@@ -131,7 +131,6 @@ main {
 
 #favoriteContainer {
   flex-grow: 1;
-  width: 340px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -385,7 +384,7 @@ main {
   width: 75px;
 }
 
-#logout, .invite, .reject {
+#logout, .invite, .reject, .accept {
   cursor: pointer;
   background: rgb(2, 77, 252);
   color: white;
