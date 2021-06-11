@@ -1,4 +1,5 @@
 // const { bind } = require("lodash")
+const { ComputeOptimizer } = require('aws-sdk');
 const { CostExplorer } = require('aws-sdk');
 const { bind } = require('lodash');
 const {
@@ -108,10 +109,36 @@ const createExchange = async (exchange) => {
   const result = await query(`INSERT INTO exchange SET ?`, exchange)
   return result.insertId
 }
+
 const updateExchangeStatus = async (exchange_id, status) => {
-  const queryString = `UPDATE exchange SET status = ? WHERE id = ?`
+  let queryString = `UPDATE exchange SET status = ? WHERE id = ?`
   const result = await query(queryString, [status, exchange_id])
+
   return result
+}
+
+const exchangeStart = async (exchange, status) => {
+  try {
+    await transaction()
+    let binding = [exchange.room_id, exchange.publisher_id, 'exchange']
+    let queryString = `INSERT INTO history (room,sender,type) VALUES ?`
+    let result = await query(queryString, [[binding]])
+    const history_id = result.insertId
+
+    const exchange_id = exchange.id
+    binding = [status, history_id, exchange_id]
+    queryString = `UPDATE exchange SET status = ? , history_id = ? WHERE id = ?`
+    result = await query(queryString, binding)
+    console.log(result)
+    await commit()
+    return result
+  } catch (error) {
+    await rollback()
+    console.log(error)
+    return error
+  }
+
+
 }
 
 const updateExchangeRead = async (exchange_id) => {
@@ -145,6 +172,14 @@ const updateTranslate = async (historyId, translateResult) => {
   return result
 }
 
+const saveCollect = async (collection) => {
+  const queryString = `
+  INSERT INTO exchange_collect SET ?
+  `
+  const result = await query(queryString, collection)
+  console.log(result)
+  return result
+}
 
 module.exports = {
   createRoom,
@@ -157,10 +192,12 @@ module.exports = {
   readMessage,
   createExchange,
   updateExchangeStatus,
+  exchangeStart,
   updateExchangeRead,
   removeExchange,
   getUnreadMsgNum,
-  updateTranslate
+  updateTranslate,
+  saveCollect
 }
 
 // function () {

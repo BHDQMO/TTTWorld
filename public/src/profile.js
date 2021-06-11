@@ -4,6 +4,7 @@ let exchange
 let favorite
 let replyData
 let senderData
+let collectionData
 let user_id // don't move it. notice need this variable
 let user
 
@@ -24,7 +25,6 @@ fetch('/user/profile', {
 
     socket.on('friend_online', online_notice)
     socket.on('waitingInvite', renderWaitingIvite)
-    socket.on('aheadExchangeNotice', aheadExchangeNotice)
 
     socket.on('exchangeInvite', handleExchangeInvite)
     socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
@@ -35,6 +35,7 @@ fetch('/user/profile', {
     favorite = res.data.favorite
     replyData = favorite.replyData
     senderData = favorite.senderData
+    collectionData = favorite.collectionData
     user = res.data.user
     renderProfile(res.data.user)
 
@@ -86,7 +87,7 @@ async function renderMessage(msg) {
   const reply = replyData[msg.reply]
 
   const template = document.querySelector('#favoriteTemplate').content
-  const clone = document.importNode(template, true)
+  let clone = document.importNode(template, true)
 
   clone.querySelector('.headIcon').src = sender.picture
   clone.querySelector('.name').textContent = sender.name
@@ -162,7 +163,7 @@ async function renderMessage(msg) {
     clone.querySelector('#replyIcon').style = 'display:inline'
   }
 
-  //render correct message
+  //render origin message
   switch (msg.type) {
     case 'text': {
       //render correction
@@ -230,6 +231,39 @@ async function renderMessage(msg) {
       audio.src = window.URL.createObjectURL(audioBlob)
       break
     }
+    case 'exchange': {
+      const history_id = msg.id
+      const collection = collectionData[history_id]
+
+      const template = document.querySelector('#collectionTemplate').content
+      clone = document.importNode(template, true)
+      const collectionContainer = clone.querySelector('.favoriteItem')
+
+
+
+
+
+
+
+      // shwo the exchagne info
+      const exchange_id = collectionData[history_id][0].exchange_id
+      const exchangeData = exchange.exchangeData.find(item => item.id === exchange_id)
+      clone.querySelector('.sendTime').textContent = exchangeData.start_time.split('T')[0]
+      const exchageClone = fillExchangeData(exchangeData)
+      exchageClone.querySelector('.time').remove()
+      collectionContainer.append(exchageClone)
+
+      collection.map(item => {
+        const collectionItemTemplate = document.querySelector('#collectionItemTemplate').content
+        const collectionClone = document.importNode(collectionItemTemplate, true)
+        collectionClone.querySelector('.timing').textContent = item.timing
+        collectionClone.querySelector('.transcript').textContent = item.transcript
+        collectionClone.querySelector('.voiceRecord').src = bufferToUrl(item.audio.data)
+        collectionClone.querySelector('.score').textContent = item.confidence
+        collectionContainer.append(collectionClone)
+      })
+      break
+    }
     case 'picture': {
       break
     }
@@ -242,45 +276,67 @@ async function renderMessage(msg) {
 }
 
 
-
-
 const renderExchange = () => {
   const exchangeData = exchange.exchangeData
-  const roommateData = exchange.roommateData
-  const template = document.querySelector('#exchangeTemplate').content
   const exchangeContainer = document.querySelector('#exchangeContainer')
 
   exchangeData.map(item => {
-    const clone = document.importNode(template, true)
-    const startTime = new Date(item.start_time)
+    const clone = fillExchangeData(item)
 
-    const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
-    const date = fillZero(startTime.getDate())
-    const startHours = fillZero(startTime.getHours())
-    const startMin = fillZero(startTime.getMinutes())
+    // const startTime = new Date(item.start_time)
+    // const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
+    // const date = fillZero(startTime.getDate())
+    // const startHours = fillZero(startTime.getHours())
+    // const startMin = fillZero(startTime.getMinutes())
 
-    const endTime = new Date(startTime + item.duration * 60 * 1000)
-    const endHours = fillZero(endTime.getHours())
-    const endMin = fillZero(endTime.getMinutes())
+    // const endTime = new Date(startTime + item.duration * 60 * 1000)
+    // const endHours = fillZero(endTime.getHours())
+    // const endMin = fillZero(endTime.getMinutes())
 
-    const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
+    // const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
-
-    clone.querySelector('.time').textContent = timeString
-    clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
-    clone.querySelector('.name').textContent = roommateData[item.room_id].name
-    const duration = item.duration
-    const ratio = item.ratio / 100
-    clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
-    clone.querySelector('.firstLang').textContent = item.first_lang
-    clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
-    clone.querySelector('.secondLang').textContent = item.second_lang
+    // clone.querySelector('.time').textContent = timeString
+    // clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
+    // clone.querySelector('.name').textContent = roommateData[item.room_id].name
+    // const duration = item.duration
+    // const ratio = item.ratio / 100
+    // clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
+    // clone.querySelector('.firstLang').textContent = langCodePair[item.first_lang]
+    // clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
+    // clone.querySelector('.secondLang').textContent = langCodePair[item.second_lang]
 
     exchangeContainer.append(clone)
   })
 }
 
+function fillExchangeData(item) {
+  const roommateData = exchange.roommateData
 
+  const template = document.querySelector('#exchangeTemplate').content
+  const clone = document.importNode(template, true)
+  const startTime = new Date(item.start_time)
+  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
+  const date = fillZero(startTime.getDate())
+  const startHours = fillZero(startTime.getHours())
+  const startMin = fillZero(startTime.getMinutes())
+
+  const endTime = new Date(startTime + item.duration * 60 * 1000)
+  const endHours = fillZero(endTime.getHours())
+  const endMin = fillZero(endTime.getMinutes())
+
+  const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
+
+  clone.querySelector('.time').textContent = timeString
+  clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
+  clone.querySelector('.name').textContent = roommateData[item.room_id].name
+  const duration = item.duration
+  const ratio = item.ratio / 100
+  clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
+  clone.querySelector('.firstLang').textContent = langCodePair[item.first_lang]
+  clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
+  clone.querySelector('.secondLang').textContent = langCodePair[item.second_lang]
+  return clone
+}
 
 function logout() {
   window.localStorage.removeItem('JWT')

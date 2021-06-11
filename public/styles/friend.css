@@ -367,6 +367,7 @@ li {
   background: rgb(2, 77, 252);
   color: rgb(227, 246, 253);
   font-weight: 450;
+  margin-top: 10px;
 }
 
 .optionBtn {
@@ -509,73 +510,91 @@ img {
 
 .form-popup {
   display: none;
+  border: 1px solid #635f5f;
+  border-radius: 10px;
+  z-index: 9;
   position: absolute;
   bottom: 40px;
   left: 0px;
-  border: 10px solid #635f5f;
-  border-radius: 10px;
-  z-index: 9;
+  flex-direction: column;
+  max-width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+#modeContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+#modeContainer .mode {
+  text-align: center;
+}
+
+#modeContainer .mode+.mode {
+  margin-left: 10px;
 }
 
 /* Add styles to the form container */
 
-.form-container {
-  max-width: 300px;
-  padding: 10px;
-  background-color: white;
-  display: flex;
-  flex-direction: column;
-}
-
 /* Full-width input fields */
 
-.form-container input[type=text], .form-container input[type=password] .form-container input[type=text] {
+.form-popup input[type=text], .form-popup input[type=password] .form-popup input[type=text] {
   width: 100%;
   padding: 0 5px;
-  margin: 5px 0;
   border: none;
+  text-align: center;
 }
 
 /* When the inputs get focus, do something */
 
-.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+.form-popup input[type=text]:focus, .form-popup input[type=password]:focus {
   outline: none;
 }
 
-.form-container .container+.title {
+.form-popup label+label {
   margin-top: 10px;
 }
 
+label[for=start_time] {
+  display: flex;
+  flex-direction: column;
+}
+
 #start_time_input {
-  width: 220px;
+  width: 190px;
+  font-size: small;
+  text-align: start;
 }
 
 #datetimeLocalWrap {
   display: flex;
   padding: 5px;
+  height: 2rem;
+  align-content: center;
 }
 
 #setTime {
+  display: none;
+  align-self: center;
   flex-grow: 1;
-  margin-left: auto;
   text-align: center;
   border-radius: 5px;
   background: rgb(2, 77, 252);
   color: rgb(227, 246, 253);
   font-weight: 450;
-  cursor: auto;
-  padding: 0 10px;
+  cursor: pointer;
+  padding: 0 5px;
   margin-left: 5px;
 }
 
-#setTime:hover {
+/* #setTime:hover {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
+} */
 
 #notify {
-  display: inline-block;
   font-size: smaller;
-  text-align: end;
+  align-self: flex-end;
 }
 
 #notifyCheckbox {
@@ -589,6 +608,13 @@ img {
 
 #ratioBody {
   align-self: flex-end;
+  font-size: small;
+  margin-right: 10px;
+}
+
+#start_time_Header {
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Set a style for the submit/login button */
@@ -601,7 +627,6 @@ img {
   border: none;
   cursor: pointer;
   width: 100%;
-  margin-top: 10px;
   opacity: 0.8;
 }
 
@@ -613,12 +638,15 @@ img {
 
 /* Add some hover effects to buttons */
 
-.form-container .btn:hover, .open-button:hover {
+.form-popup .btn:hover, .open-button:hover {
   opacity: 1;
 }
 
 .container {
-  border: 2px solid darkolivegreen
+  border: 1px solid darkolivegreen;
+  background: rgb(242, 246, 252);
+  border-radius: 10px;
+  padding: 5px;
 }
 
 #time {

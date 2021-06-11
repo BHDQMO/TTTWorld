@@ -7,7 +7,6 @@ const multerS3 = require('multer-s3')
 
 const User = require('../server/models/user_model');
 const Socket = require("./socket")
-
 const TOKEN_SECRET = process.env.TOKEN_SECRET
 
 const s3 = new aws.S3({
@@ -83,37 +82,36 @@ const calAge = (date) => {
 }
 
 const serverNotice = async (io) => {
-  //get the 1min ahead the ahead notice list
-  let waitingNoticeExchange = await User.getWaitingNoticeExchange()
-  if (waitingNoticeExchange.length > 0) {
-    // const exchangeList = {}
-    // waitingNoticeExchange.map(exchange => exchangeList[exchange.room_id] = exchange)
+  let result = await User.getWaitingNoticeExchange()
+  if (result.length > 0) {
 
-    let roomList = waitingNoticeExchange.map(exchange => exchange.room_id)
-    roomList = [...new Set(roomList)]
-    let userListByRoom = await User.getUserListByRoom(roomList)
-
-    const roomUserList = {}
-    userListByRoom.map(room => roomUserList[room.id] = [room.user_a, room.user_b])
-
-    waitingNoticeExchange = waitingNoticeExchange.map(exchange => {
-      exchange.user = roomUserList[exchange.room_id]
-      return exchange
+    let userIdList = []
+    result.map(exchange => {
+      userIdList.push(exchange.user_a)
+      userIdList.push(exchange.user_b)
     })
-    console.log(waitingNoticeExchange)
-    waitingNoticeExchange.map(exchange => {
-      console.log(exchange)
-      const timeDiff = new Date(exchange.start_time) - Date.now()
-      console.log(timeDiff)
-      const ahead = exchange.ahead_time * 60 * 1000
-      console.log(ahead)
-      if (timeDiff > 0) {
-        console.log('set aheadExchangeNotice timer')
-        setTimeout(() => Socket.aheadExchangeNotice({ io, exchange }), timeDiff)
+    userIdList = [...new Set(userIdList)]//remove dupilicate
+
+    const groupDtail = await User.getGroupDetail(userIdList)
+    const userData = {}
+    groupDtail.map(user => userData[user.user_id] = user)
+
+    result.map(exchange => {
+      const user = {}
+      user[exchange.user_a] = userData[exchange.user_a]
+      user[exchange.user_b] = userData[exchange.user_b]
+      const data = {
+        exchange,
+        user,
       }
-      if (timeDiff + ahead > 0) {
-        console.log('set exchangeStartNotice timer')
-        setTimeout(() => Socket.exchangeStartNotice({ io, exchange }), timeDiff + ahead)
+      if (exchange.remainTime < 0) {
+        Socket.onStartNotice(io, data)
+      } else {
+        if (exchange.status === 1 && exchange.notice === 1) {
+          Socket.beforeStartNotice(io, data)
+        } else if (exchange.notice === 2) {
+          Socket.onStartNotice(io, data)
+        }
       }
 
     })

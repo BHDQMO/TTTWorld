@@ -89,7 +89,16 @@ const getUserDetail = async (email) => {
     const users = await query('SELECT * FROM user WHERE email = ?', [email]);
     return users[0];
   } catch (e) {
-    return null;
+    return e;
+  }
+};
+
+const getGroupDetail = async (group) => {
+  try {
+    const result = await query('SELECT user_id,name,picture FROM user WHERE user_id IN (?)', [group]);
+    return result;
+  } catch (e) {
+    return e;
   }
 };
 
@@ -104,21 +113,23 @@ const getFavorite = async (user_id) => {
     `
     let favoriteData = await query(queryString, [user_id])
 
+    const collectedExchangeHistoryIds = []
+    const sender = []
+    const reply = []
     favoriteData = favoriteData.map(item => {
-      if (item.type === 'text') {
+      if (item.type === 'text') { //transfer blob to text
         item.content = item.content.toString()
       }
-      return item
-    })
-    let sender = []
-    let reply = []
-    favoriteData.map(item => {
       if (sender.includes(item.sender) === false) {
         sender.push(item.sender)
       }
       if (item.reply) {
         reply.push(item.reply)
       }
+      if (item.type === 'exchange') {
+        collectedExchangeHistoryIds.push(item.id)
+      }
+      return item
     })
 
     const senderData = {}
@@ -141,10 +152,29 @@ const getFavorite = async (user_id) => {
       replyResult.map(result => replyData[result.id] = result)
     }
 
+    const collectionData = {}
+    if (collectedExchangeHistoryIds.length > 0) {
+      queryString = `
+      SELECT * FROM
+      (SELECT id AS exchange_id, history_id FROM \`exchange\` WHERE history_id IN ?) AS temp1 
+      LEFT JOIN exchange_collect 
+      ON temp1.exchange_id = exchange_collect.exchange_id
+      `
+      let collectionResult = await query(queryString, [[collectedExchangeHistoryIds]])
+      collectionResult.map(item => {
+        if (collectionData[item.history_id]) {
+          collectionData[item.history_id].push(item)
+        } else {
+          collectionData[item.history_id] = [item]
+        }
+      })
+    }
+
     const data = {
       favoriteData,
       senderData,
-      replyData
+      replyData,
+      collectionData
     }
 
     await commit()
@@ -160,14 +190,14 @@ const getExchange = async (user_id) => {
   try {
     let queryString = `
     SELECT * FROM 
+    \`exchange\` 
+    LEFT JOIN
     (
     SELECT id AS roomid FROM room WHERE user_a = ?
     UNION
     SELECT id AS roomid FROM room WHERE user_b = ?
     ) AS roomlist
-    LEFT JOIN
-    \`exchange\` AS exchangetable
-    ON roomlist.roomid = exchangetable.room_id
+    ON roomlist.roomid = exchange.room_id
     `
     const exchangeData = await query(queryString, [user_id, user_id])
     const roomList = []
@@ -205,14 +235,52 @@ const getExchange = async (user_id) => {
 };
 
 async function getWaitingNoticeExchange(currentTime) {
-  const queryString = `
-  SELECT * FROM exchange
-  LEFT JOIN
-  (SELECT id, TIMESTAMPDIFF(MINUTE,CURRENT_TIMESTAMP,start_time) AS remainTime FROM exchange) AS waitNoticeList
-  ON exchange.id = waitNoticeList.id WHERE remainTime = ahead_time
-  `
-  const result = await query(queryString)
-  return result
+  try {
+    await transaction()
+    let queryString = `
+    SELECT * FROM(
+      SELECT * 
+      FROM exchange
+      LEFT JOIN(
+        SELECT id AS waitNoticeList_id, TIMESTAMPDIFF(MINUTE,CURRENT_TIMESTAMP,start_time) AS remainTime 
+        FROM exchange
+      ) AS waitNoticeList
+      ON exchange.id = waitNoticeList.waitNoticeList_id 
+      WHERE remainTime <= 10 AND status = 1 AND notice IN (1,2)
+    ) AS waitNoticeExchange
+    LEFT JOIN (
+      SELECT id AS room_id, user_a,user_b 
+      FROM room
+    ) AS room
+    ON room.room_id = waitNoticeExchange.room_id
+    `
+    const waitingNoticeExchange = await query(queryString)
+
+    if (waitingNoticeExchange.length > 0) {
+      //change the notice step by add 1
+      const exchangeList = waitingNoticeExchange.map(exchange => exchange.id)
+      queryString = `UPDATE exchange SET notice = notice + 1 WHERE id IN ?`
+      await query(queryString, [[exchangeList]])
+
+      //instant case(remainTime<0) need to send onStartNotice immediately
+      //so, change to 3 directly
+      const instantExchange = waitingNoticeExchange.map(exchange => {
+        if (exchange.remainTime < 0) {
+          return exchange.id
+        }
+      })
+      queryString = `UPDATE exchange SET notice = 3 WHERE id IN ?`
+      await query(queryString, [[instantExchange]])
+    }
+
+    await commit()
+    return waitingNoticeExchange
+  } catch (error) {
+    await rollback()
+    console.log(error)
+    return error
+  }
+
 }
 
 async function getUserListByRoom(roomList) {
@@ -228,8 +296,9 @@ module.exports = {
   signUp,
   nativeSignIn,
   getUserDetail,
+  getGroupDetail,
   getFavorite,
   getExchange,
   getWaitingNoticeExchange,
-  getUserListByRoom
+  getUserListByRoom,
 }

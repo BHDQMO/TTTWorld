@@ -1,3 +1,5 @@
+let waitingAnswerExchangeInvite = {}
+
 const online_notice = (user) => {
   const online_notice = document.querySelector('#online-notice')
   online_notice.style = 'display:flex'
@@ -31,6 +33,15 @@ window.onclick = function (event) {
   if (!dropdownContent.contains(event.target) && event.target !== noticeTag && event.target !== count && event.target !== accept && event.target !== reject) {
     dropdownContent.style.display = "none";
   }
+
+  const currentPage = window.location.pathname
+  if (currentPage === '/friend.html') {
+    const form_popup = document.querySelector('.form-popup')
+    const open_button = document.querySelector('.open-button')
+    if (!form_popup.contains(event.target) && event.target !== open_button) {
+      form_popup.style.display = "none";
+    }
+  }
 }
 
 const renderWaitingIvite = (data) => {
@@ -56,40 +67,34 @@ const renderWaitingIvite = (data) => {
   }
 }
 
-const builtExchangeBox = (invite) => {
-  const exchangeData = invite.exchangeInvite
-  const sender = invite.sender
-  const template = document.querySelector('#exchangeItemTemplate').content
-  const clone = document.importNode(template, true);
-  const startTime = new Date(exchangeData.start_time)
-  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
-  const date = fillZero(startTime.getDate())
-  const startHours = fillZero(startTime.getHours())
-  const startMin = fillZero(startTime.getMinutes())
+const handleInviteAccepted = ({ user, room }) => {
+  const count = document.querySelector(".count")
+  count.textContent = parseInt(count.textContent) + 1
+  document.querySelector('#bufferMsg').style.display = 'none'
 
-  const endTime = new Date(startTime + exchangeData.duration * 60 * 1000)
-  const endHours = fillZero(endTime.getHours())
-  const endMin = fillZero(endTime.getMinutes())
+  const dropdownContent = document.querySelector('.dropdown-content')
+  const tempalte = document.querySelector('#notice_dropdown_template').content
+  const clone = document.importNode(tempalte, true)
+  clone.querySelector('.starting').textContent = 'Your invitation has been accepted'
+  clone.querySelector('.friendInviteBox').setAttribute('userId', user.user_id)
+  clone.querySelector('.headIcon').src = user.picture
+  clone.querySelector('.name').textContent = user.name
 
-  const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
+  const acceptInvite = clone.querySelector('.acceptInvite')
+  acceptInvite.setAttribute('room', `${room}`)
+  acceptInvite.textContent = "Let's Chat"
 
-  clone.querySelector('.time').textContent = timeString
-  clone.querySelector('.headIcon').src = sender.picture
-  clone.querySelector('.name').textContent = sender.name
-  const duration = exchangeData.duration
-  const ratio = exchangeData.ratio / 100
-  clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
-  clone.querySelector('.firstLang').textContent = exchangeData.first_lang
-  clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
-  clone.querySelector('.secondLang').textContent = exchangeData.second_lang
-  return clone
+  //wait fix, ther dropdown content box just disapear after click ok
+  const rejectInvite = clone.querySelector('.rejectInvite')
+  rejectInvite.textContent = 'OK'
+
+  dropdownContent.append(clone)
 }
 
 const noticeAction = function (element) {
   switch (element.textContent) {
     case "Accept": {
-      const count = document.querySelector(".count")
-      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+      onCheckNotice()
       socket.emit('accept', { user, sender_Id: parseInt(element.id) })
       //accept the invitation
       //receive the room number from server
@@ -102,8 +107,7 @@ const noticeAction = function (element) {
     }
       querySelectorAll
     case "Reject": {
-      const count = document.querySelector(".count")
-      count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+      onCheckNotice()
       element.textContent = 'Rejected'
       document.querySelector('.acceptInvite').remove()
       socket.emit('reject', [user_id, parseInt(element.id)])
@@ -111,7 +115,7 @@ const noticeAction = function (element) {
       setTimeout(() => {
         const inviteItem = document.querySelector(`.friendInviteBox[userId='${waitRemoveId}']`)
         inviteItem.remove()
-        checkDropbox()
+        onRemoveNotice()
       }, 5 * 1000)
       break;
     }
@@ -132,8 +136,8 @@ const noticeAction = function (element) {
           box.remove()
         }
       })
+
       const dropdownContent = document.querySelector('.dropdown-content')
-      console.log(friendInviteBoxs)
       if (friendInviteBoxs.length === 1) {
         dropdownContent.style.display = 'flex'
         document.querySelector('#bufferMsg').style.display = 'flex'
@@ -143,14 +147,8 @@ const noticeAction = function (element) {
   }
 }
 
-const aheadExchangeNotice = (exchange) => {
-  console.log(exchange)
-  const userList = exchange.userList
-  const talkTo = userList.filter(user => user !== user_id)
-  alert(`your exchange with ${talkTo} will begin in ${exchange.ahead} minutes`)
-}
-
 function acceptExchangeInvite(element) {
+  onCheckNotice()
   const exchange_id = parseInt(element.getAttribute('exchange_id'))
   answer = {
     sender: {
@@ -166,14 +164,14 @@ function acceptExchangeInvite(element) {
   element.textContent = 'Accepted'
   setTimeout(() => {
     document.querySelector(`.exchangeNoticeItem[exchange_id='${exchange_id}']`).remove()
-    checkDropbox()
+    onRemoveNotice()
   }, 5 * 1000)
-  const count = document.querySelector(".count")
-  count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
-  checkDropbox()
+
+  // onRemoveNotice()
 }
 
 function rejectExchangeInvite(element) {
+  onCheckNotice()
   const exchange_id = parseInt(element.getAttribute('exchange_id'))
   answer = {
     sender: {
@@ -189,9 +187,96 @@ function rejectExchangeInvite(element) {
   element.textContent = 'Rejected'
   setTimeout(() => {
     document.querySelector(`.exchangeNoticeItem[exchange_id='${exchange_id}']`).remove()
-    checkDropbox()
+    onRemoveNotice()
   }, 5 * 1000)
-  const count = document.querySelector(".count")
-  count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
-  checkDropbox()
+
+  // onRemoveNotice()
 }
+
+const handleExchangeInvite = (data) => {
+  if (data.length > 0) {
+    onAddNotice()
+  }
+
+  data.map(invite => {
+    const exchangeInvite = invite.exchangeInvite
+    waitingAnswerExchangeInvite[exchangeInvite.exchange_id] = exchangeInvite
+  })
+
+  data.map(invite => {
+    const template = document.querySelector('#exchangeNoticeTemplate').content
+    const clone = document.importNode(template, true)
+    clone.querySelector('.starting').textContent = 'You have a new exchange invite'
+    clone.querySelector('.exchangeItem').append(builtExchangeBox(invite))
+
+    const exchange_id = invite.exchangeInvite.exchange_id
+    clone.querySelector('.exchangeNoticeItem').setAttribute('exchange_id', `${exchange_id}`)
+    clone.querySelector('.acceptExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
+    clone.querySelector('.rejectExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
+    document.querySelector('.dropdown-content').append(clone)
+  })
+}
+
+const handleExchangeInviteAccepted = (data) => {
+  const starting = 'Your exchange invitation has been accepted'
+  createExchangeInviteAnswerNotice(data, starting)
+}
+
+const handleExchangeInviteRejected = (data) => {
+  const starting = 'Your exchange invitation has been rejected'
+  createExchangeInviteAnswerNotice(data, starting)
+}
+
+const beforeExchangeStart = (data) => {
+  const starting = `Exchange with ${data.sender.name} will begin in 10 mins`
+  createExchangeInviteAnswerNotice(data, starting)
+}
+
+const exchangePreStart = (data) => {
+  const starting = `It's time for exchange with ${data.sender.name}!`
+
+  onAddNotice()
+  const template = document.querySelector('#exchangeNoticeTemplate').content
+  const clone = document.importNode(template, true)
+  clone.querySelector('.starting').textContent = starting// here is different
+  clone.querySelector('.exchangeItem').append(builtExchangeBox(data))
+  const exchange_id = data.exchangeInvite.id
+  const checkBtn = document.createElement('button')
+  checkBtn.setAttribute('exchange_id', `${exchange_id}`)
+  checkBtn.textContent = "Let's Chat"// here is different
+  checkBtn.addEventListener('click', (event) => {
+    const exchange_id = parseInt(event.target.getAttribute('exchange_id'))
+    console.log(data.exchangeInvite)
+    window.localStorage.setItem(`exchange_${exchange_id}`, JSON.stringify(data.exchangeInvite))
+    window.location = `/friend.html?room=${data.exchangeInvite.room_id}&exchange_id=${exchange_id}`
+  })
+  clone.querySelector('.acceptExchangeInvite').remove()
+  clone.querySelector('.rejectExchangeInvite').remove()
+  clone.querySelector('.btnBox').append(checkBtn)
+  document.querySelector('.dropdown-content').append(clone)
+}
+
+const createExchangeInviteAnswerNotice = (data, starting) => {
+  onAddNotice()
+
+  const template = document.querySelector('#exchangeNoticeTemplate').content
+  const clone = document.importNode(template, true)
+  clone.querySelector('.starting').textContent = starting
+  clone.querySelector('.exchangeItem').append(builtExchangeBox(data))
+
+  const exchange_id = data.exchangeInvite.exchange_id
+  const checkBtn = document.createElement('button')
+  checkBtn.setAttribute('exchange_id', `${exchange_id}`)
+  checkBtn.textContent = 'OK'
+  checkBtn.addEventListener('click', (event) => {
+    onCheckNotice()
+    event.target.parentNode.parentNode.remove()
+    onRemoveNotice()
+    // socket.emit('readExchangeInviteAnswer', exchange_id)
+  })
+  clone.querySelector('.acceptExchangeInvite').remove()
+  clone.querySelector('.rejectExchangeInvite').remove()
+  clone.querySelector('.btnBox').append(checkBtn)
+  document.querySelector('.dropdown-content').append(clone)
+}
+

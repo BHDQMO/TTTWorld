@@ -20,9 +20,9 @@ const server = http.createServer(app)
 const { Server } = require('socket.io')
 const io = new Server(server)
 
-const Socket = require("./util/socket")
-const { serverNotice } = require("./util/util")
 
+const { serverNotice } = require("./util/util")
+const Socket = require("./util/socket")
 const port = process.env.PORT
 
 // do {
@@ -37,9 +37,7 @@ const port = process.env.PORT
 //   console.log(Date.now())
 // }
 
-// setInterval(() => serverNotice(io), 5 * 1000)
-
-
+setInterval(() => serverNotice(io), 1000)
 
 app.post('/google/transcript', async (req, res) => {
   var body = Buffer.from([]); // create a buffer
@@ -149,10 +147,14 @@ const onConnect = (socket, next) => {
   socket.on('message', Socket.message(socket, io))
   socket.on('readMessage', Socket.readMessage(socket, io))
   socket.on('favorite', Socket.favorite(socket, io))
+
   socket.on('exchangeInvite', Socket.exchangeInvite(socket, io))
   socket.on('acceptExchangeInvite', Socket.acceptExchangeInvite(socket, io))
   socket.on('rejectExchangeInvite', Socket.rejectExchangeInvite(socket, io))
   socket.on('readExchangeInviteAnswer', Socket.readExchangeInviteAnswer(socket, io))
+
+  socket.on('readyToStart', Socket.readyToStart(socket, io))
+  socket.on('saveCollect', Socket.saveCollect(socket, io))
 
   socket.on('invite', Socket.invite(socket, io))
   socket.on('accept', Socket.accept(socket, io))

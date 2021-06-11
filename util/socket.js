@@ -3,7 +3,7 @@ const Chat = require('../server/models/chat_model')
 const { constant } = require('lodash')
 
 let socket_ids = {}
-
+let online_user = {}
 // let meeting_room_ids = {
 //   meeting_room_id : [user_id]
 // }
@@ -16,6 +16,10 @@ const login = (socket, next) => {
   const user_id = socket.handshake.auth.user_id
   socket.user_id = user_id
   socket_ids[user_id] = socket.id
+  // online_user[user_id] = {
+  //   socket_id: socket.id
+  // }
+  // console.log(online_user)
   next()
 }
 
@@ -126,6 +130,13 @@ const reject = (socket, io) => async (invite) => {
 };
 
 const icecandidate = (socket, io) => ({ room, candidate }) => {
+  // const hasCandidates = online_user[socket.user_id].candidates
+  // if (hasCandidates) {
+  //   online_user[socket.user_id].candidates.push(candidate)
+  // } else {
+  //   online_user[socket.user_id].candidates = [candidate]
+  // }
+  // console.log(online_user)
   console.log('switch icecandidate')
   socket.to(room).emit('icecandidate', { room, candidate });
 }
@@ -141,6 +152,7 @@ const callend = (socket, io) => (room_id) => {
 }
 
 const offer = (socket, io) => (data) => {
+  // online_user[socket.user_id].offer = data.offer
   const room = data.room
   console.log('switch offer')
   socket.to(room).emit('offer', data);
@@ -151,27 +163,66 @@ const answer = (socket, io) => (data) => {
   socket.to(data.room).emit('answer', data);
 }
 
-const aheadExchangeNotice = ({ io, exchangeList }) => {
-  console.log(exchangeList)
-  Object.entries(exchangeList).map(exchange => {
-    exchange[1].userList.map(user => {
-      console.log('emit aheadExchangeNotice event')
-      io.to(socket_ids[user]).emit('aheadExchangeNotice', exchange[1]);
-    })
+const beforeStartNotice = (io, data) => {
+  const exchange = data.exchange
+  userList = [exchange.user_a, exchange.user_b]
+  userList.map(user => {
+    if (socket_ids[user]) {
+      const invite = {
+        exchangeInvite: exchange,
+        sender: data.user[userList.find(x => x !== user)]
+      }
+      io.to(socket_ids[user]).emit('beforeExchangeStart', invite)
+    }
   })
 }
 
-const exchangeStartNotice = ({ io, exchangeList }) => {
-  Object.entries(exchangeList).map(exchange => {
-    exchange[1].userList.map(user => {
-      console.log('emit exchangeStartNotice event')
-      io.to(socket_ids[user]).emit('exchangeStartNotice', exchange[1]);
+const checkExchangeReady = {}
+const onStartNotice = (io, data) => {
+  const exchange = data.exchange
+  userList = [exchange.user_a, exchange.user_b]
+  if (!checkExchangeReady[exchange.id]) {
+    checkExchangeReady[exchange.id] = {}
+    checkExchangeReady[exchange.id][exchange.user_a] = false
+    checkExchangeReady[exchange.id][exchange.user_b] = false
+  }
+  userList.map(user => {
+    if (socket_ids[user]) {
+      const invite = {
+        exchangeInvite: exchange,
+        sender: data.user[userList.find(x => x !== user)]
+      }
+      io.to(socket_ids[user]).emit('exchangePreStart', invite)
+    }
+  })
+}
+
+const readyToStart = (socket, io) => ({ user_id, exchange }) => {
+  const exchange_id = exchange.id
+  if (checkExchangeReady[exchange_id]) {
+    checkExchangeReady[exchange_id][user_id] = true
+  }
+  const exchangeReadyStatus = Object.values(checkExchangeReady[exchange_id]).filter(x => x === true).length
+  if (exchangeReadyStatus === 2) {
+    Object.keys(checkExchangeReady[exchange_id]).map(async user => {
+      io.to(socket_ids[user]).emit('exchangeStart', { exchange_id, startExchangeTime: new Date() })
+      // insert this exchange into history
+      // update exchange status to 3, means this exchage has started
+      await Chat.exchangeStart(exchange, 3)
     })
+    io.to(socket_ids[user_id]).emit('triggerExchange')
+  }
+}
+
+const saveCollect = (socket, io) => (collection) => {
+  console.log(collection)
+  collection.map(async data => {
+    const result = await Chat.saveCollect(data)
+    console.log(result)
   })
 }
 
 const exchangeInvite = (socket, io) => async (package) => {
-  console.log(package)
   const receiver = package.receiver
   const data = package.data
   const exchange_id = await Chat.createExchange(data.exchangeInvite)
@@ -221,8 +272,10 @@ module.exports = {
   invite,
   accept,
   reject,
-  aheadExchangeNotice,
-  exchangeStartNotice,
+  beforeStartNotice,
+  onStartNotice,
+  readyToStart,
+  saveCollect,
   exchangeInvite,
   acceptExchangeInvite,
   rejectExchangeInvite,

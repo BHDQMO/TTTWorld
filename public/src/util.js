@@ -365,78 +365,61 @@ function showTime(time) {
 
 function fillZero(num) { return num < 10 ? '0' + num : num }
 
-let waitingAnswerExchangeInvite = {}
-const handleExchangeInvite = (data) => {
-  const count = document.querySelector(".count")
-  count.textContent = parseInt(count.textContent) + 1
-  const bufferMsg = document.querySelector('#bufferMsg')
-  if (data.length > 0 && bufferMsg) { bufferMsg.style.display = 'none' }
+const builtExchangeBox = (invite) => {
+  const exchangeData = invite.exchangeInvite
+  const sender = invite.sender
+  const template = document.querySelector('#exchangeItemTemplate').content
+  const clone = document.importNode(template, true);
+  const startTime = new Date(exchangeData.start_time)
+  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
+  const date = fillZero(startTime.getDate())
+  const startHours = fillZero(startTime.getHours())
+  const startMin = fillZero(startTime.getMinutes())
 
-  data.map(invite => {
-    const exchangeInvite = invite.exchangeInvite
-    waitingAnswerExchangeInvite[exchangeInvite.exchange_id] = exchangeInvite
-  })
+  const endTime = new Date(startTime + exchangeData.duration * 60 * 1000)
+  const endHours = fillZero(endTime.getHours())
+  const endMin = fillZero(endTime.getMinutes())
 
-  data.map(invite => {
-    const template = document.querySelector('#exchangeNoticeTemplate').content
-    const clone = document.importNode(template, true)
-    clone.querySelector('.starting').textContent = 'You have a new exchange invite'
-    clone.querySelector('.exchangeItem').append(builtExchangeBox(invite))
+  const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
-    const exchange_id = invite.exchangeInvite.exchange_id
-    clone.querySelector('.exchangeNoticeItem').setAttribute('exchange_id', `${exchange_id}`)
-    clone.querySelector('.acceptExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
-    clone.querySelector('.rejectExchangeInvite').setAttribute('exchange_id', `${exchange_id}`)
-    console.log(clone)
-    document.querySelector('.dropdown-content').append(clone)
-  })
+  clone.querySelector('.time').textContent = timeString
+  clone.querySelector('.headIcon').src = sender.picture
+  clone.querySelector('.name').textContent = sender.name
+  const duration = exchangeData.duration
+  const ratio = exchangeData.ratio / 100
+  clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
+  clone.querySelector('.firstLang').textContent = langCodePair[exchangeData.first_lang]
+  clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
+  clone.querySelector('.secondLang').textContent = langCodePair[exchangeData.second_lang]
+  return clone
 }
 
-const handleExchangeInviteAccepted = (data) => {
-  const starting = 'Your exchange invitation has been accepted'
-  createExchangeInviteAnswerNotice(data, starting)
-}
-
-
-const handleExchangeInviteRejected = (data) => {
-  const starting = 'Your exchange invitation has been rejected'
-  createExchangeInviteAnswerNotice(data, starting)
-}
-
-const createExchangeInviteAnswerNotice = (data, starting) => {
-  const count = document.querySelector(".count")
-  count.textContent = parseInt(count.textContent) + 1
-
-  const bufferMsg = document.querySelector('#bufferMsg')
-  if (bufferMsg) { bufferMsg.style.display = 'none' }
-  const template = document.querySelector('#exchangeNoticeTemplate').content
-  const clone = document.importNode(template, true)
-  clone.querySelector('.starting').textContent = starting
-  clone.querySelector('.exchangeItem').append(builtExchangeBox(data))
-
-  const exchange_id = data.exchangeInvite.exchange_id
-  const checkBtn = document.createElement('button')
-  checkBtn.setAttribute('exchange_id', `${exchange_id}`)
-  checkBtn.textContent = 'OK'
-  checkBtn.addEventListener('click', (event) => {
-    const count = document.querySelector(".count")
-    count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
-    event.target.parentNode.parentNode.remove()
-    checkDropbox()
-    socket.emit('readExchangeInviteAnswer', exchange_id)
-  })
-  clone.querySelector('.acceptExchangeInvite').remove()
-  clone.querySelector('.rejectExchangeInvite').remove()
-  clone.querySelector('.btnBox').append(checkBtn)
-  document.querySelector('.dropdown-content').append(clone)
-}
-
-function checkDropbox() {
+function onRemoveNotice() {
   const noticeItems = document.querySelectorAll('.noticeItem')
   const dropdownContent = document.querySelector('.dropdown-content')
-  console.log(noticeItems.length)
   if (noticeItems.length === 0) {
     dropdownContent.style.display = 'flex'
     document.querySelector('#bufferMsg').style.display = 'flex'
   }
+}
+
+function onAddNotice() {
+  const count = document.querySelector(".count")
+  count.textContent = parseInt(count.textContent) + 1
+  const bufferMsg = document.querySelector('#bufferMsg')
+  if (bufferMsg) { bufferMsg.style.display = 'none' }
+}
+
+function onCheckNotice() {
+  const count = document.querySelector(".count")
+  count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
+}
+
+function bufferToUrl(buffer) {
+  var arrayBuffer = new ArrayBuffer(buffer.length);
+  var view = new Uint8Array(arrayBuffer);
+  buffer.map((b, i) => view[i] = b)
+  const audioBlob = new Blob([arrayBuffer], { type: 'audio/ogg' })
+
+  return window.URL.createObjectURL(audioBlob)
 }

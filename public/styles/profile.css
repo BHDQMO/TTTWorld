@@ -129,6 +129,11 @@ main {
   background-size: 100% 58px;
 }
 
+#favorite audio {
+  height: 2rem;
+  width: 250px;
+}
+
 #favoriteContainer {
   flex-grow: 1;
   display: flex;
@@ -159,7 +164,7 @@ main {
   margin-left: 10px;
 }
 
-.favoriteItemHead .sendTime {
+.sendTime {
   font-size: small;
   margin-left: auto;
 }
@@ -201,11 +206,43 @@ main {
   display: none;
 }
 
+.favoriteItem .exchangeItem {
+  margin: 10px 0;
+}
+
+.collection {
+  display: flex;
+  /* justify-content: space-between; */
+}
+
+.collection+.collection {
+  margin-top: 10px;
+}
+
+.collection .timing {
+  align-self: flex-start;
+}
+
+.collection .middleBox {
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px;
+}
+
+.collection .middleBox span+audio {
+  margin-top: 5px;
+}
+
+.collection .score {
+  align-self: flex-end;
+  flex-grow: 1;
+  text-align: right;
+}
+
 #exchange {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  padding-right: 0px;
   background-image: linear-gradient(rgb(254, 192, 40), rgb(254, 192, 40));
   background-repeat: no-repeat;
   background-position: top;
@@ -231,7 +268,6 @@ main {
   background-position: left;
   background-size: 5px;
   background-repeat: no-repeat;
-  margin-right: 10px;
 }
 
 .exchangeItem+.exchangeItem {
