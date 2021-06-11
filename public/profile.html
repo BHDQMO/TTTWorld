@@ -11,12 +11,12 @@
 <body>
   <header>
     <a href="/profile.html">
-      <img src="/images/mainLogo.png">
+      <img draggable="false" src="/images/mainLogo.png">
     </a>
     <div class="tags">
       <a href="/friend.html" class="tag">Friend</a>
       <div class="tag" id="noticeHolder" onclick='showNotice(this)'>
-        <img src="/images/bell.png" id='noticeTag'>
+        <img draggable="false" src="/images/bell.png" id='noticeTag'>
         <sapn class="count-circle" onclick='showNotice(this)'>
           <sapn class="count">0</sapn>
         </sapn>
@@ -28,7 +28,7 @@
         <div class="friendInviteBox .noticeItem" userId=''>
           <span class="starting">You have a invitation from</span>
           <div class="inviteInfo">
-            <img class="headIcon" src="" alt="">
+            <img draggable="false" class="headIcon" src="" alt="">
             <span class="name"></span>
             <button class="acceptInvite" id="" onclick="noticeAction(this)">Accept</button>
             <button class="rejectInvite" id="" onclick="noticeAction(this)">Reject</button>
@@ -49,7 +49,7 @@
       <template id='exchangeItemTemplate'>
         <span class='time'></span>
         <div class="infoBox">
-          <img class="infoItem headIcon">
+          <img draggable="false" class="infoItem headIcon">
           <span class="infoItem name"></span>
           <div class="infoItem langInfoBox">
             <div class="langInfo">
@@ -73,7 +73,7 @@
   <main>
     <div id="myDetailBox" class="mainItem">
       <div id="myProfile" class="profileHead profileItem cube">
-        <img class="picture">
+        <img draggable="false" class="picture">
         <div class="name"></div>
         <div class="email"></div>
       </div>
@@ -99,13 +99,13 @@
       <span class="mainItemHead">Collection</span>
       <div id="favoriteContainer">
         <div class="emptyInfo">
-          <img src="/images/favoriteEmpty.png" alt="">
+          <img draggable="false" src="/images/favoriteEmpty.png" alt="">
           <span>Add some message to here</span>
         </div>
         <template id='favoriteTemplate'>
           <div class='favoriteItem'>
             <div class="favoriteItemHead">
-              <img class='headIcon'>
+              <img draggable="false" class='headIcon'>
               <span class='name'></span>
               <span class='sendTime'></span>
             </div>
@@ -126,25 +126,42 @@
               <div class="messageItem" id='translateMsg'>
                 <span id='content'></span>
               </div>
-
             </div>
           </div>
         </template>
+
+        <!-- collectionTemplate -->
+        <template id="collectionTemplate">
+          <div class="favoriteItem">
+            <span class="sendTime"></span>
+          </div>
+        </template>
       </div>
+      <template id="collectionItemTemplate">
+        <div class="collection">
+          <span class="timing"></span>
+          <div class="middleBox">
+            <span class="transcript"></span>
+            <audio controls class="voiceRecord" src=""></audio>
+          </div>
+          <span class="score"></span>
+        </div>
+      </template>
+
 
     </div>
     <div id="exchange" class="mainItem cube">
       <span class="mainItemHead">Exchange</span>
       <div id="exchangeContainer">
         <div class="emptyInfo">
-          <img src="/images/exchangeEmpty .png" alt="">
+          <img draggable="false" src="/images/exchangeEmpty .png" alt="">
           <span>Booking language exchange with friend</span>
         </div>
         <template id='exchangeTemplate'>
           <div class="exchangeItem">
             <span class='time'></span>
             <div class="infoBox">
-              <img class="infoItem headIcon">
+              <img draggable="false" class="infoItem headIcon">
               <span class="infoItem name"></span>
               <div class="infoItem langInfoBox">
                 <div class="langInfo">
@@ -173,7 +190,7 @@
       <div id="personContainer">
         <template id='personTemplate'>
           <div class="person" onclick="renderUserDetail(this)">
-            <img class="headIcon">
+            <img draggable="false" class="headIcon">
             <div class="personInfo">
               <span class="name"></span>
               <div class="langInfo">
@@ -193,7 +210,7 @@
     </div>
     <div id="userDetailBox" class="mainItem">
       <div id='userProfile' class="profileHead profileItem cube">
-        <img id='userPicture' class="picture">
+        <img draggable="false" id='userPicture' class="picture">
         <span id='userEmail' class="email"></span>
         <span id='userName' class="name"></span>
       </div>
@@ -218,7 +235,7 @@
   <div id="online-notice">
     <template id="online-notice-template">
       <div id="online-notice-item">
-        <img id="picture">
+        <img draggable="false" id="picture">
         <span id="name"></span>
         <span>online</span>
       </div>
