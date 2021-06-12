@@ -1340,6 +1340,12 @@ function translateMsg(element) {
 
 // translate audio
 async function translateAudio(element) {
+  const translateMsg = element.parentNode.parentNode.parentNode.querySelector('#translateMsg')
+  translateMsg.style.display = 'flex'
+  const content = translateMsg.querySelector('#content')
+  content.textContent = 'Creating...'
+  content.style = 'font-size:small;font-weight:400'
+
   const audio = element.parentNode.parentNode.children[1].getAttribute('src');
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
   fetch(audio)
@@ -1356,9 +1362,8 @@ async function translateAudio(element) {
       })
         .then(res => res.json())
         .then(({ transcript }) => {
-          const translateMsg = element.parentNode.parentNode.parentNode.querySelector('#translateMsg')
-          translateMsg.querySelector('#content').textContent = transcript
-          translateMsg.style.display = 'flex'
+          content.removeAttribute('style')
+          content.textContent = transcript
         })
     })
 }
