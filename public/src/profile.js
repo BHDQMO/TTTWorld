@@ -25,10 +25,15 @@ fetch('/user/profile', {
 
     socket.on('friend_online', online_notice)
     socket.on('waitingInvite', renderWaitingIvite)
+    socket.on('inviteAccepted', handleInviteAccepted)
+
+    socket.on('beforeExchangeStart', beforeExchangeStart)
+    socket.on('exchangePreStart', exchangePreStart)
 
     socket.on('exchangeInvite', handleExchangeInvite)
     socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
     socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
+
 
     exchange = res.data.exchange
 

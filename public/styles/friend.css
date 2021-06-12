@@ -11,6 +11,11 @@ main {
   margin-left: 20px;
 }
 
+#friend-list svg {
+  display: none;
+  margin-left: auto;
+}
+
 #friendDetailBox {
   margin-right: 20px;
 }

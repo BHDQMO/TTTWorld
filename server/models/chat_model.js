@@ -165,11 +165,15 @@ const getUnreadMsgNum = async (roomList) => {
 }
 
 const updateTranslate = async (historyId, translateResult) => {
-  const queryString = `
-  UPDATE history SET translate = ? WHERE id = ?
-  `
+  const queryString = `UPDATE history SET translate = ? WHERE id = ?`
   const result = await query(queryString, [translateResult, historyId])
   return result
+}
+
+const getTranslate = async (historyId) => {
+  const queryString = `SELECT translate FROM history WHERE id = ?`
+  const result = await query(queryString, [historyId])
+  return result[0].translate
 }
 
 const saveCollect = async (collection) => {
@@ -197,6 +201,7 @@ module.exports = {
   removeExchange,
   getUnreadMsgNum,
   updateTranslate,
+  getTranslate,
   saveCollect
 }
 

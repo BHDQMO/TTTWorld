@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/BHDQMO/TTTWorld#readme",
   "dependencies": {
-    "@google-cloud/speech": "^4.5.0",
+    "@google-cloud/speech": "^4.5.2",
     "@google-cloud/translate": "^6.2.1",
     "aws-sdk": "^2.906.0",
     "bcrypt": "^5.0.1",
