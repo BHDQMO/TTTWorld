@@ -20,12 +20,11 @@ const translateText = async (text, target) => {
 };
 
 const transcript = async (filename, languageCode) => {
-
   const client = new speech.SpeechClient();
 
   const config = {
     encoding: 'WEBM_OPUS',
-    languageCode
+    languageCode: languageCode
   };
 
   const audio = {

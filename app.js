@@ -21,8 +21,9 @@ const { serverNotice } = require("./util/util")
 const Socket = require("./util/socket")
 const port = process.env.PORT
 
-// setInterval(() => serverNotice(io), 1000) 
 // for server noticing
+setInterval(() => serverNotice(io), 1000)
+
 
 // Api Main Route
 app.use('/',

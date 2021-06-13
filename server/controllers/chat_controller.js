@@ -38,12 +38,6 @@ const getHistory = async (req, res) => {
         msg.content = msg.content.toString()
         break
       }
-      case 'audio': {
-        break
-      }
-      case 'picture': {
-        break
-      }
     }
     return msg
   })

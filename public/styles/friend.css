@@ -192,6 +192,7 @@ main {
 }
 
 #messageBody {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -206,7 +207,6 @@ main {
 
 #originMsg {
   display: flex;
-  position: relative;
 }
 
 #message[from="myself"] #originMsg span.correction, #message[from="other"] #originMsg span.correction {
@@ -272,27 +272,54 @@ main {
   margin: 0 10px;
 }
 
-#message button {
-  padding: 0 3px;
-}
-
 #message:hover #toolbar {
-  display: block;
+  display: flex;
 }
 
 #toolbar {
   display: none;
+  width: 230px;
+  /* display: flex; */
+  justify-content: space-between;
+  flex-wrap: wrap;
   position: absolute;
-  bottom: -2rem;
+  top: 100%;
   z-index: 1;
-  background: rgb(239, 239, 239);
+  background: rgb(200, 204, 212);
   border-radius: 10px;
-  padding: 0 3px;
 }
 
-#toolbar button+button {
-  border-left: 1px solid gray
+#toolbar button {
+  flex: 0 1 33%;
+  height: 2rem;
+  background: rgb(25, 35, 59);
+  color: rgb(200, 204, 212);
+  /* border-right: 1px solid rgb(200, 204, 212); */
 }
+
+#toolbar button:nth-child(1) {
+  border-top-left-radius: 10px
+}
+
+#toolbar button:nth-child(3) {
+  border-top-right-radius: 10px
+}
+
+#toolbar button:nth-last-child(1) {
+  border-bottom-right-radius: 10px
+}
+
+#toolbar button:nth-last-child(3) {
+  border-bottom-left-radius: 10px
+}
+
+#toolbar button:nth-child(n+4):nth-child(-n+7) {
+  border-top: 1px solid rgb(200, 204, 212);
+}
+
+/* #toolbar button:nth-child(3n) {
+  border-right: none
+} */
 
 audio {
   height: 2rem;
@@ -353,7 +380,7 @@ audio {
   flex-grow: 1;
   max-height: 69vh;
   overflow-y: auto;
-  padding-bottom: 40px;
+  padding-bottom: 64px;
 }
 
 li {

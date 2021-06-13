@@ -47,7 +47,7 @@ async function renderMessage(msg) {
 
       switch (replyType) {
         case 'text': {
-          const textElement = msgReplyBtn.parentNode.parentNode.children[0]
+          const textElement = msgReplyBtn.parentNode.parentNode.querySelector('#originMsg #content')
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
             let wrongString = replyContent.textContent.split('')
@@ -95,7 +95,7 @@ async function renderMessage(msg) {
           break
         }
         case 'audio': {
-          const audioElement = msgReplyBtn.parentNode.parentNode.children[1]
+          const audioElement = msgReplyBtn.parentNode.parentNode.querySelector('#originMsg audio')
           replyContent = document.importNode(audioElement, true)
           break
         }
@@ -192,16 +192,17 @@ async function renderMessage(msg) {
         audio.setAttribute('style', 'display: block')
         audio.src = window.URL.createObjectURL(audioBlob)
 
-        const translateMsgBtn = clone.querySelector('#translateMsgBtn')
-        translateMsgBtn.setAttribute('hidden', '')
-        const speakBtn = clone.querySelector('#speakBtn')
-        speakBtn.setAttribute('hidden', '')
-        const correctBtn = clone.querySelector('#correctBtn')
-        correctBtn.setAttribute('hidden', '')
-        translateMsgBtn.remove()
-        speakBtn.remove()
-        correctBtn.remove()
+        clone.querySelector('#translateMsgBtn').remove()
+        clone.querySelector('#speakBtn').remove()
+        clone.querySelector('#correctBtn').remove()
+        clone.querySelector('#bufferBtn').remove()
         break
+      }
+      case 'exchange': {
+        const sourceSpan = clone.querySelector('#originMsg #content')
+        sourceSpan.removeAttribute('hidden')
+        sourceSpan.textContent = 'Language exchange started'
+        clone.querySelector('#toolbar').remove()
       }
       case 'picture': {
         break
@@ -253,6 +254,7 @@ function sendMessage(type, content) {
 
 // reply message
 function reply(element) {
+  // remove old replyTo
   const testContent = document.querySelector('#replyTo #content')
   const audioContent = document.querySelector('#replyTo audio')
   if (testContent) {
@@ -262,22 +264,26 @@ function reply(element) {
     audioContent.remove()
   }
 
+  // check the new reply to contentType
   const type = element.getAttribute('contentType')
   let clone
   switch (type) {
     case 'text': {
-      const textElement = element.parentNode.parentNode.children[0]
+      const textElement = element.parentNode.parentNode.querySelector('#originMsg #content')
       clone = textElement.cloneNode('deep')
+
+      // for correct, merge spans into a single span
       if (clone.tagName = 'div') {
         const span = document.createElement('span')
         span.id = 'content'
         span.textContent = clone.innerText
         clone = span
       }
+
       break
     }
     case 'audio': {
-      const audioElement = element.parentNode.parentNode.children[1]
+      const audioElement = element.parentNode.parentNode.querySelector('#originMsg audio')
       clone = audioElement.cloneNode('deep')
       break
     }
@@ -301,7 +307,6 @@ function reply(element) {
   replyTo.style = 'display:flex'
 
   //return for correct
-
   return clone.textContent
 }
 
@@ -329,7 +334,7 @@ function correct(element) {
 }
 
 function favorite(element) {
-  history_id = element.parentNode.parentNode.querySelector('#reply').getAttribute('historyId')
+  history_id = element.parentNode.querySelector('#reply').getAttribute('historyId')
   const data = { user_id, history_id }
   socket.emit('favorite', data)
   Swal.fire('Add to your collection!')
@@ -635,6 +640,8 @@ let conterIntervalId
 let step = 1 //exchange step
 
 const exchangeStart = ({ exchange_id, startExchangeTime }) => {
+  renderMessage({ type: 'exchange' })
+
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
   ratio = exchangeData.ratio
@@ -1314,7 +1321,7 @@ async function settingVideoConstraints() {
 // translate text
 function translateMsg(element) {
   const historyId = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyId'))
-  const text = element.parentNode.parentNode.querySelector('#content').innerText
+  const text = element.parentNode.parentNode.querySelector('#originMsg #content').innerText
   const target = textTranslatelang //need change follow the user's native zh-TWen-US
   const data = {
     historyId,
@@ -1330,8 +1337,8 @@ function translateMsg(element) {
     body: JSON.stringify(data)
   }).then(res => res.json())
     .then(res => {
-      const translateMsg = element.parentNode.parentNode.parentNode.children[2]
-      const translateContent = translateMsg.querySelector('span')
+      const translateMsg = element.parentNode.parentNode.querySelector('#translateMsg')
+      const translateContent = translateMsg.querySelector('#content')
       translateContent.textContent = res.data
       translateMsg.style = 'display: flex'
     })
@@ -1346,7 +1353,8 @@ async function translateAudio(element) {
   content.textContent = 'Creating...'
   content.style = 'font-size:small;font-weight:400'
 
-  const audio = element.parentNode.parentNode.children[1].getAttribute('src');
+  const audio = element.parentNode.parentNode.querySelector('#originMsg audio').src
+  console.log(audio)
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
   fetch(audio)
     .then(res => res.blob())
@@ -1368,25 +1376,19 @@ async function translateAudio(element) {
     })
 }
 
+let voices // once the window loaded, once grab new voice, assign to voices
+speechSynthesis.onvoiceschanged = () => {
+  voices = speechSynthesis.getVoices()
+}
+
 // speechSynthesis
 async function speakMsg(element) {
-  const msgContent = element.parentNode.parentNode.children[0].innerText
+  const msgContent = element.parentNode.parentNode.querySelector('#originMsg #content').innerText
   const targetLang = speechSynthesisLang //need change follow the Lang of this msg
   try {
-    var synth = window.speechSynthesis
-    var utterThis = new SpeechSynthesisUtterance(msgContent);
-
-    const getSpeechSynthesisVoice = (targetLang) => {
-      return new Promise((resolve, rejects) => {
-        const SpeechSynthesisVoice = synth.getVoices().find(voice => voice.lang === targetLang)
-        resolve(SpeechSynthesisVoice)
-      })
-    }
-
-    utterThis.voice = await getSpeechSynthesisVoice(targetLang).then(() => {
-      synth.speak(utterThis);
-    })
-
+    const utterThis = new SpeechSynthesisUtterance(msgContent);
+    utterThis.voice = voices.find(voice => voice.lang === targetLang)
+    speechSynthesis.speak(utterThis);
   } catch (e) {
     console.log(e)
   }
