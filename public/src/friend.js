@@ -323,7 +323,7 @@ function cancelReply() {
   const replyTo = document.querySelector('#replyTo')
   replyTo.style = 'display:none'
   const messages = document.querySelector('#messages')
-  messages.style = 'max-height: 69vh'
+  messages.style = 'max-height: 89vh'
 }
 
 function correct(element) {
@@ -354,7 +354,7 @@ form.addEventListener('submit', function (e) {
     input.value = ''
   }
   const messages = document.querySelector('#messages')
-  messages.style = 'max-height: 69vh'
+  messages.style = 'max-height: 89vh'
 })
 
 // audio message function

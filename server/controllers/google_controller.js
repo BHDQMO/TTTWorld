@@ -32,7 +32,7 @@ const transcript = async (req, res) => {
       fs.writeFileSync(pathname, body);
       transcript = await Google.transcript(pathname, languageCode)
       res.send({ transcript })
-      // Chat.updateTranslate(history_Id, transcript)
+      Chat.updateTranslate(history_Id, transcript)
       fs.unlink(pathname, (error) => {
         if (error) {
           console.log(error)

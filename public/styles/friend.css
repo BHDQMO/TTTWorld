@@ -294,7 +294,6 @@ main {
   height: 2rem;
   background: rgb(25, 35, 59);
   color: rgb(200, 204, 212);
-  /* border-right: 1px solid rgb(200, 204, 212); */
 }
 
 #toolbar button:nth-child(1) {
@@ -378,7 +377,7 @@ audio {
 
 #messages {
   flex-grow: 1;
-  max-height: 69vh;
+  max-height: 89vh;
   overflow-y: auto;
   padding-bottom: 64px;
 }
@@ -387,19 +386,23 @@ li {
   list-style-type: none;
 }
 
-.contral {
-  padding: 10px 0;
+.chat-box-footer {
   display: flex;
-  justify-content: space-between
+  justify-content: space-between;
+  padding: 10px 0;
 }
 
-.contral button {
+.chat-box-footer button {
   padding: 5px 10px;
   border-radius: 5px;
   background: rgb(2, 77, 252);
   color: rgb(227, 246, 253);
   font-weight: 450;
-  margin-top: 10px;
+}
+
+.contral {
+  display: flex;
+  justify-content: space-between
 }
 
 .optionBtn {
@@ -429,6 +432,7 @@ li {
 
 #replyTo img {
   height: 2rem;
+  width: 2rem;
 }
 
 #replyTo #replyBody {
@@ -502,7 +506,8 @@ li {
 }
 
 .user_box img {
-  height: 80%;
+  height: 32px;
+  width: 32px;
 }
 
 .user_box p {
@@ -552,6 +557,10 @@ img {
   max-width: 300px;
   padding: 10px;
   background-color: white;
+}
+
+.form-popup button {
+  margin-top: 10px;
 }
 
 #modeContainer {
