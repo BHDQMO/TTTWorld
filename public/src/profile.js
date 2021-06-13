@@ -157,7 +157,7 @@ async function renderMessage(msg) {
         var arrayBuffer = new ArrayBuffer(buffer.length);
         var view = new Uint8Array(arrayBuffer);
         buffer.map((b, i) => view[i] = b)
-        const audioBlob = new Blob([arrayBuffer], { type: 'audio/ogg' })
+        const audioBlob = new Blob([arrayBuffer], { type: 'audio/opus' })
         const audio = clone.querySelector('#replyMsg audio')
         audio.style = 'display : block'
         audio.src = window.URL.createObjectURL(audioBlob)
@@ -230,7 +230,7 @@ async function renderMessage(msg) {
       var view = new Uint8Array(arrayBuffer);
       buffer.map((b, i) => view[i] = b)
       msg.content = arrayBuffer
-      const audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
+      const audioBlob = new Blob([msg.content], { type: 'audio/opus' })
       const audio = clone.querySelector('#originMsg audio')
       audio.setAttribute('style', 'display: block')
       audio.src = window.URL.createObjectURL(audioBlob)

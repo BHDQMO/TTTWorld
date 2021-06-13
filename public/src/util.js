@@ -419,7 +419,7 @@ function bufferToUrl(buffer) {
   var arrayBuffer = new ArrayBuffer(buffer.length);
   var view = new Uint8Array(arrayBuffer);
   buffer.map((b, i) => view[i] = b)
-  const audioBlob = new Blob([arrayBuffer], { type: 'audio/ogg' })
+  const audioBlob = new Blob([arrayBuffer], { type: 'audio/opus' })
 
   return window.URL.createObjectURL(audioBlob)
 }

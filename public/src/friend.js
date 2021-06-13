@@ -187,7 +187,8 @@ async function renderMessage(msg) {
           buffer.map((b, i) => view[i] = b)
           msg.content = arrayBuffer
         }
-        const audioBlob = new Blob([msg.content], { type: 'audio/ogg' })
+
+        const audioBlob = new Blob([msg.content], { type: 'audio/opus' })
         const audio = clone.querySelector('audio')
         audio.setAttribute('style', 'display: block')
         audio.src = window.URL.createObjectURL(audioBlob)
@@ -200,6 +201,7 @@ async function renderMessage(msg) {
       }
       case 'exchange': {
         const sourceSpan = clone.querySelector('#originMsg #content')
+        sourceSpan.setAttribute('class', 'systemMsg')
         sourceSpan.removeAttribute('hidden')
         sourceSpan.textContent = 'Language exchange started'
         clone.querySelector('#toolbar').remove()
@@ -381,7 +383,7 @@ async function startAudioRecord() {
   }
 
   mediaRecorder.onstop = function (e) {
-    const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
+    const blob = new Blob(chunks, { type: 'audio/opus' })
     sendMessage('audio', blob)
     voiceStream.getTracks().forEach((track) => { track.stop() })
     clearTimeout(timeoutID)
@@ -839,7 +841,9 @@ async function startSpeechRecognition() {
   voiceRecorder.onstop = function (e) {
     voiceRecorderCounter++
     if (isNeedStoreCheck[voiceRecorderCounter] === true) {
-      const blob = new Blob(chunks, { type: 'audio/ogg codecs=opus' })
+      const blob = new Blob(chunks, {
+        type: 'audio/opus'
+      })
       const audioUrl = window.URL.createObjectURL(blob)
       if (!lowScoreList[recognitionCounter]) {
         lowScoreList[recognitionCounter] = {}
@@ -1186,8 +1190,16 @@ async function handleSDPOffer(data) {
         if (!localPeer) {
           await createPeerConnection()
         }
-        console.log('*** [WebRTC] set Remote Description ...')
         await localPeer.setRemoteDescription(data.offer)
+        console.log('*** [WebRTC] set Remote Description ...')
+        if (tempCandidate.length > 0) {
+          tempCandidate.map(async candidate => {
+            await localPeer.addIceCandidate(candidate)
+            console.log(`*** [WebRTC] add ICE candidate: ${JSON.stringify(candidate.candidate)}`)
+          })
+          tempCandidate = []
+        }
+
         if (!localStream) {
           const videoConstraints = await settingVideoConstraints()
           renderSetting(videoConstraints)
@@ -1266,6 +1278,7 @@ async function handleSDPAnswer(data) {
     if (tempCandidate.length > 0) {
       tempCandidate.map(async candidate => {
         await localPeer.addIceCandidate(candidate)
+        console.log(`*** [WebRTC] add ICE candidate: ${JSON.stringify(candidate.candidate)}`)
       })
       tempCandidate = []
     }
@@ -1275,6 +1288,7 @@ async function handleSDPAnswer(data) {
 }
 
 async function handleRemoteStream(event) {
+  console.log(event)
   console.log("*** [WebRTC] render remote stream")
   remoteStream = event.streams[0]
   const mainVideo = document.querySelector("#mainVideo")

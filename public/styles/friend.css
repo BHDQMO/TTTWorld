@@ -205,6 +205,10 @@ main {
   text-decoration-color: red;
 }
 
+.systemMsg {
+  font-weight: normal;
+}
+
 #originMsg {
   display: flex;
 }
@@ -441,7 +445,6 @@ li {
 }
 
 #replyTo span {
-  height: 2rem;
   padding: 0 10px;
   line-height: 2rem;
 }
