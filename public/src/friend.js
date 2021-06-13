@@ -1192,6 +1192,7 @@ async function handleSDPOffer(data) {
         }
         await localPeer.setRemoteDescription(data.offer)
         console.log('*** [WebRTC] set Remote Description ...')
+
         if (tempCandidate.length > 0) {
           tempCandidate.map(async candidate => {
             await localPeer.addIceCandidate(candidate)
@@ -1288,9 +1289,9 @@ async function handleSDPAnswer(data) {
 }
 
 async function handleRemoteStream(event) {
-  console.log(event)
   console.log("*** [WebRTC] render remote stream")
   remoteStream = event.streams[0]
+  console.log(remoteStream.getTracks())
   const mainVideo = document.querySelector("#mainVideo")
   mainVideo.srcObject = remoteStream
 
