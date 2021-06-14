@@ -11,12 +11,12 @@ const online_notice = (user) => {
   clone.querySelector('#name').textContent = user.name
   online_notice.append(clone)
 
-  // window.setTimeout(() => {
-  //   document.querySelector(`div[name='${user.user_id}'`).remove()
-  //   if (!online_notice.hasChildNodes()) {
-  //     online_notice.style = 'display:none'
-  //   }
-  // }, 10 * 1000)
+  window.setTimeout(() => {
+    document.querySelector(`div[name='${user.user_id}'`).remove()
+    if (!online_notice.hasChildNodes()) {
+      online_notice.style = 'display:none'
+    }
+  }, 10 * 1000)
 }
 
 function showNotice() {
