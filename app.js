@@ -24,7 +24,6 @@ const port = process.env.PORT
 // for server noticing
 setInterval(() => serverNotice(io), 1000)
 
-
 // Api Main Route
 app.use('/',
   [

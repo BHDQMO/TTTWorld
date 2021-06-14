@@ -1494,6 +1494,12 @@ exchangeForm.addEventListener('submit', (e) => {
   formData.append('first_lang', user.native);
   formData.append('second_lang', user.learning);
   const checkBox = document.getElementById("noticing");
+
+  const localtime = new Date(formData.get('start_time'))
+  const timezone = new Date().getTimezoneOffset()
+  localtime.setHours(localtime.getHours() + timezone / 60)
+  formData.set('start_time', localtime)
+
   if (formData.get('notice') === 'on') {
     formData.set('notice', 1);
   } else {
