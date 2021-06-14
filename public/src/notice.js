@@ -105,7 +105,6 @@ const noticeAction = function (element) {
       })
       break
     }
-      querySelectorAll
     case "Reject": {
       onCheckNotice()
       element.textContent = 'Rejected'
@@ -246,7 +245,6 @@ const exchangePreStart = (data) => {
   checkBtn.textContent = "Let's Chat"// here is different
   checkBtn.addEventListener('click', (event) => {
     const exchange_id = parseInt(event.target.getAttribute('exchange_id'))
-    console.log(data.exchangeInvite)
     window.localStorage.setItem(`exchange_${exchange_id}`, JSON.stringify(data.exchangeInvite))
     window.location = `/friend.html?room=${data.exchangeInvite.room_id}&exchange_id=${exchange_id}`
   })

@@ -423,3 +423,11 @@ function bufferToUrl(buffer) {
 
   return window.URL.createObjectURL(audioBlob)
 }
+
+function finishExchange() {
+  let params = (new URL(document.location)).searchParams
+  let room = parseInt(params.get('room'))
+  if (room) {
+    window.location = `/friend.html?room=${room}`
+  }
+}

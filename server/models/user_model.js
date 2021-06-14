@@ -186,17 +186,18 @@ const getFavorite = async (user_id) => {
 };
 
 const getExchange = async (user_id) => {
+  console.log(user_id)
   await transaction()
   try {
     let queryString = `
     SELECT * FROM 
-    \`exchange\` 
-    LEFT JOIN
     (
     SELECT id AS roomid FROM room WHERE user_a = ?
     UNION
     SELECT id AS roomid FROM room WHERE user_b = ?
     ) AS roomlist
+    LEFT JOIN
+    \`exchange\` 
     ON roomlist.roomid = exchange.room_id
     `
     const exchangeData = await query(queryString, [user_id, user_id])

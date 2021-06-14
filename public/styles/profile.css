@@ -195,6 +195,10 @@ main {
   display: none;
 }
 
+#translateIcon {
+  display: inline;
+}
+
 #replyMsg .fix {
   text-decoration-line: line-through;
   text-decoration-color: red;
@@ -300,6 +304,7 @@ main {
 .exchangeItem .langInfoBox {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 .exchangeItem .langInfo {

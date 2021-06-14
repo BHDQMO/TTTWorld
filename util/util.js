@@ -2,6 +2,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
 const crypto = require('crypto')
+const fs = require('fs');
 const aws = require('aws-sdk')
 const multerS3 = require('multer-s3')
 
@@ -104,26 +105,36 @@ const serverNotice = async (io) => {
         exchange,
         user,
       }
-      if (exchange.remainTime < 0) {
+      if (exchange.remainTime <= 0) {
+        console.log('find instant exchange')
         Socket.onStartNotice(io, data)
       } else {
         if (exchange.status === 1 && exchange.notice === 1) {
+          console.log('find pre-warning exchange')
           Socket.beforeStartNotice(io, data)
         } else if (exchange.notice === 2) {
+          console.log('find onstart exchange')
           Socket.onStartNotice(io, data)
         }
       }
-
     })
   } else {
     console.log('there is no exchange need to be notice')
   }
 }
 
+const removeFile = (pathname) => {
+  fs.unlink(pathname, (error) => {
+    if (error) {
+      console.log(error)
+    }
+  })
+}
 module.exports = {
   upload,
   wrapAsync,
   authentication,
   calAge,
-  serverNotice
+  serverNotice,
+  removeFile
 }

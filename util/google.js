@@ -47,7 +47,6 @@ const transcript = async (filename, languageCode) => {
     .map(result => result.alternatives[0].transcript)
     .join('\n');
 
-  console.log(transcription)
   return transcription
 };
 

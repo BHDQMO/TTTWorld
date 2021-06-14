@@ -61,7 +61,15 @@ const getFriendList = async (user_id) => {
 // }
 
 const addFavorite = async (data) => {
-  const result = await query(`INSERT INTO favorite SET ?`, data)
+  let binding = Object.values(data)
+  binding = [binding, binding].flat()
+  const queryString = `
+  INSERT INTO favorite (user_id, history_id) 
+  SELECT ?, ?
+  WHERE NOT EXISTS 
+  (SELECT * FROM favorite WHERE user_id = ? AND history_id = ?)
+  `
+  const result = await query(queryString, binding)
   return result
 }
 
@@ -120,25 +128,31 @@ const updateExchangeStatus = async (exchange_id, status) => {
 const exchangeStart = async (exchange, status) => {
   try {
     await transaction()
-    let binding = [exchange.room_id, exchange.publisher_id, 'exchange']
-    let queryString = `INSERT INTO history (room,sender,type) VALUES ?`
-    let result = await query(queryString, [[binding]])
+    let binding = [exchange.room_id, exchange.publisher_id, 'exchange', exchange.id]
+    let queryString = `
+    INSERT INTO history (room,sender,\`type\`)
+    SELECT ?,?,?
+    WHERE NOT EXISTS 
+    (SELECT * FROM \`exchange\` WHERE id = ? AND history_id IS NOT NULL)`
+    let result = await query(queryString, binding)
     const history_id = result.insertId
 
-    const exchange_id = exchange.id
-    binding = [status, history_id, exchange_id]
-    queryString = `UPDATE exchange SET status = ? , history_id = ? WHERE id = ?`
-    result = await query(queryString, binding)
-    console.log(result)
+    if (history_id) {
+      const exchange_id = exchange.id
+      binding = [status, history_id, exchange_id]
+      queryString = `UPDATE exchange SET status = ? , history_id = ? WHERE id = ?`
+      await query(queryString, binding)
+      queryString = `SELECT * FROM history WHERE id = ?`
+      result = await query(queryString, history_id)
+    }
+
     await commit()
-    return result
+    return result[0]
   } catch (error) {
     await rollback()
     console.log(error)
     return error
   }
-
-
 }
 
 const updateExchangeRead = async (exchange_id) => {
@@ -146,7 +160,6 @@ const updateExchangeRead = async (exchange_id) => {
   const result = await query(queryString, [exchange_id])
   return result
 }
-
 
 const removeExchange = async (exchange_id) => {
   const result = await query(`DELETE FROM exchange WHERE id = ?`, [exchange_id])
@@ -177,11 +190,8 @@ const getTranslate = async (historyId) => {
 }
 
 const saveCollect = async (collection) => {
-  const queryString = `
-  INSERT INTO exchange_collect SET ?
-  `
+  const queryString = `INSERT INTO exchange_collect SET ?`
   const result = await query(queryString, collection)
-  console.log(result)
   return result
 }
 

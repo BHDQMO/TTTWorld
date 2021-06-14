@@ -641,8 +641,9 @@ let startTime
 let conterIntervalId
 let step = 1 //exchange step
 
-const exchangeStart = ({ exchange_id, startExchangeTime }) => {
-  renderMessage({ type: 'exchange' })
+const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
+  console.log(msg)
+  renderMessage(msg)
 
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
@@ -655,6 +656,7 @@ const exchangeStart = ({ exchange_id, startExchangeTime }) => {
   document.querySelector('#currentLang').textContent = `Part I : ${langCodePair[exchangeData.first_lang]}`
 
   conterIntervalId = window.setInterval(counter, 1000);
+  console.log(`conterIntervalId:${conterIntervalId}`)
 
   //use to decide whether to open the recognition or not
   if (exchangeData.first_lang === user.learning) {
@@ -664,12 +666,14 @@ const exchangeStart = ({ exchange_id, startExchangeTime }) => {
 
 function counter() {
   if (time > 0) {
+    console.log(time)
     let min = fillZero(Math.floor(time / 60))
     let sec = fillZero(time % 60)
     document.querySelector('#timer').textContent = min + " : " + sec
   } else {
     window.clearInterval(conterIntervalId)
     if (step === 1) {
+      console.log(step)
       swap() // swap to step2
     } else {
       stopExchange() // stop exchange
@@ -695,7 +699,7 @@ function swap() {
 }
 
 async function stopExchange() {
-  if (voiceRecorder.state !== 'active') {
+  if (voiceRecorder.state !== 'inactive') {
     voiceRecorder.stop()
   }
   recognition.stop()
@@ -801,7 +805,6 @@ async function stopExchange() {
       socket.emit('saveCollect', data)
       lowScoreList = {}
     }
-
   } else {
     {
       Swal.fire(
@@ -812,7 +815,7 @@ async function stopExchange() {
     }
   }
   lowScoreList = {}
-  // finishExchange()
+  finishExchange()
 }
 
 
@@ -1402,9 +1405,18 @@ async function translateAudio(element) {
         }
       })
         .then(res => res.json())
-        .then(({ transcript }) => {
-          content.removeAttribute('style')
-          content.textContent = transcript
+        .then(res => {
+          if (res.error) {
+            translateMsg.style.display = 'none'
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: res.error,
+            })
+          } else {
+            content.removeAttribute('style')
+            content.textContent = res.transcript
+          }
         })
     })
 }

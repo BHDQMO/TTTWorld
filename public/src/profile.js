@@ -67,6 +67,8 @@ const renderProfile = (user) => {
   birthday.innerHTML = user.birthday.split('T')[0]
   const email = document.querySelector('#myDetailBox .email')
   email.innerHTML = user.email
+  const interest = document.querySelector('#myDetailBox .interest')
+  interest.innerHTML = user.interest
   const gender = document.querySelector('#myDetailBox .gender')
   gender.innerHTML = user.gender
   const introduction = document.querySelector('#myDetailBox .introduction')
@@ -88,6 +90,7 @@ const renderFavorite = () => {
 }
 
 async function renderMessage(msg) {
+  console.log(msg)
   const sender = senderData[msg.sender]
   const reply = replyData[msg.reply]
 
@@ -99,7 +102,7 @@ async function renderMessage(msg) {
   clone.querySelector('.sendTime').textContent = msg.time.split('T')[0]
 
   //render reply message
-  if (msg.reply !== null) {
+  if (msg.reply) {
     const replyType = reply.type
     switch (replyType) {
       case 'text': {
@@ -244,12 +247,6 @@ async function renderMessage(msg) {
       clone = document.importNode(template, true)
       const collectionContainer = clone.querySelector('.favoriteItem')
 
-
-
-
-
-
-
       // shwo the exchagne info
       const exchange_id = collectionData[history_id][0].exchange_id
       const exchangeData = exchange.exchangeData.find(item => item.id === exchange_id)
@@ -274,6 +271,12 @@ async function renderMessage(msg) {
     }
   }
 
+  if (msg.translate) {
+    const translateMsg = clone.querySelector('#translateMsg')
+    translateMsg.querySelector('#content').textContent = msg.translate
+    translateMsg.style.display = 'block'
+  }
+
   const favoriteContainer = document.querySelector('#favoriteContainer')
   favoriteContainer.append(clone)
   favoriteContainer.scrollTop = favoriteContainer.scrollHeight
@@ -284,37 +287,15 @@ async function renderMessage(msg) {
 const renderExchange = () => {
   const exchangeData = exchange.exchangeData
   const exchangeContainer = document.querySelector('#exchangeContainer')
-
+  console.log(exchangeData)
   exchangeData.map(item => {
     const clone = fillExchangeData(item)
-
-    // const startTime = new Date(item.start_time)
-    // const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(startTime).toUpperCase().slice(0, 3)
-    // const date = fillZero(startTime.getDate())
-    // const startHours = fillZero(startTime.getHours())
-    // const startMin = fillZero(startTime.getMinutes())
-
-    // const endTime = new Date(startTime + item.duration * 60 * 1000)
-    // const endHours = fillZero(endTime.getHours())
-    // const endMin = fillZero(endTime.getMinutes())
-
-    // const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
-
-    // clone.querySelector('.time').textContent = timeString
-    // clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
-    // clone.querySelector('.name').textContent = roommateData[item.room_id].name
-    // const duration = item.duration
-    // const ratio = item.ratio / 100
-    // clone.querySelector('.firstDuration').textContent = '' + duration * ratio + 'mins'
-    // clone.querySelector('.firstLang').textContent = langCodePair[item.first_lang]
-    // clone.querySelector('.secondDuration').textContent = '' + duration * (1 - ratio) + 'mins'
-    // clone.querySelector('.secondLang').textContent = langCodePair[item.second_lang]
-
     exchangeContainer.append(clone)
   })
 }
 
 function fillExchangeData(item) {
+  console.log(exchange)
   const roommateData = exchange.roommateData
 
   const template = document.querySelector('#exchangeTemplate').content
@@ -332,6 +313,9 @@ function fillExchangeData(item) {
   const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
   clone.querySelector('.time').textContent = timeString
+  console.log(roommateData)
+  console.log(item)
+  console.log(roommateData[item.room_id])
   clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
   clone.querySelector('.name').textContent = roommateData[item.room_id].name
   const duration = item.duration

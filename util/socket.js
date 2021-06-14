@@ -76,7 +76,6 @@ const message = (socket, io) => async (data) => {
   const result = await Chat.saveMessage(msg)
   msg.time = result.time
   msg.id = result.historyId
-  console.log(msg)
   io.to(msg.room).emit('message', msg)
   console.log(io.sockets.adapter.rooms)
   try {
@@ -197,28 +196,28 @@ const onStartNotice = (io, data) => {
   })
 }
 
-const readyToStart = (socket, io) => ({ user_id, exchange }) => {
+const readyToStart = (socket, io) => async ({ user_id, exchange }) => {
   const exchange_id = exchange.id
   if (checkExchangeReady[exchange_id]) {
     checkExchangeReady[exchange_id][user_id] = true
   }
   const exchangeReadyStatus = Object.values(checkExchangeReady[exchange_id]).filter(x => x === true).length
   if (exchangeReadyStatus === 2) {
+    const exchangeHistory = await Chat.exchangeStart(exchange, 3)
+    console.log(exchangeHistory)
     Object.keys(checkExchangeReady[exchange_id]).map(async user => {
-      io.to(socket_ids[user]).emit('exchangeStart', { exchange_id, startExchangeTime: new Date() })
+      io.to(socket_ids[user]).emit('exchangeStart', { exchange_id, startExchangeTime: new Date(), msg: exchangeHistory })
       // insert this exchange into history
       // update exchange status to 3, means this exchage has started
-      await Chat.exchangeStart(exchange, 3)
+
     })
-    io.to(socket_ids[user_id]).emit('triggerExchange')
+    io.to(socket_ids[user_id]).emit('triggerExchange',)
   }
 }
 
 const saveCollect = (socket, io) => (collection) => {
-  console.log(collection)
   collection.map(async data => {
     const result = await Chat.saveCollect(data)
-    console.log(result)
   })
 }
 
