@@ -213,8 +213,17 @@ main {
   display: flex;
 }
 
+#messageBody svg {
+  height: 2rem;
+}
+
 #message[from="myself"] #originMsg span.correction, #message[from="other"] #originMsg span.correction {
   color: limegreen;
+}
+
+#message[from="myself"] svg {
+  margin-left: 10px;
+  order: 1
 }
 
 #content {
@@ -235,6 +244,10 @@ main {
 
 #message[from="other"] #messageBody {
   background: white;
+}
+
+#message[from="other"] svg {
+  margin-left: 10px
 }
 
 #message[from="myself"] {
@@ -259,9 +272,9 @@ main {
 }
 
 #message[from="myself"] #translateMsg {
-  justify-content: flex-end;
+  flex-direction: row-reverse;
   width: -webkit-fill-available;
-  border-top: 1px solid white
+  border-top: 1px solid white;
 }
 
 #message[from="other"] #translateMsg {
@@ -816,3 +829,5 @@ span#scoreTitle, span#collectTitle {
 #replyIcon {
   display: none;
 }
+
+#translateIcon {}

@@ -21,7 +21,7 @@ let speechSynthesisLang //= 'en-US' //text lang
 let speechRecognitionLearningLang //= 'en-US' //target Lang when exchange 'zh-TW''en-US'
 let speechRecognitionNativeLang //= 'zh-TW'
 
-const confidenceThreshold = 1
+const confidenceThreshold = 0.7
 const voiceMsgLimit = 10 * 1000
 
 async function renderMessage(msg) {
@@ -44,12 +44,13 @@ async function renderMessage(msg) {
 
     if (msg.reply !== null) {
       replyType = msgReplyBtn.getAttribute('contentType')
-
+      clone.querySelector('#replyIcon').style = 'display:inline'
       switch (replyType) {
         case 'text': {
           const textElement = msgReplyBtn.parentNode.parentNode.querySelector('#originMsg #content')
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
+            clone.querySelector('#replyIcon').removeAttribute('style')
             let wrongString = replyContent.textContent.split('')
             let rightString = msg.content.split('')
             const result = patienceDiff(wrongString, rightString).lines
@@ -104,7 +105,6 @@ async function renderMessage(msg) {
       replyMsg.append(replyContent)
       replyMsg.style = 'display:flex'
     }
-
 
     const message = clone.querySelector('#message')
     message.setAttribute('from', from)
@@ -639,12 +639,12 @@ let ratio
 let time
 let startTime
 let conterIntervalId
-let step = 1 //exchange step
+let step = 0 //exchange step
 
 const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
-  console.log(msg)
-  renderMessage(msg)
+  step = 1
 
+  renderMessage(msg) //system message
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
   ratio = exchangeData.ratio
@@ -655,9 +655,6 @@ const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
   document.querySelector('#chat-box-head').setAttribute('part', 'I')
   document.querySelector('#currentLang').textContent = `Part I : ${langCodePair[exchangeData.first_lang]}`
 
-  conterIntervalId = window.setInterval(counter, 1000);
-  console.log(`conterIntervalId:${conterIntervalId}`)
-
   //use to decide whether to open the recognition or not
   if (exchangeData.first_lang === user.learning) {
     startSpeechRecognition()
@@ -665,7 +662,7 @@ const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
 }
 
 function counter() {
-  if (time > 0) {
+  if (time >= 0) {
     console.log(time)
     let min = fillZero(Math.floor(time / 60))
     let sec = fillZero(time % 60)
@@ -804,6 +801,7 @@ async function stopExchange() {
 
       socket.emit('saveCollect', data)
       lowScoreList = {}
+      step = 0
     }
   } else {
     {
@@ -1237,6 +1235,11 @@ async function handleSDPOffer(data) {
 
           await addStreamProcess(videoConstraints)
         }
+
+        // //when on exchange step 1, start the timer
+        // if (step === 1) {
+        //   conterIntervalId = window.setInterval(counter, 1000);
+        // }
       } catch (error) {
         console.log(`*** [WebRTC] Failed to create answer: ${error.toString()}`)
         console.log(`Error ${error.name}: ${error.message}`)
@@ -1322,6 +1325,11 @@ async function handleRemoteStream(event) {
 
   // show the camera icon on the friend box who you are talking to
   document.querySelector(`div[id='${talkTo.user_id}'] svg`).style.display = 'inline'
+
+  //when on exchange step 1, start the timer
+  if (step === 1) {
+    conterIntervalId = window.setInterval(counter, 1000);
+  }
 }
 
 function handleCallEnd() {
