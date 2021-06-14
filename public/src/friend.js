@@ -1521,5 +1521,5 @@ exchangeForm.addEventListener('submit', (e) => {
       }
     }
   }
-  // socket.emit('exchangeInvite', package)
+  socket.emit('exchangeInvite', package)
 })
