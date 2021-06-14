@@ -803,7 +803,7 @@ async function stopExchange() {
       await socket.emit('saveCollect', data)
       lowScoreList = {}
       step = 0
-      finishExchange()
+      // finishExchange()
     }
   } else {
     Swal.fire({
