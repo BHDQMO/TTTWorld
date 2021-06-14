@@ -1495,9 +1495,8 @@ exchangeForm.addEventListener('submit', (e) => {
   formData.append('second_lang', user.learning);
   const checkBox = document.getElementById("noticing");
 
-  const localtime = new Date(formData.get('start_time'))
-  const timezone = new Date().getTimezoneOffset()
-  localtime.setHours(localtime.getHours() + timezone / 60)
+  // for server
+  const localtime = new Date(formData.get('start_time')).toISOString().split('.')[0]
   formData.set('start_time', localtime)
 
   if (formData.get('notice') === 'on') {
@@ -1522,5 +1521,5 @@ exchangeForm.addEventListener('submit', (e) => {
       }
     }
   }
-  socket.emit('exchangeInvite', package)
+  // socket.emit('exchangeInvite', package)
 })
