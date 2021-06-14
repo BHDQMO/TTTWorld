@@ -404,7 +404,7 @@ window.onmouseup = () => {
   }
 }
 
-function stopAudioRecord() {
+const stopAudioRecord = () => {
   mediaRecorder.stop()
   clearTimeout(timeoutID)
 }
@@ -812,6 +812,7 @@ async function stopExchange() {
     }
   }
   lowScoreList = {}
+  // finishExchange()
 }
 
 
@@ -1193,8 +1194,9 @@ async function handleNegotiationNeeded() {
 
 async function handleSDPOffer(data) {
   console.log('*** [WebRTC] receive offer')
+  console.log(friendData)
   Swal.fire({
-    title: `${data.sender} is calling you`,
+    title: `${friendData[data.sender].name} is calling you`,
     text: "Do you want to pick the phone?",
     icon: 'question',
     showDenyButton: true,

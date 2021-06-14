@@ -766,6 +766,8 @@ b {
 
 .contentBox span {
   text-align: left;
+  white-space: normal;
+  word-break: break-all;
 }
 
 .contentBox audio {
