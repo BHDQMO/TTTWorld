@@ -204,6 +204,10 @@ main {
   text-decoration-color: red;
 }
 
+.messageItem {
+  display: flex;
+}
+
 #originMsg .fix {
   color: limegreen;
 }
