@@ -49,7 +49,6 @@ fetch('/user/profile', {
     } else {
       document.querySelector('#exchange .emptyInfo').style = 'display:flex'
     }
-
     if (favorite.favoriteData.length > 0) {
       renderFavorite()
     } else {
@@ -287,7 +286,6 @@ async function renderMessage(msg) {
 const renderExchange = () => {
   const exchangeData = exchange.exchangeData
   const exchangeContainer = document.querySelector('#exchangeContainer')
-  console.log(exchangeData)
   exchangeData.map(item => {
     const clone = fillExchangeData(item)
     exchangeContainer.append(clone)
@@ -295,7 +293,6 @@ const renderExchange = () => {
 }
 
 function fillExchangeData(item) {
-  console.log(exchange)
   const roommateData = exchange.roommateData
 
   const template = document.querySelector('#exchangeTemplate').content
@@ -313,9 +310,6 @@ function fillExchangeData(item) {
   const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
   clone.querySelector('.time').textContent = timeString
-  console.log(roommateData)
-  console.log(item)
-  console.log(roommateData[item.room_id])
   clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
   clone.querySelector('.name').textContent = roommateData[item.room_id].name
   const duration = item.duration

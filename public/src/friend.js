@@ -640,10 +640,11 @@ let time
 let startTime
 let conterIntervalId
 let step = 0 //exchange step
+let history_Id
 
 const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
   step = 1
-
+  history_id = msg.id
   renderMessage(msg) //system message
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
@@ -801,6 +802,7 @@ async function stopExchange() {
       })
 
       await socket.emit('saveCollect', data)
+      await socket.emit('favorite', { user_id, history_id })
       lowScoreList = {}
       step = 0
       // finishExchange()

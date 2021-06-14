@@ -170,13 +170,13 @@ const getFavorite = async (user_id) => {
       })
     }
 
+
     const data = {
       favoriteData,
       senderData,
       replyData,
       collectionData
     }
-
     await commit()
     return data
   } catch (error) {
