@@ -21,7 +21,7 @@ let speechSynthesisLang //= 'en-US' //text lang
 let speechRecognitionLearningLang //= 'en-US' //target Lang when exchange 'zh-TW''en-US'
 let speechRecognitionNativeLang //= 'zh-TW'
 
-const confidenceThreshold = 0.7
+const confidenceThreshold = 0.85
 const voiceMsgLimit = 10 * 1000
 
 async function renderMessage(msg) {
@@ -669,6 +669,7 @@ function counter() {
     document.querySelector('#timer').textContent = min + " : " + sec
   } else {
     window.clearInterval(conterIntervalId)
+    conterIntervalId = null
     if (step === 1) {
       console.log(step)
       swap() // swap to step2
@@ -799,23 +800,24 @@ async function stopExchange() {
         data.push(collect)
       })
 
-      socket.emit('saveCollect', data)
+      await socket.emit('saveCollect', data)
       lowScoreList = {}
       step = 0
+      finishExchange()
     }
   } else {
-    {
-      Swal.fire(
-        'Exchange Finish',
-        'Well Done, your pronunciation is very good!',
-        'success'
-      )
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Exchange Finish',
+      html: '<span style=font-size:x-large>Well Done, your pronunciation is very good!<span>',
+      confirmButtonText: `OK`
+    }).then(res => {
+      if (res.isConfirmed) {
+        finishExchange()
+      }
+    })
   }
-  lowScoreList = {}
-  finishExchange()
 }
-
 
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
@@ -1327,7 +1329,7 @@ async function handleRemoteStream(event) {
   document.querySelector(`div[id='${talkTo.user_id}'] svg`).style.display = 'inline'
 
   //when on exchange step 1, start the timer
-  if (step === 1) {
+  if (step === 1 && !conterIntervalId) {
     conterIntervalId = window.setInterval(counter, 1000);
   }
 }
