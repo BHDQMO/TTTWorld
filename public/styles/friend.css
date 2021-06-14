@@ -746,7 +746,7 @@ b {
   display: none;
   height: 20px;
   border-radius: 10px;
-  width: 20px;
+  min-width: 20px;
   background: red;
   justify-content: center;
   margin-left: auto;
