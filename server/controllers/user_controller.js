@@ -1,11 +1,13 @@
+const _ = require('lodash')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const validator = require('validator')
+
 const User = require('../models/user_model')
 const Google = require('../../util/google')
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
-var _ = require('lodash');
+
 const { TOKEN_SECRET, S3_OBJECT_URL } = process.env
-const salt = parseInt(process.env.BCRYPT_SALT);
+const salt = parseInt(process.env.BCRYPT_SALT)
 
 const signUp = async (req, res) => {
   let { name } = req.body
@@ -37,9 +39,9 @@ const signUp = async (req, res) => {
   try {
     let user = req.body
     let interests = await Google.translateText(user.interest, 'en')
-    interests = interests.map(interest => _.startCase(interest))
+    interests = interests.map((interest) => _.startCase(interest))
     user.password = bcrypt.hashSync(user.password, salt)
-    user.picture = S3_OBJECT_URL + '/' + user.picture
+    user.picture = `${S3_OBJECT_URL}/'${user.picture}`
     user.geocode = `ST_PointFromText('POINT(${await Google.geocoding(user.address)})',3857)`
     user.interest = interests.toString()
     user.token = jwt.sign({
@@ -49,7 +51,6 @@ const signUp = async (req, res) => {
       picture: user.picture
     }, TOKEN_SECRET)
     user = await User.signUp(user, interests)
-    console.log(user)
     res.status(200).send({
       data: {
         token: user.token,
@@ -63,9 +64,9 @@ const signUp = async (req, res) => {
       }
     })
   } catch (error) {
+    console.log(error)
     res.send(error)
   }
-
 }
 
 const nativeSignIn = async (email, password) => {
@@ -73,48 +74,44 @@ const nativeSignIn = async (email, password) => {
     return {
       error: 'Request Error: email and password are required.',
       status: 400
-    };
+    }
   }
 
   try {
-    return await User.nativeSignIn(email, password);
+    return await User.nativeSignIn(email, password)
   } catch (error) {
+    console.log(error)
     return {
       error
-    };
+    }
   }
-};
+}
 
 const signIn = async (req, res) => {
-  const data = req.body;
-  let result;
+  const data = req.body
+  let result
   switch (data.provider) {
     case 'native':
-      result = await nativeSignIn(data.email, data.password);
-      break;
-    case 'facebook':
-      result = await facebookSignIn(data.access_token);
-      break;
+      result = await nativeSignIn(data.email, data.password)
+      break
     default:
-      result = {
-        error: 'Wrong Request'
-      };
+      result = { error: 'Wrong Request' }
   }
 
   if (result.error) {
-    const status_code = result.status ? result.status : 403;
-    res.status(status_code).send({
+    const statusCode = result.status ? result.status : 403
+    res.status(statusCode).send({
       error: result.error
-    });
-    return;
+    })
+    return
   }
 
-  const user = result.user;
+  const { user } = result
   if (!user) {
     res.status(500).send({
       error: 'Database Query Error'
-    });
-    return;
+    })
+    return
   }
 
   res.status(200).send({
@@ -128,42 +125,40 @@ const signIn = async (req, res) => {
         picture: user.picture
       }
     }
-  });
-};
+  })
+}
 
 const getUserProfile = async (req, res) => {
-  const user_id = req.user.user_id
+  const userId = req.user.user_id
   try {
-    let favoriteData = await User.getFavorite(user_id)
+    let favoriteData = await User.getFavorite(userId)
+
     if (favoriteData.error) {
       favoriteData = {
         favoriteData: []
       }
     }
 
-    let exchangeData = await User.getExchange(user_id)
+    let exchangeData = await User.getExchange(userId)
     if (exchangeData.error) {
       exchangeData = {
         exchangeData: []
       }
     }
-
     const data = {
       user: req.user,
       favorite: favoriteData,
       exchange: exchangeData
     }
-    res.status(200).send({ data });
+    res.status(200).send({ data })
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     res.status(501).send({ error })
   }
-};
+}
 
 module.exports = {
   signUp,
   signIn,
-  getUserProfile,
-
+  getUserProfile
 }
-

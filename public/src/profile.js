@@ -34,9 +34,7 @@ fetch('/user/profile', {
     socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
     socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
 
-
     exchange = res.data.exchange
-
     favorite = res.data.favorite
     replyData = favorite.replyData
     senderData = favorite.senderData
@@ -89,7 +87,6 @@ const renderFavorite = () => {
 }
 
 async function renderMessage(msg) {
-  console.log(msg)
   const sender = senderData[msg.sender]
   const reply = replyData[msg.reply]
 
@@ -282,7 +279,6 @@ async function renderMessage(msg) {
 
 }
 
-
 const renderExchange = () => {
   const exchangeData = exchange.exchangeData
   const exchangeContainer = document.querySelector('#exchangeContainer')
@@ -399,7 +395,6 @@ fetch('/explore/user_list', {
       clone.querySelector('.name').textContent = user.name
 
       const acceptInvite = clone.querySelector('.acceptInvite')
-      console.log(room)
       acceptInvite.setAttribute('room', `${room}`)
       acceptInvite.textContent = "Let's Chat"
 
@@ -484,7 +479,6 @@ const action = function (element) {
     }
     case "Let's Chat": {
       const room = element.getAttribute('room')
-      // console.log(`/friend.html?room=${room}`)
       window.location = `/friend.html?room=${room}`
       break;
     }

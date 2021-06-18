@@ -1,18 +1,7 @@
-// const { bind } = require("lodash")
-const { ComputeOptimizer } = require('aws-sdk');
-const { CostExplorer } = require('aws-sdk');
-const { bind } = require('lodash');
-const {
-  mysql,
-  query,
-  transaction,
-  commit,
-  rollback
-} = require('./mysqlcon');
+const { pool } = require('./mysqlcon')
 
 async function createRoom(invite) {
-  console.log(invite)
-  queryString = `
+  const queryString = `
   INSERT INTO room (user_a, user_b)
   SELECT * FROM (SELECT ?) AS temp
   WHERE NOT EXISTS
@@ -21,15 +10,13 @@ async function createRoom(invite) {
     OR user_b = ? AND user_a = ?
   )
   `
-  binding = [invite]
-  invite.concat(invite).flat().map(i => binding.push(i))
-  console.log(binding)
-  const result = await query(queryString, binding)
-  console.log(result)
+  const binding = [invite]
+  invite.concat(invite).flat().map((i) => binding.push(i))
+  const [result] = await pool.query(queryString, binding)
   return result.insertId
 }
 
-const getFriendList = async (user_id) => {
+const getFriendList = async (userId) => {
   const queryString = `
   SELECT * FROM 
   ( 
@@ -43,22 +30,9 @@ const getFriendList = async (user_id) => {
   ) AS user_data
   ON friend_list.user_id = user_data.user_id 
   `
-  const result = await query(queryString, [user_id, user_id])
+  const [result] = await pool.query(queryString, [userId, userId])
   return result
 }
-
-// const getFriendIdList = async (user_id) => {
-//   const queryString = `
-//   SELECT * FROM 
-//   ( 
-//     SELECT receiver_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND sender_id = ?
-//     UNION
-//     SELECT sender_id AS user_id FROM friend WHERE status = 'Let\\'s Chat' AND receiver_id = ?
-//   ) AS friend_list
-// `
-//   const result = await query(queryString, [user_id, user_id])
-//   return result
-// }
 
 const addFavorite = async (data) => {
   let binding = Object.values(data)
@@ -69,100 +43,106 @@ const addFavorite = async (data) => {
   WHERE NOT EXISTS 
   (SELECT * FROM favorite WHERE user_id = ? AND history_id = ?)
   `
-  const result = await query(queryString, binding)
+  const [result] = await pool.query(queryString, binding)
   return result
 }
 
-
-const getRooms = async (user_id) => {
+const getRooms = async (userId) => {
   const queryString = `
   SELECT user_a AS user_id, id AS room_id FROM room WHERE user_b = ?
   UNION
   SELECT user_b AS user_id, id AS room_id FROM room WHERE user_a = ?
   `
-  const result = await query(queryString, [user_id, user_id])
+  const [result] = await pool.query(queryString, [userId, userId])
   return result
 }
 
 const getHistory = async (room) => {
-  const queryString = `SELECT *  FROM history WHERE room = ?`
-  const result = await query(queryString, room)
+  const queryString = 'SELECT *  FROM history WHERE room = ?'
+  const [result] = await pool.query(queryString, room)
   return result
 }
 
 const saveMessage = async (msg) => {
-  await transaction()
+  const conn = await pool.getConnection()
+  await conn.query('START TRANSACTION')
   try {
-    const result = await query(`INSERT INTO history SET ?`, msg)
+    const result = await conn.query('INSERT INTO history SET ?', msg)
     const historyId = result.insertId
-    const timeStamp = await query(`SELECT time FROM history WHERE id = ?`, [historyId])
-    await commit()
+    const timeStamp = await conn.query('SELECT time FROM history WHERE id = ?', [historyId])
+    await conn.query('COMMIT')
     return { time: timeStamp[0].time, historyId }
   } catch (error) {
-    rollback()
+    console.log(error)
+    await conn.query('ROLLBACK')
     return error
+  } finally {
+    conn.release()
   }
 }
 
 const readMessage = async (data) => {
-  console.log(data)
   const queryString = `
-  UPDATE history SET \`read\` = 1 WHERE sender = ? AND room = ? AND \`read\` = 0
+    UPDATE history SET \`read\` = 1 WHERE sender = ? AND room = ? AND \`read\` = 0
   `
-  const result = await query(queryString, data)
+  const [result] = await pool.query(queryString, data)
   return result
 }
 
 const createExchange = async (exchange) => {
-  const result = await query(`INSERT INTO exchange SET ?`, exchange)
+  const [result] = await pool.query('INSERT INTO exchange SET ?', exchange)
   return result.insertId
 }
 
-const updateExchangeStatus = async (exchange_id, status) => {
-  let queryString = `UPDATE exchange SET status = ? WHERE id = ?`
-  const result = await query(queryString, [status, exchange_id])
+const updateExchangeStatus = async (exchangeId, status) => {
+  const queryString = 'UPDATE exchange SET status = ? WHERE id = ?'
+  const [result] = await pool.query(queryString, [status, exchangeId])
 
   return result
 }
 
 const exchangeStart = async (exchange, status) => {
+  const conn = await pool.getConnection()
   try {
-    await transaction()
+    await conn.query('START TRANSACTION')
     let binding = [exchange.room_id, exchange.publisher_id, 'exchange', exchange.id]
     let queryString = `
     INSERT INTO history (room,sender,\`type\`)
     SELECT ?,?,?
     WHERE NOT EXISTS 
     (SELECT * FROM \`exchange\` WHERE id = ? AND history_id IS NOT NULL)`
-    let result = await query(queryString, binding)
-    const history_id = result.insertId
+    let result = await conn.query(queryString, binding)
+    const historyId = result.insertId
 
-    if (history_id) {
-      const exchange_id = exchange.id
-      binding = [status, history_id, exchange_id]
-      queryString = `UPDATE exchange SET status = ? , history_id = ? WHERE id = ?`
-      await query(queryString, binding)
-      queryString = `SELECT * FROM history WHERE id = ?`
-      result = await query(queryString, history_id)
+    if (historyId) {
+      const exchangeId = exchange.id
+      binding = [status, historyId, exchangeId]
+      queryString = 'UPDATE exchange SET status = ? , history_id = ? WHERE id = ?'
+      await conn.query(queryString, binding)
+      queryString = 'SELECT * FROM history WHERE id = ?'
+      result = await conn.query(queryString, historyId)
     }
 
-    await commit()
+    await conn.query('COMMIT')
     return result[0]
   } catch (error) {
-    await rollback()
+    console.log(error)
+    await conn.query('ROLLBACK')
     console.log(error)
     return error
+  } finally {
+    conn.release()
   }
 }
 
-const updateExchangeRead = async (exchange_id) => {
-  const queryString = `UPDATE exchange SET \`read\` = 1 WHERE id = ?`
-  const result = await query(queryString, [exchange_id])
+const updateExchangeRead = async (exchangeId) => {
+  const queryString = 'UPDATE exchange SET `read` = 1 WHERE id = ?'
+  const [result] = await pool.query(queryString, [exchangeId])
   return result
 }
 
-const removeExchange = async (exchange_id) => {
-  const result = await query(`DELETE FROM exchange WHERE id = ?`, [exchange_id])
+const removeExchange = async (exchangeId) => {
+  const [result] = await pool.query('DELETE FROM exchange WHERE id = ?', [exchangeId])
   return result
 }
 
@@ -173,32 +153,31 @@ const getUnreadMsgNum = async (roomList) => {
   WHERE \`read\` = 0 AND sender <> 35 AND room IN (11,12,13,14)
   GROUP BY sender
   `
-  const result = await query(queryString, roomList)
+  const [result] = await pool.query(queryString, roomList)
   return result
 }
 
 const updateTranslate = async (historyId, translateResult) => {
-  const queryString = `UPDATE history SET translate = ? WHERE id = ?`
-  const result = await query(queryString, [translateResult, historyId])
+  const queryString = 'UPDATE history SET translate = ? WHERE id = ?'
+  const [result] = await pool.query(queryString, [translateResult, historyId])
   return result
 }
 
 const getTranslate = async (historyId) => {
-  const queryString = `SELECT translate FROM history WHERE id = ?`
-  const result = await query(queryString, [historyId])
+  const queryString = 'SELECT translate FROM history WHERE id = ?'
+  const [result] = await pool.query(queryString, [historyId])
   return result[0].translate
 }
 
 const saveCollect = async (collection) => {
-  const queryString = `INSERT INTO exchange_collect SET ?`
-  const result = await query(queryString, collection)
+  const queryString = 'INSERT INTO exchange_collect SET ?'
+  const [result] = await pool.query(queryString, collection)
   return result
 }
 
 module.exports = {
   createRoom,
   getFriendList,
-  // getFriendIdList,
   addFavorite,
   getRooms,
   getHistory,
@@ -214,14 +193,3 @@ module.exports = {
   getTranslate,
   saveCollect
 }
-
-// function () {
-//   await transaction()
-//   try{
-//     await query()
-//     await commit()
-//   }catch(error){
-//     rollback()
-//     return error
-//   }
-// }

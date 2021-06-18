@@ -297,7 +297,8 @@ function reply(element) {
   try {
     replyTo.querySelector('img').src = friendData[sender].picture
     replyTo.querySelector('span#senderName').textContent = friendData[sender].name
-  } catch (e) {
+  } catch (error) {
+    console.log(error)
     replyTo.querySelector('img').src = user.picture
     replyTo.querySelector('span#senderName').textContent = user.name
   }
@@ -484,7 +485,6 @@ fetch('/chat/friend', {
 
     textTranslatelang = user.native
     audioTranlateLang = user.learning
-    console.log(user.learning)
     speechSynthesisLang = user.learning
 
     if (res.data.length === 0) {
@@ -515,7 +515,7 @@ fetch('/chat/friend', {
       //render friend list
       const template = document.querySelector('#uerBoxTemplate').content
       const friend_list = document.querySelector('#friend-list')
-      friendList.map(user => {
+      friendList.forEach((user) => {
         const clone = document.importNode(template, true)
         clone.querySelector('.user_box').id = user.user_id
         clone.querySelector('img').setAttribute('src', user.picture)
@@ -1514,7 +1514,7 @@ exchangeForm.addEventListener('submit', (e) => {
     exchangeInvite[data[0]] = data[1]
   }
 
-  const package = {
+  const invitation = {
     receiver: talkTo.user_id,
     data: {
       exchangeInvite,
@@ -1525,5 +1525,5 @@ exchangeForm.addEventListener('submit', (e) => {
       }
     }
   }
-  socket.emit('exchangeInvite', package)
+  socket.emit('exchangeInvite', invitation)
 })
