@@ -1,20 +1,16 @@
 const router = require('express').Router()
 
 const {
-  upload,
   wrapAsync,
-  authentication,
+  authentication
 } = require('../../util/util')
 
-const {
-  translate,
-  transcript,
-} = require('../controllers/google_controller')
+const Google = require('../controllers/google_controller')
 
 router.route('/google/translate')
-  .post(authentication(), wrapAsync(translate))
+  .post(authentication(), wrapAsync(Google.getTranslate))
 
 router.route('/google/transcript')
-  .post(authentication(), wrapAsync(transcript))
+  .post(authentication(), wrapAsync(Google.getTranscript))
 
 module.exports = router
