@@ -50,29 +50,29 @@ const onConnect = (socket) => {
   socket.on('leaveRoom', Socket.leaveRoom(socket, io))
 
   // for peer to peer communicate
-  socket.on('offer', Socket.offer(socket, io))
-  socket.on('answer', Socket.answer(socket, io))
-  socket.on('icecandidate', Socket.icecandidate(socket, io))
+  socket.on('offer', Socket.switchOffer(socket, io))
+  socket.on('answer', Socket.switchAnswer(socket, io))
+  socket.on('icecandidate', Socket.iceCandidate(socket, io))
 
   // for calling
-  socket.on('hangup', Socket.hangup(socket, io))
-  socket.on('callend', Socket.callend(socket, io))
+  socket.on('hangup', Socket.hangup(socket, io)) // reject the phone call
+  socket.on('callend', Socket.callend(socket, io)) // during the phone call, someone end the call
 
   socket.on('message', Socket.message(socket, io))
   socket.on('readMessage', Socket.readMessage(socket, io))
-  socket.on('favorite', Socket.favorite(socket, io))
+  socket.on('favorite', Socket.savefavorite(socket, io))
 
-  socket.on('exchangeInvite', Socket.exchangeInvite(socket, io))
+  socket.on('exchangeInvite', Socket.sendExchangeInvite(socket, io))
   socket.on('acceptExchangeInvite', Socket.acceptExchangeInvite(socket, io))
   socket.on('rejectExchangeInvite', Socket.rejectExchangeInvite(socket, io))
   socket.on('readExchangeInviteAnswer', Socket.readExchangeInviteAnswer(socket, io))
 
-  socket.on('readyToStart', Socket.readyToStart(socket, io))
+  socket.on('readyToStart', Socket.sayReadyToStart(socket, io))
   socket.on('saveCollect', Socket.saveCollect(socket, io))
 
   socket.on('invite', Socket.createInvite(socket, io))
-  socket.on('accept', Socket.accept(socket, io))
-  socket.on('reject', Socket.reject(socket, io))
+  socket.on('accept', Socket.acceptInvite(socket, io))
+  socket.on('reject', Socket.rejectInvite(socket, io))
 }
 
 io.use(Socket.login)

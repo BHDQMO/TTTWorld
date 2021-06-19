@@ -30,15 +30,15 @@ const readInvite = (socket, io) => async () => {
 }
 
 const onlineNotice = (socket, io) => async (user) => {
-  const friendList = await Chat.getFriendList(user.user_id)
-  const roomList = await Chat.getRooms(user.user_id)
-  const roomPair = {}
-  roomList.forEach((room) => { roomPair[room.user_id] = room.room_id })
-  friendList.forEach((friend) => {
-    const friendId = friend.user_id
+  const friend = await Chat.getFriendList(user.user_id)
+  const roomsDetail = await Chat.getRooms(user.user_id)
+  const roomDetail = {}
+  roomsDetail.forEach((room) => { roomDetail[room.user_id] = room.room_id })
+  friend.forEach((x) => {
+    const friendId = x.user_id
     const friendSocketId = socketIds[friendId]
     if (friendSocketId) {
-      user.room_id = roomPair[friendId]
+      user.room_id = roomDetail[friendId]
       io.to(friendSocketId).emit('friend_online', user)
     }
   })
@@ -74,8 +74,8 @@ const readMessage = (socket, io) => async (data) => {
   await Chat.readMessage(data)
 }
 
-const favorite = (socket, io) => async (data) => {
-  await Chat.addFavorite(data)
+const savefavorite = (socket, io) => async (data) => {
+  await Chat.savefavorite(data)
 }
 
 const createInvite = (socket, io) => async (invite) => {
@@ -95,19 +95,19 @@ const createInvite = (socket, io) => async (invite) => {
   io.to(socketIds[invite[1]]).emit('waitingInvite', data)
 }
 
-const accept = (socket, io) => async ({ user, senderId }) => {
+const acceptInvite = (socket, io) => async ({ user, senderId }) => {
   await Explore.acceptInvite([user.user_id, senderId])
   const room = await Chat.createRoom([user.user_id, senderId])
   io.to(socketIds[user.user_id]).emit('accept', room)
   io.to(socketIds[senderId]).emit('inviteAccepted', { user, room })
 }
 
-const reject = (socket, io) => async (invite) => {
+const rejectInvite = (socket, io) => async (invite) => {
   await Explore.rejectInvite(invite)
   io.to(socketIds[invite[1]]).emit('reject', invite[0])
 }
 
-const icecandidate = (socket, io) => ({ room, candidate }) => {
+const iceCandidate = (socket, io) => ({ room, candidate }) => {
   socket.to(room).emit('icecandidate', { room, candidate })
 }
 
@@ -119,16 +119,16 @@ const callend = (socket, io) => (roomId) => {
   socket.to(roomId).emit('callend')
 }
 
-const offer = (socket, io) => (data) => {
+const switchOffer = (socket, io) => (data) => {
   const { room } = data
   socket.to(room).emit('offer', data)
 }
 
-const answer = (socket, io) => (data) => {
+const switchAnswer = (socket, io) => (data) => {
   socket.to(data.room).emit('answer', data)
 }
 
-const beforeStartNotice = (io, data) => {
+const noticeBeforeStart = (io, data) => {
   const { exchange } = data
   const userList = [exchange.user_a, exchange.user_b]
   userList.forEach((user) => {
@@ -143,7 +143,7 @@ const beforeStartNotice = (io, data) => {
 }
 
 const exchanges = {}
-const onStartNotice = (io, data) => {
+const noticeOnStart = (io, data) => {
   const { exchange } = data
   const userList = [exchange.user_a, exchange.user_b]
   if (!exchanges[exchange.id]) {
@@ -162,7 +162,7 @@ const onStartNotice = (io, data) => {
   })
 }
 
-const readyToStart = (socket, io) => async ({ userId, exchange }) => {
+const sayReadyToStart = (socket, io) => async ({ userId, exchange }) => {
   const exchangeId = exchange.id
   if (exchanges[exchangeId]) {
     exchanges[exchangeId][userId] = true
@@ -185,7 +185,7 @@ const saveCollect = (socket, io) => (collection) => {
   })
 }
 
-const exchangeInvite = (socket, io) => async (invitation) => {
+const sendExchangeInvite = (socket, io) => async (invitation) => {
   const { receiver } = invitation
   const { data } = invitation
   const exchangeId = await Chat.createExchange(data.exchangeInvite)
@@ -222,22 +222,22 @@ module.exports = {
   readInvite,
   joinRoom,
   leaveRoom,
-  offer,
-  answer,
-  icecandidate,
+  switchOffer,
+  switchAnswer,
+  iceCandidate,
   hangup,
   callend,
   message,
-  favorite,
+  savefavorite,
   readMessage,
   createInvite,
-  accept,
-  reject,
-  beforeStartNotice,
-  onStartNotice,
-  readyToStart,
+  acceptInvite,
+  rejectInvite,
+  noticeBeforeStart,
+  noticeOnStart,
+  sayReadyToStart,
   saveCollect,
-  exchangeInvite,
+  sendExchangeInvite,
   acceptExchangeInvite,
   rejectExchangeInvite,
   readExchangeInviteAnswer

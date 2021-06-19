@@ -8,8 +8,8 @@ const getFriendList = async (req, res) => {
   const roomPair = {}
   rooms.forEach((room) => { roomPair[room.user_id] = room.room_id })
 
-  const roomList = rooms.map((room) => room.room_id)
-  const unread = await Chat.getUnreadMsgNum(roomList)
+  const roomIds = rooms.map((room) => room.room_id)
+  const unread = await Chat.getUnreadMsgNum(roomIds)
   const unreadPair = {}
   unread.forEach((record) => { unreadPair[record.sender] = record.unread })
 

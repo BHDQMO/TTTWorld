@@ -1,18 +1,18 @@
-let signInForm = document.forms.namedItem('signInForm');
+const signInForm = document.forms.namedItem('signInForm')
 signInForm.addEventListener('submit', (e) => {
-  const formData = new FormData(signInForm);
+  const formData = new FormData(signInForm)
   formData.append('provider', 'native')
-  e.preventDefault();
-  let xhr = new XMLHttpRequest();
-  xhr.open('POST', '/user/signin');
-  xhr.onreadystatechange = function () {
+  e.preventDefault()
+  const xhr = new XMLHttpRequest()
+  xhr.open('POST', '/user/signin')
+  xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       const data = JSON.parse(xhr.responseText)
       if (!data.data) {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: `${data.error}`,
+          text: `${data.error}`
         })
       } else {
         const socket = io({
@@ -20,11 +20,11 @@ signInForm.addEventListener('submit', (e) => {
             user_id: data.data.user.user_id
           }
         })
-        socket.emit("signin", data.data.user)
+        socket.emit('signin', data.data.user)
         window.localStorage.setItem('JWT', data.data.token)
         Swal.fire(
           'Wlecome back!',
-          "Your friend are waiting for you",
+          'Your friend are waiting for you',
           'success'
         ).then((result) => {
           if (result.isConfirmed) {
@@ -33,9 +33,9 @@ signInForm.addEventListener('submit', (e) => {
         })
       }
     }
-  };
-  xhr.send(formData);
-});
+  }
+  xhr.send(formData)
+})
 
 function signup() {
   window.location = '/signup.html'

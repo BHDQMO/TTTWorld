@@ -95,7 +95,8 @@ const noticeAction = function (element) {
   switch (element.textContent) {
     case "Accept": {
       onCheckNotice()
-      socket.emit('accept', { user, sender_Id: parseInt(element.id) })
+      console.log(parseInt(element.id))
+      socket.emit('accept', { user, senderId: parseInt(element.id) })
       //accept the invitation
       //receive the room number from server
       socket.on('accept', (room) => {
