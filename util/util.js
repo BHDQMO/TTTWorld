@@ -8,6 +8,7 @@ const multerS3 = require('multer-s3')
 const User = require('../server/models/user_model')
 const Socket = require('./socket')
 
+const MAX_HEADSHOT_SIZE = 5 * 1024 * 1024
 const { TOKEN_SECRET } = process.env
 
 const s3 = new aws.S3({
@@ -16,6 +17,9 @@ const s3 = new aws.S3({
 })
 
 const upload = multer({
+  limits: {
+    fileSize: MAX_HEADSHOT_SIZE
+  },
   storage: multerS3({
     s3,
     bucket: process.env.S3_BUCKET,
@@ -80,23 +84,23 @@ const calAge = (date) => {
 }
 
 const serverNotice = async (io) => {
-  const result = await User.getWaitingNoticeExchange()
+  const waitingNoticeExchange = await User.getWaitingNoticeExchange()
 
-  if (result.length > 0) {
-    let userIdList = []
-    result.forEach((exchange) => {
-      userIdList.push(exchange.user_a)
-      userIdList.push(exchange.user_b)
+  if (waitingNoticeExchange.length > 0) {
+    let waitingNoticeExchangeUserIds = []
+    waitingNoticeExchange.forEach((exchange) => {
+      waitingNoticeExchangeUserIds.push(exchange.user_a)
+      waitingNoticeExchangeUserIds.push(exchange.user_b)
     })
 
     // remove dupilicate
-    userIdList = [...new Set(userIdList)]
+    waitingNoticeExchangeUserIds = [...new Set(waitingNoticeExchangeUserIds)]
 
-    const groupDtail = await User.getGroupDetail(userIdList)
+    const waitingNoticeExchangeUsersDetail = await User.getGroupDetail(waitingNoticeExchangeUserIds)
     const userData = {}
-    groupDtail.forEach((user) => { userData[user.user_id] = user })
+    waitingNoticeExchangeUsersDetail.forEach((user) => { userData[user.user_id] = user })
 
-    result.forEach((exchange) => {
+    waitingNoticeExchange.forEach((exchange) => {
       const user = {}
       user[exchange.user_a] = userData[exchange.user_a]
       user[exchange.user_b] = userData[exchange.user_b]
@@ -105,11 +109,11 @@ const serverNotice = async (io) => {
         user
       }
       if (exchange.remainTime <= 0) {
-        Socket.onStartNotice(io, data)
+        Socket.noticeOnStart(io, data)
       } else if (exchange.status === 1 && exchange.notice === 1) {
-        Socket.beforeStartNotice(io, data)
+        Socket.noticeBeforeStart(io, data)
       } else if (exchange.notice === 2) {
-        Socket.onStartNotice(io, data)
+        Socket.noticeOnStart(io, data)
       }
     })
   } else {
@@ -126,6 +130,7 @@ const removeFile = (pathname) => {
 }
 
 module.exports = {
+  multer,
   upload,
   wrapAsync,
   authentication,

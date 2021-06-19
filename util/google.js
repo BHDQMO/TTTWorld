@@ -19,7 +19,7 @@ const translateText = async (text, target) => {
   return Array.isArray(translations) ? translations : [translations]
 }
 
-const transcript = async (filename, languageCode) => {
+const transcriptAudio = async (filename, languageCode) => {
   const client = new speech.SpeechClient()
 
   const config = {
@@ -67,6 +67,6 @@ const geocoding = async (address) => {
 
 module.exports = {
   translateText,
-  transcript,
+  transcriptAudio,
   geocoding
 }

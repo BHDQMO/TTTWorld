@@ -6,10 +6,17 @@ const {
   authentication
 } = require('../../util/util')
 
-const cpUpload = upload.fields([{
-  name: 'picture',
-  maxCount: 1
-}])
+const cpUpload = (req, res, next) => {
+  upload.fields([
+    { name: 'picture', maxCount: 1 }
+  ])(req, res, (error) => {
+    if (error) {
+      res.send({ error: error.message })
+    } else {
+      next()
+    }
+  })
+}
 
 const {
   signUp,

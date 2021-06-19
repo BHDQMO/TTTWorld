@@ -34,7 +34,7 @@ const getFriendList = async (userId) => {
   return result
 }
 
-const addFavorite = async (data) => {
+const savefavorite = async (data) => {
   let binding = Object.values(data)
   binding = [binding, binding].flat()
   const queryString = `
@@ -67,11 +67,11 @@ const saveMessage = async (msg) => {
   const conn = await pool.getConnection()
   await conn.query('START TRANSACTION')
   try {
-    const result = await conn.query('INSERT INTO history SET ?', msg)
+    const [result] = await conn.query('INSERT INTO history SET ?', msg)
     const historyId = result.insertId
-    const timeStamp = await conn.query('SELECT time FROM history WHERE id = ?', [historyId])
+    const [[timeStamp]] = await conn.query('SELECT time FROM history WHERE id = ?', [historyId])
     await conn.query('COMMIT')
-    return { time: timeStamp[0].time, historyId }
+    return { time: timeStamp.time, historyId }
   } catch (error) {
     console.log(error)
     await conn.query('ROLLBACK')
@@ -111,7 +111,7 @@ const exchangeStart = async (exchange, status) => {
     SELECT ?,?,?
     WHERE NOT EXISTS 
     (SELECT * FROM \`exchange\` WHERE id = ? AND history_id IS NOT NULL)`
-    let result = await conn.query(queryString, binding)
+    let [result] = await conn.query(queryString, binding)
     const historyId = result.insertId
 
     if (historyId) {
@@ -120,11 +120,11 @@ const exchangeStart = async (exchange, status) => {
       queryString = 'UPDATE exchange SET status = ? , history_id = ? WHERE id = ?'
       await conn.query(queryString, binding)
       queryString = 'SELECT * FROM history WHERE id = ?'
-      result = await conn.query(queryString, historyId)
+      [result] = await conn.query(queryString, historyId)
     }
 
     await conn.query('COMMIT')
-    return result[0]
+    return result
   } catch (error) {
     console.log(error)
     await conn.query('ROLLBACK')
@@ -166,7 +166,7 @@ const updateTranslate = async (historyId, translateResult) => {
 const getTranslate = async (historyId) => {
   const queryString = 'SELECT translate FROM history WHERE id = ?'
   const [result] = await pool.query(queryString, [historyId])
-  return result[0].translate
+  return result.translate
 }
 
 const saveCollect = async (collection) => {
@@ -178,7 +178,7 @@ const saveCollect = async (collection) => {
 module.exports = {
   createRoom,
   getFriendList,
-  addFavorite,
+  savefavorite,
   getRooms,
   getHistory,
   saveMessage,

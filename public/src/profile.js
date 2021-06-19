@@ -306,6 +306,8 @@ function fillExchangeData(item) {
   const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
   clone.querySelector('.time').textContent = timeString
+  console.log(roommateData)
+  console.log(item)
   clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
   clone.querySelector('.name').textContent = roommateData[item.room_id].name
   const duration = item.duration

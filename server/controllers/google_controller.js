@@ -34,7 +34,7 @@ const getTranscript = async (req, res) => {
       const pathname = `${Date.now()}${req.user.user_id}.ogg`
       fs.writeFileSync(pathname, body)
       try {
-        transcript = await Google.transcript(pathname, languageCode)
+        transcript = await Google.transcriptAudio(pathname, languageCode)
         res.send({ transcript })
         Chat.updateTranslate(historyId, transcript)
         removeFile(pathname)

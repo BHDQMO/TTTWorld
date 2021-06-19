@@ -113,6 +113,7 @@ async function renderMessage(msg) {
     replyBtn.setAttribute('senderId', msg.sender)
     replyBtn.setAttribute('contentType', msg.type)
     const timeSpan = clone.querySelector('#sendTime')
+    console.log(msg)
     timeSpan.textContent = showTime(msg.time)
 
     switch (msg.type) {

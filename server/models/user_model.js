@@ -14,7 +14,7 @@ const signUp = async (user, interests) => {
     delete user.geocode
 
     const userQueryStr = 'INSERT INTO user SET ?'
-    const userResult = await conn.query(userQueryStr, user)
+    const [userResult] = await conn.query(userQueryStr, user)
     await conn.query(`UPDATE user SET geocode = ${geocode} WHERE email = '${user.email}'`)
     if (interests.length > 0) {
       interests.map(async (interest) => {
@@ -39,7 +39,7 @@ const signUp = async (user, interests) => {
 }
 
 const isEmailExist = async (email) => {
-  const result = await pool.query('SELECT email FROM user WHERE email = ? FOR UPDATE', [email])
+  const [result] = await pool.query('SELECT email FROM user WHERE email = ? FOR UPDATE', [email])
   return result.length > 0
 }
 
@@ -47,15 +47,15 @@ const nativeSignIn = async (email, password) => {
   const conn = await pool.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const users = await conn.query('SELECT * FROM user WHERE email = ?', [email])
+    const [[users]] = await conn.query('SELECT * FROM user WHERE email = ?', [email])
 
-    if (users[0].length === 0) {
+    if (users.length === 0) {
       return {
         error: 'This Email has not been registered'
       }
     }
 
-    const user = users[0][0]
+    const user = users
     if (!bcrypt.compareSync(password, user.password)) {
       await conn.query('COMMIT')
       return {
@@ -195,18 +195,22 @@ const getExchange = async (userId) => {
     UNION
     SELECT id AS roomid FROM room WHERE user_b = ?
     ) AS roomlist
-    LEFT JOIN
+    INNER JOIN
     \`exchange\` 
     ON roomlist.roomid = exchange.room_id
     `
     const [exchangeData] = await conn.query(queryString, [userId, userId])
+
     const roomList = []
     exchangeData.forEach((item) => {
       if (roomList.includes(item.room_id) === false) {
         roomList.push(item.room_id)
       }
     })
-    queryString = `
+
+    const roommateData = {}
+    if (roomList.length > 0) {
+      queryString = `
     SELECT user.user_id, name, picture, room_id FROM 
     (SELECT user_a AS user_id, id AS room_id FROM room WHERE id IN ?
     UNION
@@ -216,14 +220,14 @@ const getExchange = async (userId) => {
     ON roommatelist.user_id = user.user_id
     WHERE user.user_id <> ?
     `
-
-    const [roommateResult] = await conn.query(queryString, [[roomList], [roomList], userId])
-    const roommateData = {}
-    roommateResult.forEach((item) => { roommateData[item.room_id] = item })
+      const [roommateResult] = await conn.query(queryString, [[roomList], [roomList], userId])
+      roommateResult.forEach((item) => { roommateData[item.room_id] = item })
+    }
     const data = {
       exchangeData,
       roommateData
     }
+
     await conn.query('COMMIT')
     return data
   } catch (error) {
@@ -267,12 +271,6 @@ async function getWaitingNoticeExchange() {
       // instant case(remainTime<0) need to send onStartNotice immediately
       // so, change to 3 directly
       const instantExchange = waitingNoticeExchange.filter((x) => x.id < 0)
-
-      // const instantExchange = waitingNoticeExchange.map((exchange) => {
-      //   if (exchange.remainTime < 0) {
-      //     exchange.id
-      //   }
-      // })
 
       queryString = 'UPDATE exchange SET notice = 3 WHERE id IN ?'
       await conn.query(queryString, [[instantExchange]])

@@ -32,13 +32,13 @@ async function getFriendStatus(user, userIds) {
     await conn.query('START TRANSACTION')
     let queryString = `
     SELECT receiver_id, status FROM friend WHERE sender_id = ? AND receiver_id IN (?)`
-    const sent = await conn.query(queryString, [user, userIds])
+    const [sent] = await conn.query(queryString, [user, userIds])
     const sentPair = {}
     sent.forEach((invite) => { sentPair[invite.receiver_id] = invite.status })
 
     queryString = `
     SELECT sender_id, status FROM friend WHERE receiver_id = ? AND sender_id IN (?)`
-    const received = await conn.query(queryString, [user, userIds])
+    const [received] = await conn.query(queryString, [user, userIds])
     const receivedPair = {}
     received.forEach((invite) => { receivedPair[invite.sender_id] = invite.status })
 
