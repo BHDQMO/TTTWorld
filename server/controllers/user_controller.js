@@ -11,7 +11,6 @@ const salt = parseInt(process.env.BCRYPT_SALT)
 
 const signUp = async (req, res) => {
   let { name } = req.body
-  name = validator.escape(name)
   const { email, password } = req.body
 
   if (!name || !email || !password) {
@@ -27,6 +26,8 @@ const signUp = async (req, res) => {
     })
     return
   }
+
+  name = validator.escape(name)
 
   const isEmailEsixt = await User.isEmailExist(email)
   if (isEmailEsixt) {

@@ -11,6 +11,7 @@ const {
   DB_USERNAME_RDS,
   DB_PASSWORD_RDS,
   DB_DATABASE_RDS,
+  DB_DATABASE_LOCAL_TEST,
   DB_CONNECTION_LIMIT
 } = process.env
 
@@ -26,15 +27,14 @@ const mysqlConfig = {
     user: DB_USERNAME_LOCAL,
     password: DB_PASSWORD_LOCAL,
     database: DB_DATABASE_LOCAL
+  },
+  test: { // for automation testing (command: npm run test)
+    host: DB_HOST_LOCAL,
+    user: DB_USERNAME_LOCAL,
+    password: DB_PASSWORD_LOCAL,
+    database: DB_DATABASE_LOCAL_TEST
   }
-  // test: { // for automation testing (command: npm run test)
-  //   host: DB_HOST,
-  //   user: DB_USERNAME,
-  //   password: DB_PASSWORD,
-  //   database: DB_DATABASE_TEST
-  // }
 }
-
 const env = NODE_ENV || 'production'
 const mysqlEnv = mysqlConfig[env]
 mysqlEnv.waitForConnections = true
