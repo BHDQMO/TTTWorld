@@ -1,14 +1,15 @@
 const users = [
   {
+    user_id: 1,
     provider: 'native',
-    email: 'test@test.com',
+    email: 'user1@test.com',
     password: 'test',
     name: 'testName',
     picture: 'test.png',
     birthday: '2021-06-20',
     gender: 'Male',
-    address: 'test',
-    geocode: 'ST_PointFromText(\'POINT(0 0)\',3857)',
+    address: 'taiwan',
+    geocode: 'POINT(0 0)',
     native: 'zh-TW',
     learning: 'en-US',
     introduction: 'test',
@@ -16,23 +17,31 @@ const users = [
     token: 'testToken'
   },
   {
+    user_id: 2,
     provider: 'native',
-    email: 'test2@test.com',
-    password: 'test2',
-    name: 'test2Name',
-    picture: 'test2.png',
+    email: 'user2@test.com',
+    password: 'test',
+    name: 'testName',
+    picture: 'test.png',
     birthday: '2021-06-20',
     gender: 'Male',
-    address: 'test2',
-    geocode: 'ST_PointFromText(\'POINT(0 0)\',3857)',
+    address: 'taiwan',
+    geocode: 'POINT(0 0)',
     native: 'zh-TW',
     learning: 'en-US',
-    introduction: 'test2',
+    introduction: 'test',
     interest: 'Cycling',
-    token: 'testToken2'
+    token: 'testToken'
   }
 ]
 
+const friends = [{
+  sender_id: 2,
+  receiver_id: 1,
+  read: 0
+}]
+
 module.exports = {
-  users
+  users,
+  friends
 }

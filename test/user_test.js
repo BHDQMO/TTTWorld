@@ -4,7 +4,7 @@ const { users } = require('./fake_data')
 const { S3_OBJECT_URL } = process.env
 
 const signupUser = {
-  provider: 'native',
+  provider: 's',
   email: 'test@test.com',
   password: 'test',
   name: 'test',
@@ -20,7 +20,7 @@ const signupUser = {
 
 describe('user', () => {
   it('sign up', async function () {
-    this.timeout(2500)
+    this.timeout(3000)
 
     const res = await requester
       .post('/user/signup')
@@ -77,19 +77,15 @@ describe('user', () => {
     const res = await requester
       .post('/user/signup')
       .send(signupUser)
-    console.log(signupUser)
-    console.log(res.body)
     assert.equal(res.body.error, 'Email Already Exists')
   })
 
   it('sign up with malicious email', async () => {
     const user = { ...signupUser }
     user.email = '<script>alert(1)</script>'
-    console.log(user)
     const res = await requester
       .post('/user/signup')
       .send(user)
-    console.log(res.body)
     assert.equal(res.body.error, 'Request Error: Invalid email format')
   })
 })
