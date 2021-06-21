@@ -1,4 +1,5 @@
 let socket
+let friendList
 let friendData
 let exchange
 let favorite
@@ -6,7 +7,6 @@ let replyData
 let senderData
 let collectionData
 let user_id // don't move it. notice need this variable
-let user
 
 fetch('/user/profile', {
   method: 'GET',
@@ -33,6 +33,10 @@ fetch('/user/profile', {
     socket.on('exchangeInvite', handleExchangeInvite)
     socket.on('exchangeInviteAccepted', handleExchangeInviteAccepted)
     socket.on('exchangeInviteRejected', handleExchangeInviteRejected)
+
+    friendList = res.data.friendList
+    friendData = {}
+    friendList.forEach((item) => { friendData[item.user_id] = item })
 
     exchange = res.data.exchange
     favorite = res.data.favorite
@@ -306,8 +310,6 @@ function fillExchangeData(item) {
   const timeString = month + ' ' + date + ', ' + startHours + ':' + startMin + '-' + endHours + ':' + endMin
 
   clone.querySelector('.time').textContent = timeString
-  console.log(roommateData)
-  console.log(item)
   clone.querySelector('.headIcon').src = roommateData[item.room_id].picture
   clone.querySelector('.name').textContent = roommateData[item.room_id].name
   const duration = item.duration

@@ -45,25 +45,41 @@ window.onclick = function (event) {
 }
 
 const renderWaitingIvite = (data) => {
-  const waitingNum = data.waitingInvite.length
-  document.querySelector(".count").textContent = waitingNum
+  const { waitingInvite, waitingExchangeInvite } = data
+
+  const waitingInviteCount = waitingInvite.length
+  const waitingExchangeInviteCount = waitingExchangeInvite.length
+  const waitingNum = waitingInviteCount + waitingExchangeInviteCount
+
+  // document.querySelector(".count").textContent = waitingNum
+
   if (waitingNum > 0) {
     const bufferMsg = document.querySelector('#bufferMsg')
     if (bufferMsg) {
       bufferMsg.style.display = 'none'
     }
 
-    const dropdownContent = document.querySelector('.dropdown-content')
-    data.waitingInvite.map(invite => {
-      const tempalte = document.querySelector('#notice_dropdown_template').content
-      const clone = document.importNode(tempalte, true)
-      clone.querySelector('.friendInviteBox').setAttribute('userId', invite.user_id)
-      clone.querySelector('.headIcon').src = invite.picture
-      clone.querySelector('.name').textContent = invite.name
-      clone.querySelector('.acceptInvite').id = invite.user_id
-      clone.querySelector('.rejectInvite').id = invite.user_id
-      dropdownContent.append(clone)
-    })
+    if (waitingInviteCount > 0) {
+      const dropdownContent = document.querySelector('.dropdown-content')
+      data.waitingInvite.map(invite => {
+        const tempalte = document.querySelector('#notice_dropdown_template').content
+        const clone = document.importNode(tempalte, true)
+        clone.querySelector('.friendInviteBox').setAttribute('userId', invite.user_id)
+        clone.querySelector('.headIcon').src = invite.picture
+        clone.querySelector('.name').textContent = invite.name
+        clone.querySelector('.acceptInvite').id = invite.user_id
+        clone.querySelector('.rejectInvite').id = invite.user_id
+        dropdownContent.append(clone)
+      })
+    }
+
+    if (waitingExchangeInviteCount > 0) {
+      const data = waitingExchangeInvite.map((x) => ({
+        exchangeInvite: x,
+        sender: friendData[x.publisher_id]
+      }))
+      handleExchangeInvite(data)
+    }
   }
 }
 
@@ -95,7 +111,6 @@ const noticeAction = function (element) {
   switch (element.textContent) {
     case "Accept": {
       onCheckNotice()
-      console.log(parseInt(element.id))
       socket.emit('accept', { user, senderId: parseInt(element.id) })
       //accept the invitation
       //receive the room number from server

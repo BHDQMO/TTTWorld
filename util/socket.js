@@ -14,13 +14,15 @@ const login = (socket, next) => {
 // once user online, send waiting invite to them
 const sendWaitingInvite = async (socket, io) => {
   const waitingInvite = await Explore.getWaitingInvite(socket.user_id)
+  const waitingExchangeInvite = await Explore.getWaitingExchangeInvite(socket.user_id)
   let unreadNum = 0
   waitingInvite.forEach((invite) => {
     if (invite.read === 0) { unreadNum += 1 }
   })
   const data = {
     unreadNum,
-    waitingInvite
+    waitingInvite,
+    waitingExchangeInvite
   }
   io.to(socket.id).emit('waitingInvite', data)
 }
@@ -65,8 +67,7 @@ const message = (socket, io) => async (data) => {
       io.to(socketIds[data.receiver]).emit('message', msg)
     }
   } catch (error) {
-    console.log(error)
-    console.log("can't find the room num in sever list")
+    console.log(error)// can't find the room num in sever list
   }
 }
 
@@ -216,6 +217,7 @@ const readExchangeInviteAnswer = (socket, io) => async (exchangeId) => {
 }
 
 module.exports = {
+  socketIds,
   login,
   sendWaitingInvite,
   onlineNotice,

@@ -45,6 +45,7 @@ const isEmailExist = async (email) => {
 
 const nativeSignIn = async (email, password) => {
   const conn = await pool.getConnection()
+
   try {
     await conn.query('START TRANSACTION')
     const [[users]] = await conn.query('SELECT * FROM user WHERE email = ?', [email])

@@ -69,6 +69,18 @@ async function getWaitingInvite(userId) {
   return result
 }
 
+async function getWaitingExchangeInvite(userId) {
+  const queryString = `
+  SELECT *, id AS exchange_id FROM
+  (SELECT id as room_id FROM room WHERE user_a = ? OR user_b = ?) AS room_id_list
+  LEFT JOIN exchange
+  ON room_id_list.room_id = exchange.room_id
+  WHERE status = 0 AND publisher_id <> ? 
+  `
+  const [result] = await pool.query(queryString, [userId, userId, userId])
+  return result
+}
+
 async function readInvite(userId) {
   const queryString = `
   UPDATE friend SET \`read\` = 1 WHERE receiver_id = ? AND status = 'Waiting' 
@@ -119,6 +131,7 @@ module.exports = {
   getUserList,
   getFriendStatus,
   getWaitingInvite,
+  getWaitingExchangeInvite,
   readInvite,
   getRooms,
   createInvite,

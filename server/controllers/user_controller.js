@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 
 const User = require('../models/user_model')
+const Chat = require('../models/chat_model')
 const Google = require('../../util/google')
 
 const { TOKEN_SECRET, S3_OBJECT_URL } = process.env
@@ -146,10 +147,19 @@ const getUserProfile = async (req, res) => {
         exchangeData: []
       }
     }
+
+    let friendList = await Chat.getFriendList(userId)
+    if (friendList.error) {
+      friendList = {
+        friendList: []
+      }
+    }
+
     const data = {
       user: req.user,
       favorite: favoriteData,
-      exchange: exchangeData
+      exchange: exchangeData,
+      friendList
     }
     res.status(200).send({ data })
   } catch (error) {

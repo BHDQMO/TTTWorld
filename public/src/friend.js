@@ -6,14 +6,14 @@ let user_id
 let friendData
 let friendList
 let talkTo
-let historyData = {}
+const historyData = {}
 
 let localPeer
 let tempCandidate = []
 let localStream
 let remoteStream
-let mediaRecorder //new MediaRecorder(localStream) for voiceRecorder
-let voiceRecorder //new MediaRecorder(localStream) for SpeechRecognition
+let mediaRecorder // new MediaRecorder(localStream) for voiceRecorder
+let voiceRecorder // new MediaRecorder(localStream) for SpeechRecognition
 
 let textTranslatelang //= 'en' //native lang
 let audioTranlateLang //= 'en-US' //learning lang
@@ -25,7 +25,7 @@ const confidenceThreshold = 0.85
 const voiceMsgLimit = 10 * 1000
 
 async function renderMessage(msg) {
-  const sender = msg.sender
+  const { sender } = msg
   if (sender === talkTo.user_id || sender === user_id) {
     const template = document.querySelector('#messageTemplate').content
     const clone = document.importNode(template, true)
@@ -51,8 +51,8 @@ async function renderMessage(msg) {
           replyContent = document.importNode(textElement, true)
           if (msg.correct === 1) {
             clone.querySelector('#replyIcon').removeAttribute('style')
-            let wrongString = replyContent.textContent.split('')
-            let rightString = msg.content.split('')
+            const wrongString = replyContent.textContent.split('')
+            const rightString = msg.content.split('')
             const result = patienceDiff(wrongString, rightString).lines
             let tempString = ''
             let isDetected = false
@@ -67,7 +67,7 @@ async function renderMessage(msg) {
                   tempElement.textContent = tempString
                   tempElement.setAttribute('class', 'pass')
                   markedWrongSpans.appendChild(tempElement)
-                  tempString = '' + char.line
+                  tempString = `${char.line}`
                   isDetected = true
                 } else if (char.bIndex === -1 && isDetected === true) {
                   tempString += char.line
@@ -76,7 +76,7 @@ async function renderMessage(msg) {
                   tempElement.textContent = tempString
                   tempElement.setAttribute('class', 'fix')
                   markedWrongSpans.appendChild(tempElement)
-                  tempString = '' + char.line
+                  tempString = `${char.line}`
                   isDetected = false
                 }
               }
@@ -108,20 +108,19 @@ async function renderMessage(msg) {
 
     const message = clone.querySelector('#message')
     message.setAttribute('from', from)
-    const replyBtn = clone.querySelector("#reply")
+    const replyBtn = clone.querySelector('#reply')
     replyBtn.setAttribute('historyId', msg.id)
     replyBtn.setAttribute('senderId', msg.sender)
     replyBtn.setAttribute('contentType', msg.type)
     const timeSpan = clone.querySelector('#sendTime')
-    console.log(msg)
     timeSpan.textContent = showTime(msg.time)
 
     switch (msg.type) {
       case 'text': {
-        //render correction
+        // render correction
         if (msg.correct === 1) {
-          let wrongString = replyContent.textContent.split('')
-          let rightString = msg.content.split('')
+          const wrongString = replyContent.textContent.split('')
+          const rightString = msg.content.split('')
           const result = patienceDiff(wrongString, rightString).lines
 
           let tempString = ''
@@ -130,17 +129,15 @@ async function renderMessage(msg) {
           markedRightSpans.setAttribute('id', 'content')
 
           result.map((char, i) => {
-
             if (char.bIndex !== -1) {
               if (char.aIndex !== -1 && isDetected === false) {
-
                 tempString += char.line
               } else if (char.aIndex === -1 && isDetected === false) {
                 const tempElement = document.createElement('span')
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'pass')
                 markedRightSpans.appendChild(tempElement)
-                tempString = '' + char.line
+                tempString = `${char.line}`
                 isDetected = true
               } else if (char.aIndex === -1 && isDetected === true) {
                 tempString += char.line
@@ -149,7 +146,7 @@ async function renderMessage(msg) {
                 tempElement.textContent = tempString
                 tempElement.setAttribute('class', 'correction')
                 markedRightSpans.appendChild(tempElement)
-                tempString = '' + char.line
+                tempString = `${char.line}`
                 isDetected = false
               }
             }
@@ -170,7 +167,6 @@ async function renderMessage(msg) {
           textSpan.remove()
           const audio = clone.querySelector('#originMsg audio')
           markedRightSpans = originMsg.insertBefore(markedRightSpans, audio)
-
         } else {
           const sourceSpan = clone.querySelector('#originMsg #content')
           sourceSpan.removeAttribute('hidden')
@@ -183,8 +179,8 @@ async function renderMessage(msg) {
       case 'audio': {
         if (msg.content.data) {
           const buffer = msg.content.data
-          var arrayBuffer = new ArrayBuffer(buffer.length);
-          var view = new Uint8Array(arrayBuffer);
+          const arrayBuffer = new ArrayBuffer(buffer.length)
+          const view = new Uint8Array(arrayBuffer)
           buffer.map((b, i) => view[i] = b)
           msg.content = arrayBuffer
         }
@@ -245,11 +241,11 @@ function sendMessage(type, content) {
     receiver: talkTo.user_id,
     msg: {
       reply: historyId,
-      correct: correct,
+      correct,
       room: talkTo.room_id,
       sender: user_id,
-      type: type,
-      content: content,
+      type,
+      content
     }
   }
   socket.emit('message', data)
@@ -310,7 +306,7 @@ function reply(element) {
   replyBody.append(clone)
   replyTo.style = 'display:flex'
 
-  //return for correct
+  // return for correct
   return clone.textContent
 }
 
@@ -344,10 +340,9 @@ function favorite(element) {
   Swal.fire('Add to your collection!')
 }
 
-
 // text message function
 const form = document.forms.textInput
-form.addEventListener('submit', function (e) {
+form.addEventListener('submit', (e) => {
   e.preventDefault()
 
   const input = document.getElementById('input')
@@ -412,7 +407,7 @@ const stopAudioRecord = () => {
 }
 
 async function renderHistory(element) {
-  //when click on userBox, change talkTo to this user
+  // when click on userBox, change talkTo to this user
   if (element) {
     talkTo = friendData[element.id]
 
@@ -432,20 +427,20 @@ async function renderHistory(element) {
     checkedUserBox.removeAttribute('checked')
   }
 
-  //set background to the box of talkTo user
+  // set background to the box of talkTo user
   const user_box = document.querySelector(`div[id='${talkTo.user_id}']`)
   user_box.setAttribute('checked', '')
 
-  //clear ex-history
+  // clear ex-history
   document.querySelector('#messages').textContent = ''
 
-  //inform server that user has leave certain room number
+  // inform server that user has leave certain room number
   socket.emit('leaveRoom', { user_id, room: talkTo.room_id })
 
-  //inform server that user has join to certain room number
+  // inform server that user has join to certain room number
   socket.emit('joinRoom', { user_id, room: talkTo.room_id })
 
-  //render talkTo's data to the friendDetailBox
+  // render talkTo's data to the friendDetailBox
   document.querySelector('#friendPicture').setAttribute('src', talkTo.picture)
   document.querySelector('#friendEmail').textContent = talkTo.email
   document.querySelector('#friendName').textContent = talkTo.name
@@ -466,9 +461,9 @@ async function renderHistory(element) {
   // get the history then render it
   fetch(`/chat/history?room=${talkTo.room_id}`, {
     method: 'GET',
-    headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
-  }).then(res => res.json())
-    .then(res => {
+    headers: { Authorization: `Bearer ${window.localStorage.getItem('JWT')}` }
+  }).then((res) => res.json())
+    .then((res) => {
       res.map((msg) => {
         renderMessage(msg)
       })
@@ -478,9 +473,9 @@ async function renderHistory(element) {
 // first come into this page
 fetch('/chat/friend', {
   method: 'GET',
-  headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
-}).then(res => res.json())
-  .then(res => {
+  headers: { Authorization: `Bearer ${window.localStorage.getItem('JWT')}` }
+}).then((res) => res.json())
+  .then((res) => {
     user = res.user
     user_id = res.user.user_id
 
@@ -493,8 +488,8 @@ fetch('/chat/friend', {
         icon: 'info',
         title: 'Your Friend List is Empty',
         html: '<span style=font-size:x-large>Go to Explore!<span>',
-        confirmButtonText: `OK`
-      }).then(res => {
+        confirmButtonText: 'OK'
+      }).then((res) => {
         if (res.isConfirmed) {
           window.location = '/profile.html'
         }
@@ -502,18 +497,19 @@ fetch('/chat/friend', {
     } else {
       friendList = res.data
       friendData = {}
-      friendList.map(item => friendData[item.user_id] = item)
+      friendList.map((item) => friendData[item.user_id] = item)
+
       socket = io({
         auth: {
           user_id
         }
       })
 
-      //render myProfile
+      // render myProfile
       document.querySelector('img#myPicture').src = user.picture
       document.querySelector('span#myName').textContent = user.name
 
-      //render friend list
+      // render friend list
       const template = document.querySelector('#uerBoxTemplate').content
       const friend_list = document.querySelector('#friend-list')
       friendList.forEach((user) => {
@@ -521,7 +517,7 @@ fetch('/chat/friend', {
         clone.querySelector('.user_box').id = user.user_id
         clone.querySelector('img').setAttribute('src', user.picture)
         clone.querySelector('#name').textContent = user.name
-        const unread = user.unread
+        const { unread } = user
         if (unread > 0) {
           clone.querySelector('.count-circle').style = 'display: flex'
           clone.querySelector('.count').textContent = unread
@@ -529,16 +525,16 @@ fetch('/chat/friend', {
         friend_list.append(clone)
       })
 
-      //set room as the global variable
-      let params = (new URL(document.location)).searchParams
-      let room = parseInt(params.get('room'))
-      let exchange_id = parseInt(params.get('exchange_id'))
+      // set room as the global variable
+      const params = (new URL(document.location)).searchParams
+      const room = parseInt(params.get('room'))
+      const exchange_id = parseInt(params.get('exchange_id'))
 
-      //decide talk to whom and collect data
+      // decide talk to whom and collect data
       if (!room) {
         talkTo = friendList[0]
       } else {
-        friendList.map(friend => {
+        friendList.map((friend) => {
           if (friend.room_id === room) {
             talkTo = friend
           }
@@ -556,19 +552,19 @@ fetch('/chat/friend', {
         socket.emit('readyToStart', { user_id, exchange })
       }
 
-      //render popup form
+      // render popup form
       document.querySelector('#first-lang').textContent = langCodePair[user.native]
       document.querySelector('#second-lang').textContent = langCodePair[user.learning]
 
       const start_time_input = document.querySelector('#start_time_input')
       const rightNow = new Date()
       const year = rightNow.getFullYear()
-      function fillZero(num) { return num < 10 ? '0' + num : num }
+      function fillZero(num) { return num < 10 ? `0${num}` : num }
       const month = fillZero(rightNow.getMonth() + 1)
       const date = fillZero(rightNow.getDate())
       const hours = fillZero(rightNow.getHours())
       const minutes = fillZero(rightNow.getMinutes())
-      const ISOTime = year + '-' + month + '-' + date + 'T' + hours + ':' + minutes
+      const ISOTime = `${year}-${month}-${date}T${hours}:${minutes}`
       start_time_input.min = ISOTime
       start_time_input.value = ISOTime
 
@@ -577,8 +573,8 @@ fetch('/chat/friend', {
       socket.emit('joinRoom', { user_id, room: talkTo.room_id })
 
       socket.on('connect', () => {
-        console.log('[socket] connect');
-      });
+        console.log('[socket] connect')
+      })
 
       socket.on('disconnect', () => {
         console.log('[socket] disconnect')
@@ -625,12 +621,12 @@ async function micBtn(element) {
   const muteIcon = element.querySelector('#muteIcon')
   if (activeIcon === 'muteIcon') {
     muteIcon.removeAttribute('style')
-    unmuteIcon.style = "display:inline"
-    localStream.getAudioTracks().map(track => track.enabled = true)
+    unmuteIcon.style = 'display:inline'
+    localStream.getAudioTracks().map((track) => track.enabled = true)
   } else if (activeIcon === 'unmuteIcon') {
     unmuteIcon.removeAttribute('style')
-    muteIcon.style = "display: inline"
-    localStream.getAudioTracks().map(track => track.enabled = false)
+    muteIcon.style = 'display: inline'
+    localStream.getAudioTracks().map((track) => track.enabled = false)
   }
 }
 
@@ -640,24 +636,24 @@ let ratio
 let time
 let startTime
 let conterIntervalId
-let step = 0 //exchange step
+let step = 0 // exchange step
 let history_Id
 
 const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
   step = 1
   history_id = msg.id
-  renderMessage(msg) //system message
+  renderMessage(msg) // system message
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
   ratio = exchangeData.ratio
-  time = duration * ratio / 100;
+  time = duration * ratio / 100
   startTime = new Date(startExchangeTime).valueOf()
 
   document.querySelector('#chat-box-head').style = 'display:flex'
   document.querySelector('#chat-box-head').setAttribute('part', 'I')
   document.querySelector('#currentLang').textContent = `Part I : ${langCodePair[exchangeData.first_lang]}`
 
-  //use to decide whether to open the recognition or not
+  // use to decide whether to open the recognition or not
   if (exchangeData.first_lang === user.learning) {
     startSpeechRecognition()
   }
@@ -665,21 +661,19 @@ const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
 
 function counter() {
   if (time >= 0) {
-    console.log(time)
-    let min = fillZero(Math.floor(time / 60))
-    let sec = fillZero(time % 60)
-    document.querySelector('#timer').textContent = min + " : " + sec
+    const min = fillZero(Math.floor(time / 60))
+    const sec = fillZero(time % 60)
+    document.querySelector('#timer').textContent = `${min} : ${sec}`
   } else {
     window.clearInterval(conterIntervalId)
     conterIntervalId = null
     if (step === 1) {
-      console.log(step)
       swap() // swap to step2
     } else {
       stopExchange() // stop exchange
     }
   }
-  time -= 1;
+  time -= 1
 }
 
 function swap() {
@@ -694,8 +688,8 @@ function swap() {
   document.querySelector('#chat-box-head').setAttribute('part', 'II')
   document.querySelector('#currentLang').textContent = `Part II : ${langCodePair[exchangeData.second_lang]}`
 
-  time = duration * (100 - ratio) / 100;
-  conterIntervalId = window.setInterval(counter, 1000);
+  time = duration * (100 - ratio) / 100
+  conterIntervalId = window.setInterval(counter, 1000)
 }
 
 async function stopExchange() {
@@ -790,14 +784,14 @@ async function stopExchange() {
 
     if (formValues) {
       const data = []
-      formValues.map(item => {
+      formValues.map((item) => {
         const collect = {
           exchange_id: exchangeData.id,
           user_id,
           timing: item.timing,
           audio: item.audioBlob,
           transcript: item.transcript,
-          confidence: item.confidence,
+          confidence: item.confidence
         }
         data.push(collect)
       })
@@ -813,8 +807,8 @@ async function stopExchange() {
       icon: 'success',
       title: 'Exchange Finish',
       html: '<span style=font-size:x-large>Well Done, your pronunciation is very good!<span>',
-      confirmButtonText: `OK`
-    }).then(res => {
+      confirmButtonText: 'OK'
+    }).then((res) => {
       if (res.isConfirmed) {
         finishExchange()
       }
@@ -822,17 +816,16 @@ async function stopExchange() {
   }
 }
 
-var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-var recognition = new SpeechRecognition();
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+var recognition = new SpeechRecognition()
 let lowScoreList = {}
 
 // let startTime
 let startPt
-let isNeedStoreCheck = {}
+const isNeedStoreCheck = {}
 
 async function startSpeechRecognition() {
-
   if (!voiceRecorder) {
     const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true })
     voiceRecorder = new MediaRecorder(voiceStream)
@@ -866,25 +859,25 @@ async function startSpeechRecognition() {
   } else {
     recognition.lang = exchangeData.second_lang
   }
-  recognition.maxAlternatives = 1;
-  recognition.interimResults = false;
+  recognition.maxAlternatives = 1
+  recognition.interimResults = false
 
-  recognition.start();
+  recognition.start()
 
   recognition.onstart = function (event) {
-    console.log('[SpeechRecognition] recognition start');
+    console.log('[SpeechRecognition] recognition start')
   }
 
   recognition.onaudiostart = function (event) {
-    console.log('[SpeechRecognition] audio start');
+    console.log('[SpeechRecognition] audio start')
   }
 
   recognition.onsoundstart = function (event) {
-    console.log('[SpeechRecognition] sound start');
+    console.log('[SpeechRecognition] sound start')
   }
 
   recognition.onspeechstart = function (event) {
-    console.log('[SpeechRecognition] speechs tart');
+    console.log('[SpeechRecognition] speechs tart')
   }
 
   let recognitionCounter = 0
@@ -892,8 +885,8 @@ async function startSpeechRecognition() {
     const resultList = event.results
     const lastResult = resultList[resultList.length - 1]
     const alternative = lastResult[0]
-    console.log(event.results)
-    console.log('Confidence: ' + alternative.confidence + '\n' + alternative.transcript.toLowerCase());
+    // console.log(event.results)
+    // console.log('Confidence: ' + alternative.confidence + '\n' + alternative.transcript.toLowerCase());
 
     if (lastResult.isFinal === true) {
       voiceRecorder.stop()
@@ -903,14 +896,14 @@ async function startSpeechRecognition() {
         isNeedStoreCheck[recognitionCounter] = true
 
         const millisToMinutesAndSeconds = (millis) => {
-          var minutes = Math.floor(millis / 60000);
-          var seconds = ((millis % 60000) / 1000).toFixed(0);
-          return `${minutes}:${(seconds < 10 ? "0" : "")}${seconds}`;
+          const minutes = Math.floor(millis / 60000)
+          const seconds = ((millis % 60000) / 1000).toFixed(0)
+          return `${minutes}:${(seconds < 10 ? '0' : '')}${seconds}`
         }
 
-        let endTime = Date.now()
+        const endTime = Date.now()
         const timing = millisToMinutesAndSeconds(endTime - startTime)
-        const transcript = alternative.transcript
+        const { transcript } = alternative
         const confidence = Math.floor(alternative.confidence * 100)
 
         if (!lowScoreList[recognitionCounter]) {
@@ -919,36 +912,35 @@ async function startSpeechRecognition() {
         lowScoreList[recognitionCounter].timing = timing
         lowScoreList[recognitionCounter].transcript = transcript
         lowScoreList[recognitionCounter].confidence = confidence
-
       }
     }
   }
 
   recognition.onnomatch = function (event) {
-    console.log('[SpeechRecognition] no match');
+    console.log('[SpeechRecognition] no match')
   }
 
   recognition.onspeechend = function () {
-    console.log('[SpeechRecognition] speech end');
+    console.log('[SpeechRecognition] speech end')
   }
 
   recognition.onsoundend = function (event) {
-    console.log('[SpeechRecognition] sound end');
+    console.log('[SpeechRecognition] sound end')
   }
 
   recognition.onaudioend = function (event) {
-    console.log('[SpeechRecognition] audio end');
+    console.log('[SpeechRecognition] audio end')
   }
 
   recognition.onend = function (event) {
-    console.log('[SpeechRecognition] recognition end');
+    console.log('[SpeechRecognition] recognition end')
     if (voiceRecorder.state !== 'inactive') {
-      recognition.start();
+      recognition.start()
     }
   }
 
   recognition.onerror = function (event) {
-    console.log('[SpeechRecognition] error occurred: ' + event.error);
+    console.log(`[SpeechRecognition] error occurred: ${event.error}`)
   }
 }
 
@@ -963,7 +955,7 @@ async function callBtn() {
     if (!await calling()) {
       callBtn.style = 'background:rgb(237,27,36)'
       hangUpIcon.removeAttribute('style')
-      callIcon.style = "display: none"
+      callIcon.style = 'display: none'
       micBtn.style = 'display:inline-block'
       cameraBtn.style = 'display:inline-block'
     }
@@ -980,12 +972,12 @@ async function cameraBtn(element) {
   const cameraOff = element.querySelector('#cameraOff')
   if (activeIcon === 'cameraOn') {
     cameraOn.removeAttribute('style')
-    cameraOff.style = "display: inline"
-    localStream.getVideoTracks().map(track => track.enabled = false)
+    cameraOff.style = 'display: inline'
+    localStream.getVideoTracks().map((track) => track.enabled = false)
   } else if (activeIcon === 'cameraOff') {
     cameraOff.removeAttribute('style')
-    cameraOn.style = "display: inline"
-    localStream.getVideoTracks().map(track => track.enabled = true)
+    cameraOn.style = 'display: inline'
+    localStream.getVideoTracks().map((track) => track.enabled = true)
   }
 }
 
@@ -1038,7 +1030,7 @@ async function calling() {
     Swal.fire({
       icon: 'error',
       title: 'Oops...',
-      text: error.message,
+      text: error.message
     })
     closing()
     return error
@@ -1067,17 +1059,17 @@ function closing() {
   document.getElementById('chatBox').removeAttribute('style')
 
   const arr = ['#mainVideo', '#myVideo', '#friendVideo']
-  arr.map(video => {
+  arr.map((video) => {
     const vedeoElement = document.querySelector(video)
     vedeoElement.srcObject = null
     vedeoElement.removeAttribute('style')
   })
 
   if (localStream) {
-    localStream.getTracks().forEach(track => { track.stop() })
+    localStream.getTracks().forEach((track) => { track.stop() })
   }
   if (remoteStream) {
-    remoteStream.getTracks().forEach(track => { track.stop() })
+    remoteStream.getTracks().forEach((track) => { track.stop() })
   }
 
   // Close the peer connection
@@ -1087,25 +1079,25 @@ function closing() {
   remoteStream = null
 
   // hidden the camera icon on the user_box
-  document.querySelector(`.user_box svg[style]`).removeAttribute('style')
+  document.querySelector('.user_box svg[style]').removeAttribute('style')
 }
 
 // utils
 async function createPeerConnection() {
   localPeer = new RTCPeerConnection({
-    'iceServers': [
+    iceServers: [
       {
-        'urls': 'stun:stun.l.google.com:19302'
+        urls: 'stun:stun.l.google.com:19302'
       },
       {
-        'urls': 'turn:192.158.29.39:3478?transport=udp',
-        'credential': 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-        'username': '28224511:1379330808'
+        urls: 'turn:192.158.29.39:3478?transport=udp',
+        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+        username: '28224511:1379330808'
       },
       {
-        'urls': 'turn:192.158.29.39:3478?transport=tcp',
-        'credential': 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-        'username': '28224511:1379330808'
+        urls: 'turn:192.158.29.39:3478?transport=tcp',
+        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+        username: '28224511:1379330808'
       }
     ]
   })
@@ -1128,7 +1120,7 @@ async function handleNewIceCandidate({ room, candidate }) {
     if (!localPeer) {
       createPeerConnection()
     } else if (!localPeer.remoteDescription) {
-      console.log("can't find remoteDescription in peer")
+      console.log("*** [WebRTC] can't find remoteDescription in peer")
       tempCandidate.push(candidate)
     } else {
       await localPeer.addIceCandidate(candidate)
@@ -1147,10 +1139,10 @@ async function addStreamProcess(constraints) {
   try {
     await getUserStream({ audio: true, video: true })
   } catch (error) {
-    throw new Error('*** [WebRTC] get User Stream error: ' + error.toString())
+    throw new Error(`*** [WebRTC] get User Stream error: ${error.toString()}`)
   }
 
-  localStream.getTracks().map(track => {
+  localStream.getTracks().map((track) => {
     if (track.kind === 'video') {
       track.enabled = constraints.video
     }
@@ -1167,7 +1159,7 @@ async function addStreamProcess(constraints) {
       .getTracks()
       .forEach((track) => localPeer.addTrack(track, localStream)) // triggers renegotiation by firing a negotiationneeded event
   } catch (error) {
-    throw new Error('*** [WebRTC] Peer add Track error: ' + error.toString())
+    throw new Error(`*** [WebRTC] Peer add Track error: ${error.toString()}`)
   }
 }
 
@@ -1189,7 +1181,7 @@ async function handleNegotiationNeeded() {
       offer: localPeer.localDescription
     }
     console.log('*** [WebRTC] signaling offer ...')
-    socket.emit('offer', data)//........................................................................................................................
+    socket.emit('offer', data)// ........................................................................................................................
   } catch (error) {
     console.log(`*** [WebRTC] failed to create offer: ${error.toString()}`)
     console.log(`*** [WebRTC] Error ${error.name}: ${error.message}`)
@@ -1200,14 +1192,13 @@ async function handleNegotiationNeeded() {
 
 async function handleSDPOffer(data) {
   console.log('*** [WebRTC] receive offer')
-  console.log(friendData)
   Swal.fire({
     title: `${friendData[data.sender].name} is calling you`,
-    text: "Do you want to pick the phone?",
+    text: 'Do you want to pick the phone?',
     icon: 'question',
     showDenyButton: true,
     denyButtonText: 'No',
-    confirmButtonText: 'Yes',
+    confirmButtonText: 'Yes'
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
@@ -1218,7 +1209,7 @@ async function handleSDPOffer(data) {
         console.log('*** [WebRTC] set Remote Description ...')
 
         if (tempCandidate.length > 0) {
-          tempCandidate.map(async candidate => {
+          tempCandidate.map(async (candidate) => {
             await localPeer.addIceCandidate(candidate)
             console.log(`*** [WebRTC] add ICE candidate: ${JSON.stringify(candidate.candidate)}`)
           })
@@ -1233,10 +1224,10 @@ async function handleSDPOffer(data) {
           const callIcon = document.querySelector('#callIcon')
           const hangUpIcon = document.querySelector('#hangUpIcon')
           callBtn.style = 'background:rgb(237,27,36)'
-          callIcon.style = "display: none"
+          callIcon.style = 'display: none'
           hangUpIcon.removeAttribute('style')
           const arr = ['#micBtn', '#cameraBtn']
-          arr.map(btn => document.querySelector(btn).style = 'display:inline-block')
+          arr.map((btn) => document.querySelector(btn).style = 'display:inline-block')
 
           await addStreamProcess(videoConstraints)
         }
@@ -1247,7 +1238,6 @@ async function handleSDPOffer(data) {
         // }
       } catch (error) {
         console.log(`*** [WebRTC] Failed to create answer: ${error.toString()}`)
-        console.log(`Error ${error.name}: ${error.message}`)
       }
       await createAnswer(data)
     } else if (result.isDenied) {
@@ -1267,7 +1257,7 @@ const handleHangup = (data) => {
   Swal.fire({
     icon: 'error',
     title: 'Oops...',
-    text: 'The call is hanged up',
+    text: 'The call is hanged up'
   })
 }
 
@@ -1279,7 +1269,7 @@ function initCallBtn() {
   const cameraBtn = document.querySelector('#cameraBtn')
   callBtn.style = 'background:rgb(2,77,252);'
   callIcon.removeAttribute('style')
-  hangUpIcon.style = "display: none"
+  hangUpIcon.style = 'display: none'
   micBtn.removeAttribute('style')
   cameraBtn.removeAttribute('style')
 }
@@ -1294,7 +1284,7 @@ async function createAnswer(data) {
     data.answer = answer
     socket.emit('answer', data)
   } catch (error) {
-    console.log('*** [WebRTC] Create Answer error: ' + error.toString())
+    console.log(`*** [WebRTC] Create Answer error: ${error.toString()}`)
   }
 }
 
@@ -1306,7 +1296,7 @@ async function handleSDPAnswer(data) {
     console.log('*** [WebRTC] set Remote Description ...')
     await localPeer.setRemoteDescription(data.answer)
     if (tempCandidate.length > 0) {
-      tempCandidate.map(async candidate => {
+      tempCandidate.map(async (candidate) => {
         await localPeer.addIceCandidate(candidate)
         console.log(`*** [WebRTC] add ICE candidate: ${JSON.stringify(candidate.candidate)}`)
       })
@@ -1318,22 +1308,22 @@ async function handleSDPAnswer(data) {
 }
 
 async function handleRemoteStream(event) {
-  console.log("*** [WebRTC] render remote stream")
+  console.log('*** [WebRTC] render remote stream')
   remoteStream = event.streams[0]
   console.log(remoteStream.getTracks())
-  const mainVideo = document.querySelector("#mainVideo")
+  const mainVideo = document.querySelector('#mainVideo')
   mainVideo.srcObject = remoteStream
 
   // remove the background to show the main video
-  const chatbox = document.querySelector("#chatBox")
+  const chatbox = document.querySelector('#chatBox')
   chatbox.style = 'background:none'
 
   // show the camera icon on the friend box who you are talking to
   document.querySelector(`div[id='${talkTo.user_id}'] svg`).style.display = 'inline'
 
-  //when on exchange step 1, start the timer
+  // when on exchange step 1, start the timer
   if (step === 1 && !conterIntervalId) {
-    conterIntervalId = window.setInterval(counter, 1000);
+    conterIntervalId = window.setInterval(counter, 1000)
   }
 }
 
@@ -1347,51 +1337,49 @@ async function settingVideoConstraints() {
   const { value: formValues } = await Swal.fire({
     title: 'Set the environment',
     html:
-      'Camera:<input type = "checkbox" style="height:1rem;" id="swal-input1" class="swal2-input">' +
-      '<br>' +
-      'Microphone:<input type = "checkbox" style="height:1rem" id="swal-input2" class="swal2-input" value = true >',
+      'Camera:<input type = "checkbox" style="height:1rem;" id="swal-input1" class="swal2-input">'
+      + '<br>'
+      + 'Microphone:<input type = "checkbox" style="height:1rem" id="swal-input2" class="swal2-input" value = true >',
     focusConfirm: false,
     icon: 'question',
     preConfirm: () => {
       const isCamera = document.getElementById('swal-input1')
       const isVoice = document.getElementById('swal-input2')
       const videoConstraints = {}
-      videoConstraints.video = isCamera.checked ? true : false
-      videoConstraints.audio = isVoice.checked ? true : false
+      videoConstraints.video = !!isCamera.checked
+      videoConstraints.audio = !!isVoice.checked
       return videoConstraints
     }
   })
   if (formValues) {
     return formValues
   }
-
 }
 
 // translate text
 function translateMsg(element) {
   const historyId = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyId'))
   const text = element.parentNode.parentNode.querySelector('#originMsg #content').innerText
-  const target = textTranslatelang //need change follow the user's native zh-TWen-US
+  const target = textTranslatelang // need change follow the user's native zh-TWen-US
   const data = {
     historyId,
     text,
     target
   }
-  fetch(`/google/translate`, {
-    method: "POST",
+  fetch('/google/translate', {
+    method: 'POST',
     headers: {
-      'Authorization': window.localStorage.getItem('JWT'),
+      Authorization: window.localStorage.getItem('JWT'),
       'Content-Type': 'application/JSON'
     },
     body: JSON.stringify(data)
-  }).then(res => res.json())
-    .then(res => {
+  }).then((res) => res.json())
+    .then((res) => {
       const translateMsg = element.parentNode.parentNode.querySelector('#translateMsg')
       const translateContent = translateMsg.querySelector('#content')
       translateContent.textContent = res.data
       translateMsg.style = 'display: flex'
     })
-  return
 }
 
 // translate audio
@@ -1403,28 +1391,27 @@ async function translateAudio(element) {
   content.style = 'font-size:small;font-weight:400'
 
   const audio = element.parentNode.parentNode.querySelector('#originMsg audio').src
-  console.log(audio)
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
   fetch(audio)
-    .then(res => res.blob())
-    .then(blob => {
-      fetch(`/google/transcript`, {
-        method: "POST",
+    .then((res) => res.blob())
+    .then((blob) => {
+      fetch('/google/transcript', {
+        method: 'POST',
         body: blob,
         headers: {
-          'Authorization': window.localStorage.getItem('JWT'),
-          'targetLang': audioTranlateLang,
-          'history_id': history_id,
+          Authorization: window.localStorage.getItem('JWT'),
+          targetLang: audioTranlateLang,
+          history_id
         }
       })
-        .then(res => res.json())
-        .then(res => {
+        .then((res) => res.json())
+        .then((res) => {
           if (res.error) {
             translateMsg.style.display = 'none'
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
-              text: res.error,
+              text: res.error
             })
           } else {
             content.removeAttribute('style')
@@ -1442,22 +1429,22 @@ speechSynthesis.onvoiceschanged = () => {
 // speechSynthesis
 async function speakMsg(element) {
   const msgContent = element.parentNode.parentNode.querySelector('#originMsg #content').innerText
-  const targetLang = speechSynthesisLang //need change follow the Lang of this msg
+  const targetLang = speechSynthesisLang // need change follow the Lang of this msg
   try {
-    const utterThis = new SpeechSynthesisUtterance(msgContent);
-    utterThis.voice = voices.find(voice => voice.lang === targetLang)
-    speechSynthesis.speak(utterThis);
-  } catch (e) {
-    console.log(e)
+    const utterThis = new SpeechSynthesisUtterance(msgContent)
+    utterThis.voice = voices.find((voice) => voice.lang === targetLang)
+    speechSynthesis.speak(utterThis)
+  } catch (error) {
+    console.log(error)
   }
 }
 
 function openForm() {
-  document.querySelector(".form-popup").style.display = "flex";
+  document.querySelector('.form-popup').style.display = 'flex'
 }
 
 function closeForm() {
-  document.querySelector(".form-popup").style.display = "none";
+  document.querySelector('.form-popup').style.display = 'none'
 }
 
 const startTimeInput = document.querySelector('#start_time_input')
@@ -1470,7 +1457,7 @@ setTime.onclick = function (event) {
   event.target.style.display = 'none'
 }
 
-const instantCheck = document.querySelector('#instant');
+const instantCheck = document.querySelector('#instant')
 instantCheck.onclick = function (event) {
   const startTimeInput = document.querySelector('#start_time_input')
   const setTime = document.querySelector('#setTime')
@@ -1489,29 +1476,29 @@ instantCheck.onclick = function (event) {
   }
 }
 
-const exchangeForm = document.forms.namedItem('exchangeForm');
+const exchangeForm = document.forms.namedItem('exchangeForm')
 exchangeForm.addEventListener('submit', (e) => {
-  document.querySelector('.form-popup').style.display = "none";
-  e.preventDefault();
-  const formData = new FormData(exchangeForm);
-  formData.append('room_id', talkTo.room_id);
-  formData.append('publisher_id', user_id);
-  formData.append('first_lang', user.native);
-  formData.append('second_lang', user.learning);
-  const checkBox = document.getElementById("noticing");
+  document.querySelector('.form-popup').style.display = 'none'
+  e.preventDefault()
+  const formData = new FormData(exchangeForm)
+  formData.append('room_id', talkTo.room_id)
+  formData.append('publisher_id', user_id)
+  formData.append('first_lang', user.native)
+  formData.append('second_lang', user.learning)
+  const checkBox = document.getElementById('noticing')
 
   // for server
   const localtime = new Date(formData.get('start_time')).toISOString().split('.')[0]
   formData.set('start_time', localtime)
 
   if (formData.get('notice') === 'on') {
-    formData.set('notice', 1);
+    formData.set('notice', 1)
   } else {
-    formData.set('notice', 2);
+    formData.set('notice', 2)
   }
 
   const exchangeInvite = {}
-  for (let data of formData.entries()) {
+  for (const data of formData.entries()) {
     exchangeInvite[data[0]] = data[1]
   }
 

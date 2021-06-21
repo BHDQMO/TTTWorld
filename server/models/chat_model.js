@@ -146,14 +146,14 @@ const removeExchange = async (exchangeId) => {
   return result
 }
 
-const getUnreadMsgNum = async (roomList) => {
+const getUnreadMsgNum = async (userId, roomIds) => {
   const queryString = `
   SELECT sender, COUNT(*) AS unread 
   FROM history 
-  WHERE \`read\` = 0 AND sender <> 35 AND room IN (11,12,13,14)
+  WHERE \`read\` = 0 AND sender <> ? AND room IN ?
   GROUP BY sender
   `
-  const [result] = await pool.query(queryString, roomList)
+  const [result] = await pool.query(queryString, [userId, [roomIds]])
   return result
 }
 
