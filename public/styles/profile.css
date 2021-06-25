@@ -405,7 +405,7 @@ main {
   align-items: stretch;
   justify-content: space-between;
   white-space: normal;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 
 #userDetailBox #userEmail {

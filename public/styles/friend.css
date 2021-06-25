@@ -22,7 +22,7 @@ main {
 
 #friendDetailBox span {
   white-space: normal;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 
 #friendDetailBox #friendEmail {
@@ -35,7 +35,7 @@ main {
   height: calc(100% - 164px);
   padding: 5px 10px;
   white-space: normal;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 
 #friendDetail label {
@@ -229,7 +229,7 @@ main {
 #content {
   border-radius: 1rem;
   padding: 0 10px;
-  word-break: break-all;
+  /* word-break: break-all; */
   white-space: normal;
 }
 
@@ -780,7 +780,7 @@ b {
 .contentBox span {
   text-align: left;
   white-space: normal;
-  word-break: break-all;
+  /* word-break: break-all; */
 }
 
 .timeBox {

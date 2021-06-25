@@ -205,7 +205,7 @@ const acceptExchangeInvite = (socket, io) => async (resonse) => {
 }
 
 const rejectExchangeInvite = (socket, io) => async (resonse) => {
-  await Chat.updateExchangeStatus(resonse.exchange_id, 1)
+  await Chat.updateExchangeStatus(resonse.exchange_id, 0)
   const publisherSocketId = socketIds[resonse.exchangeInvite.publisher_id]
   if (publisherSocketId) {
     io.to(publisherSocketId).emit('exchangeInviteRejected', resonse)
