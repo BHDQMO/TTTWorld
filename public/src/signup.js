@@ -1,4 +1,19 @@
 const socket = io()
+const MAX_SIZE = 10
+document.querySelector('label[for=formFile]').textContent += ` (Max size: ${MAX_SIZE}MB)`
+const headShot = document.querySelector('#formFile')
+headShot.addEventListener('change', (e) => {
+  const fileSize = e.currentTarget.files[0].size / 1024 / 1024
+  if (fileSize > MAX_SIZE) {
+    Swal.fire(
+      `The file is over ${MAX_SIZE}MB(${Math.ceil(fileSize * 10) / 10}MB)`,
+      'Please choose another one',
+      'info'
+    )
+    e.currentTarget.value = null
+  }
+})
+
 const signUpForm = document.forms.namedItem('signUpForm')
 signUpForm.addEventListener('submit', (e) => {
   e.preventDefault()

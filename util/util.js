@@ -8,7 +8,7 @@ const multerS3 = require('multer-s3')
 const User = require('../server/models/user_model')
 const Socket = require('./socket')
 
-const MAX_HEADSHOT_SIZE = 5 * 1024 * 1024
+const MAX_HEADSHOT_SIZE = 10 * 1024 * 1024
 const { TOKEN_SECRET } = process.env
 
 const s3 = new aws.S3({

@@ -42,10 +42,11 @@ const signUp = async (req, res) => {
     let user = req.body
     let interests = await Google.translateText(user.interest, 'en')
     interests = interests.map((interest) => _.startCase(interest))
+    console.log(interests)
     user.password = bcrypt.hashSync(user.password, salt)
     user.picture = `${S3_OBJECT_URL}/${user.picture}`
     user.geocode = `ST_PointFromText('POINT(${await Google.geocoding(user.address)})',3857)`
-    user.interest = interests.toString()
+    user.interest = interests.toString().replace(/,/g, ', ')
     user.token = jwt.sign({
       provider: user.provider,
       name: user.name,
