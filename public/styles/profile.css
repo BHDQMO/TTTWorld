@@ -132,7 +132,7 @@ main {
 
 #favorite audio {
   height: 2rem;
-  width: 250px;
+  width: 200px;
 }
 
 #favoriteContainer {
@@ -234,6 +234,7 @@ main {
 }
 
 .collection .middleBox {
+  width: 250px;
   display: flex;
   flex-direction: column;
   padding: 0 10px;
