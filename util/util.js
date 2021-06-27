@@ -113,9 +113,10 @@ const serverNotice = async (io) => {
         Socket.noticeOnStart(io, data)
       } else if (exchange.status === 1 && exchange.notice === 1) {
         Socket.noticeBeforeStart(io, data)
-      } else if (exchange.notice === 2) {
-        Socket.noticeOnStart(io, data)
       }
+      // } else if (exchange.notice === 2) {
+      //   Socket.noticeOnStart(io, data)
+      // }
     })
   } else {
     console.log('there is no exchange need to be notice')

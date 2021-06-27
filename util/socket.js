@@ -46,14 +46,14 @@ const onlineNotice = (socket, io) => async (user) => {
   })
 }
 
-const joinRoom = (socket, io) => async ({ userId, room }) => {
+const joinRoom = (socket, io) => async ({ user_id, room }) => {
   socket.join(room)
-  io.to(room).emit('joinRoom', { userId, room })
+  io.to(room).emit('joinRoom', { user_id, room })
 }
 
-const leaveRoom = (socket, io) => async ({ userId, room }) => {
+const leaveRoom = (socket, io) => async ({ user_id, room }) => {
   socket.leave(room)
-  io.to(room).emit('leaveRoom', userId)
+  io.to(room).emit('leaveRoom', user_id)
 }
 
 const message = (socket, io) => async (data) => {
@@ -163,20 +163,22 @@ const noticeOnStart = (io, data) => {
   })
 }
 
-const sayReadyToStart = (socket, io) => async ({ userId, exchange }) => {
+const sayReadyToStart = (socket, io) => async ({ user_id, exchange }) => {
   const exchangeId = exchange.id
   if (exchanges[exchangeId]) {
-    exchanges[exchangeId][userId] = true
+    exchanges[exchangeId][user_id] = true
   }
+
   const exchangeReadyStatus = Object.values(exchanges[exchangeId]).filter((x) => x === true).length
+
   if (exchangeReadyStatus === 2) {
     const exchangeHistory = await Chat.exchangeStart(exchange, 3)
     Object.keys(exchanges[exchangeId]).map(async (user) => {
-      io.to(socketIds[user]).emit('exchangeStart', { exchangeId, startExchangeTime: new Date(), msg: exchangeHistory })
+      io.to(socketIds[user]).emit('exchangeStart', { exchange_id: exchangeId, startExchangeTime: new Date(), msg: exchangeHistory })
       // insert this exchange into history
       // update exchange status to 3, means this exchage has started
     })
-    io.to(socketIds[userId]).emit('triggerExchange')
+    io.to(socketIds[user_id]).emit('triggerExchange')
   }
 }
 

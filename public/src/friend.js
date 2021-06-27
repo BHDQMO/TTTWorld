@@ -1,5 +1,5 @@
 'user strict'
-
+const HOST_NAME = 'talktotheworld.online'
 let socket
 let user
 let user_id
@@ -212,12 +212,17 @@ async function renderMessage(msg) {
     messages.append(clone)
     messages.scrollTop = messages.scrollHeight
   } else {
-    const user_box = document.querySelector(`div[id='${sender}']`)
-    const count = user_box.querySelector('.count')
-    const num = count.textContent
-    const count_circle = user_box.querySelector('.count-circle')
-    count_circle.style = 'display: flex'
-    count.textContent = parseInt(num) + 1
+    console.log(sender)
+    try {
+      const user_box = document.querySelector(`div[id='${sender}']`)
+      const count = user_box.querySelector('.count')
+      const num = count.textContent
+      const count_circle = user_box.querySelector('.count-circle')
+      count_circle.style = 'display: flex'
+      count.textContent = parseInt(num) + 1
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
@@ -263,7 +268,7 @@ function reply(element) {
     audioContent.remove()
   }
 
-  // check the new reply to contentType
+  // check the new reply contentType
   const type = element.getAttribute('contentType')
   let clone
   switch (type) {
@@ -278,7 +283,6 @@ function reply(element) {
         span.textContent = clone.innerText
         clone = span
       }
-
       break
     }
     case 'audio': {
@@ -478,7 +482,6 @@ fetch('/chat/friend', {
   .then((res) => {
     user = res.user
     user_id = res.user.user_id
-
     textTranslatelang = user.native
     audioTranlateLang = user.learning
     speechSynthesisLang = user.learning
@@ -1488,8 +1491,10 @@ exchangeForm.addEventListener('submit', (e) => {
   const checkBox = document.getElementById('noticing')
 
   // for server
-  const localtime = new Date(formData.get('start_time')).toISOString().split('.')[0]
-  formData.set('start_time', localtime)
+  if (window.location.hostname === HOST_NAME) {
+    const localtime = new Date(formData.get('start_time')).toISOString().split('.')[0]
+    formData.set('start_time', localtime)
+  }
 
   if (formData.get('notice') === 'on') {
     formData.set('notice', 1)

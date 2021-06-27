@@ -265,14 +265,16 @@ async function getWaitingNoticeExchange() {
     if (waitingNoticeExchange.length > 0) {
       // change the notice step by add 1
       const exchangeList = waitingNoticeExchange.map((exchange) => exchange.id)
-      queryString = 'UPDATE exchange SET notice = notice + 1 WHERE id IN ?'
+      queryString = 'UPDATE exchange SET notice = notice + 1 WHERE id IN ? AND notice = 1'
       await conn.query(queryString, [[exchangeList]])
 
       // instant case(remainTime<0) need to send onStartNotice immediately
       // so, change to 3 directly
-      const instantExchange = waitingNoticeExchange.filter((x) => x.remainTime < 0)
-      queryString = 'UPDATE exchange SET notice = 3 WHERE id IN ?'
-      await conn.query(queryString, [[instantExchange]])
+      const instantExchange = waitingNoticeExchange.filter((x) => x.remainTime <= 0)
+      if (instantExchange.length > 0) {
+        queryString = 'UPDATE exchange SET notice = 3 WHERE id IN ?'
+        await conn.query(queryString, [[instantExchange.map((x) => x.id)]])
+      }
     }
 
     await conn.query('COMMIT')
