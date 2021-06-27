@@ -48,12 +48,17 @@ const renderWaitingIvite = (data) => {
   const { waitingInvite, waitingExchangeInvite } = data
 
   const waitingInviteCount = waitingInvite.length
-  const waitingExchangeInviteCount = waitingExchangeInvite.length
+  let waitingExchangeInviteCount = 0
+  if (waitingExchangeInvite) {
+    waitingExchangeInviteCount = waitingExchangeInvite.length
+  }
   const waitingNum = waitingInviteCount + waitingExchangeInviteCount
 
   // document.querySelector(".count").textContent = waitingNum
 
   if (waitingNum > 0) {
+    onAddNotice()
+
     const bufferMsg = document.querySelector('#bufferMsg')
     if (bufferMsg) {
       bufferMsg.style.display = 'none'
@@ -138,7 +143,7 @@ const noticeAction = function (element) {
       const count = document.querySelector(".count")
       count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
       const room = element.getAttribute('room')
-      window.location = `/friend.html?room=${room}`
+      // window.location = `/friend.html?room=${room}`
       break;
     }
     case "OK": {
