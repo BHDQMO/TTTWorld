@@ -143,7 +143,7 @@ const noticeAction = function (element) {
       const count = document.querySelector(".count")
       count.textContent = parseInt(count.textContent) > 0 ? parseInt(count.textContent) - 1 : 0
       const room = element.getAttribute('room')
-      // window.location = `/friend.html?room=${room}`
+      window.location = `/friend.html?room=${room}`
       break;
     }
     case "OK": {
