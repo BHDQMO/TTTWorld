@@ -50,6 +50,8 @@ A language exchange platform that allows users to chat with native speakers thro
   * **Recognize pronounce in the background**
   * **List incorrect or unclear sentences**
   * **Add them to favorite for review**
+  
+    https://user-images.githubusercontent.com/74060604/123701587-9f0b2800-d894-11eb-89d5-dff603c085e8.mp4
 * **Message toolbox**
   * **Transfer text or audio message**
   * **Reply specific message**
