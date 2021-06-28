@@ -12,14 +12,23 @@ A language exchange platform that allows users to chat with native speakers thro
 5. Features
 6. Demo Account
 
-## Technologies
-  | Back-End     | Front-End  | AWS        | Web API            | Google API     | Open Street Map API | Others        |
-  | :----------- | :--------- | :--------- | :----------------- | :------------- | :------------------ | :------------ |
-  | Node.js      | HTML       | EC2        | Geolocation        | Geocoding      | Reverse Geocoding   | Socket.IO     |
-  | Express      | CSS        | RDS        | MediaDevice        | Translation    |                     | MVC Framework |
-  | MySQL        | JavaScript | S3         | SpeechSynthesis    | Speech-to-Text |                     | CloudFlare    |
-  | Nginx        | AJAX       | CloudFront | SpeechRecognition  |                |                     |               |
-  | Mocha & Chai | Bootstrap  |            | RTCPeerConnections |                |                     |               |
+## Technologieshttps://i.imgur.com/h9XLSSx.png
+  | Back-End     | Front-End  | AWS        | Others        |
+  | :----------- | :--------- | :--------- | :------------ |
+  | Node.js      | HTML       | EC2        | Socket.IO     |
+  | Express      | CSS        | RDS        | MVC Framework |
+  | MySQL        | JavaScript | S3         | CloudFlare    |
+  | Nginx        | AJAX       | CloudFront |               |
+  | Mocha & Chai | Bootstrap  |            |               |
+  
+  | Web API            | Google API     | Open Street Map API |
+  | :----------------- | :------------- | :------------------ |
+  | Geolocation        | Geocoding      | Reverse Geocoding   |
+  | MediaDevice        | Translation    |                     |
+  | SpeechSynthesis    | Speech-to-Text |                     |
+  | SpeechRecognition  |                |                     |
+  | RTCPeerConnections |                |                     |
+
   
 ## Architecture
 ![Imgur](https://i.imgur.com/lrE7RB2.png)
@@ -28,7 +37,7 @@ A language exchange platform that allows users to chat with native speakers thro
 ![Imgur](https://i.imgur.com/kFLN9d7.png)
 
 ## Socket.IO Flow
-![Imgur](https://i.imgur.com/VYMeEpS.jpg)
+![Imgur](https://i.imgur.com/h9XLSSx.png)
 
 ## Features
 * **Language exchange**
