@@ -12,7 +12,7 @@ A language exchange platform that allows users to chat with native speakers thro
 5. Features
 6. Demo Account
 
-## Technologieshttps://i.imgur.com/h9XLSSx.png
+## Technologies
   | Back-End     | Front-End  | AWS        | Others        |
   | :----------- | :--------- | :--------- | :------------ |
   | Node.js      | HTML       | EC2        | Socket.IO     |
