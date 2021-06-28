@@ -95,6 +95,6 @@ A language exchange platform that allows users to chat with native speakers thro
 ## Demo Account
 Website URL: https://www.talktotheworld.online/signin.html
   * Account: test1@test.com
-  * Password: test
+  * Password: test1
   * Account: test2@test.com
-  * Password: test
+  * Password: test2
