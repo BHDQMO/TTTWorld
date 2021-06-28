@@ -182,10 +182,25 @@ const sayReadyToStart = (socket, io) => async ({ user_id, exchange }) => {
   }
 }
 
-const saveCollect = (socket, io) => (collection) => {
-  collection.map(async (data) => {
-    await Chat.saveCollect(data)
+const getRemoteStream = (socket, io) => ({ exchange_id, user_id }) => {
+  if (!exchanges[exchange_id].getRemoteStream) {
+    exchanges[exchange_id].getRemoteStream = {}
+  }
+  const getRemoteStreamStatus = exchanges[exchange_id].getRemoteStream
+  getRemoteStreamStatus[user_id] = true
+  const getRemoteStreamCount = Object.values(getRemoteStreamStatus).filter((x) => x === true).length
+  if (getRemoteStreamCount === 2) {
+    Object.keys(getRemoteStreamStatus).forEach((x) => {
+      io.to(socketIds[x]).emit('startTimer')
+    })
+  }
+}
+
+const saveCollect = (socket, io) => async (collection) => {
+  await collection.map(async (data) => {
+    const result = await Chat.saveCollect(data)
   })
+  io.to(socket.id).emit('saveCollectSuccess')
 }
 
 const sendExchangeInvite = (socket, io) => async (invitation) => {
@@ -240,6 +255,7 @@ module.exports = {
   noticeBeforeStart,
   noticeOnStart,
   sayReadyToStart,
+  getRemoteStream,
   saveCollect,
   sendExchangeInvite,
   acceptExchangeInvite,

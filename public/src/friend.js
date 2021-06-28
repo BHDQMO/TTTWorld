@@ -614,7 +614,9 @@ fetch('/chat/friend', {
 
       // Exchange
       socket.on('exchangeStart', exchangeStart)
+      socket.on('startTimer', startTimer)
       socket.on('triggerExchange', callBtn)
+      socket.on('saveCollectSuccess', redirectToRoomInURL)
     }
   })
 
@@ -640,11 +642,13 @@ let time
 let startTime
 let conterIntervalId
 let step = 0 // exchange step
-let history_Id
+let history_id
 
 const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
   step = 1
+  console.log(msg)
   history_id = msg.id
+  console.log(history_id)
   renderMessage(msg) // system message
   exchangeData = JSON.parse(window.localStorage.getItem(`exchange_${exchange_id}`))
   duration = exchangeData.duration * 60
@@ -662,8 +666,15 @@ const exchangeStart = ({ exchange_id, startExchangeTime, msg }) => {
   }
 }
 
+const startTimer = () => {
+  // when on exchange step 1, start the timer
+  if (step === 1 && !conterIntervalId) {
+    conterIntervalId = window.setInterval(counter, 1000)
+  }
+}
+
 function counter() {
-  if (time >= 0) {
+  if (time >= 0 && step !== 0) {
     const min = fillZero(Math.floor(time / 60))
     const sec = fillZero(time % 60)
     document.querySelector('#timer').textContent = `${min} : ${sec}`
@@ -696,16 +707,6 @@ function swap() {
 }
 
 async function stopExchange() {
-  if (voiceRecorder.state !== 'inactive') {
-    voiceRecorder.stop()
-  }
-  recognition.stop()
-  closing()
-  initCallBtn()
-
-  // remove the exchange header
-  document.querySelector('#chat-box-head').removeAttribute('style')
-
   // show the recored voice file
   const lowScoreArray = Object.values(lowScoreList)
   if (lowScoreArray.length > 0) {
@@ -802,8 +803,9 @@ async function stopExchange() {
       await socket.emit('saveCollect', data)
       await socket.emit('favorite', { user_id, history_id })
       lowScoreList = {}
-      step = 0
-      // finishExchange()
+      initExchangeEnvironment()
+      closing()
+      initCallBtn()
     }
   } else {
     Swal.fire({
@@ -892,7 +894,9 @@ async function startSpeechRecognition() {
     // console.log('Confidence: ' + alternative.confidence + '\n' + alternative.transcript.toLowerCase());
 
     if (lastResult.isFinal === true) {
-      voiceRecorder.stop()
+      if (voiceRecorder.status !== 'inactive') {
+        voiceRecorder.stop()
+      }
       voiceRecorder.start()
       recognitionCounter++
       if (alternative.confidence < confidenceThreshold) {
@@ -963,9 +967,11 @@ async function callBtn() {
       cameraBtn.style = 'display:inline-block'
     }
   } else if (hiddenIcon === 'callIcon') {
+    socket.emit('callend', talkTo.room_id)
+    initExchangeEnvironment()
     closing()
     initCallBtn()
-    socket.emit('callend', talkTo.room_id)
+    redirectToRoomInURL()
   }
 }
 
@@ -1082,7 +1088,10 @@ function closing() {
   remoteStream = null
 
   // hidden the camera icon on the user_box
-  document.querySelector('.user_box svg[style]').removeAttribute('style')
+  const cameraIconOnUserBox = document.querySelector('.user_box svg[style]')
+  if (cameraIconOnUserBox) {
+    cameraIconOnUserBox.removeAttribute('style')
+  }
 }
 
 // utils
@@ -1245,22 +1254,36 @@ async function handleSDPOffer(data) {
       await createAnswer(data)
     } else if (result.isDenied) {
       socket.emit('hangup', data)
-      Swal.fire(
-        'Cancelled',
-        'Hang up the call',
-        'error'
-      )
+      initExchangeEnvironment()
+
+      Swal.fire({
+        title: 'Cancelled',
+        text: 'Hang up the call',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      }).then((res) => {
+        if (res.isConfirmed) {
+          redirectToRoomInURL()
+        }
+      })
     }
   })
 }
 
 const handleHangup = (data) => {
+  initExchangeEnvironment()
   closing()
   initCallBtn()
+
   Swal.fire({
     icon: 'error',
     title: 'Oops...',
-    text: 'The call is hanged up'
+    text: 'The call is hanged up',
+    confirmButtonText: 'OK'
+  }).then((res) => {
+    if (res.isConfirmed) {
+      redirectToRoomInURL()
+    }
   })
 }
 
@@ -1317,23 +1340,35 @@ async function handleRemoteStream(event) {
   const mainVideo = document.querySelector('#mainVideo')
   mainVideo.srcObject = remoteStream
 
+  const params = (new URL(document.location)).searchParams
+  const exchange_id = parseInt(params.get('exchange_id'))
+  if (exchange_id) {
+    socket.emit('getRemoteStream', { exchange_id, user_id })
+  }
+
   // remove the background to show the main video
   const chatbox = document.querySelector('#chatBox')
   chatbox.style = 'background:none'
 
   // show the camera icon on the friend box who you are talking to
   document.querySelector(`div[id='${talkTo.user_id}'] svg`).style.display = 'inline'
-
-  // when on exchange step 1, start the timer
-  if (step === 1 && !conterIntervalId) {
-    conterIntervalId = window.setInterval(counter, 1000)
-  }
 }
 
 function handleCallEnd() {
-  Swal.fire('Call ended')
+  initExchangeEnvironment()
   closing()
   initCallBtn()
+
+  Swal.fire({
+    title: 'Call ended',
+    text: 'Your friend ended this call',
+    icon: 'info',
+    confirmButtonText: 'OK'
+  }).then((res) => {
+    if (res.isConfirmed) {
+      redirectToRoomInURL()
+    }
+  })
 }
 
 async function settingVideoConstraints() {
@@ -1520,3 +1555,35 @@ exchangeForm.addEventListener('submit', (e) => {
   }
   socket.emit('exchangeInvite', invitation)
 })
+
+function initExchangeEnvironment() {
+  step = 0 // exchange step
+  exchangeData = null
+  duration = null
+  ratio = null
+  time = null
+  startTime = null
+  window.clearInterval(conterIntervalId)
+  conterIntervalId = null
+  history_id = null
+
+  document.querySelector('#chat-box-head').removeAttribute('style')
+  document.querySelector('#chat-box-head').removeAttribute('part')
+  document.querySelector('#currentLang').textContent = ''
+
+  if (voiceRecorder) {
+    voiceRecorder.stop()
+  }
+  if (recognition) {
+    recognition.stop()
+  }
+}
+
+function redirectToRoomInURL() {
+  const params = (new URL(document.location)).searchParams
+  const room = params.get('room')
+  if (room) {
+    const roomInt = parseInt(room)
+    window.location = `/friend.html?room=${roomInt}`
+  }
+}

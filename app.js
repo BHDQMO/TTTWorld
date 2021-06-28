@@ -68,6 +68,7 @@ const onConnect = (socket) => {
   socket.on('readExchangeInviteAnswer', Socket.readExchangeInviteAnswer(socket, io))
 
   socket.on('readyToStart', Socket.sayReadyToStart(socket, io))
+  socket.on('getRemoteStream', Socket.getRemoteStream(socket, io))
   socket.on('saveCollect', Socket.saveCollect(socket, io))
 
   socket.on('invite', Socket.createInvite(socket, io))

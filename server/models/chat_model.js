@@ -1,3 +1,4 @@
+const { CostExplorer } = require('aws-sdk')
 const { pool } = require('./mysqlcon')
 
 async function createRoom(invite) {
@@ -35,6 +36,7 @@ const getFriendList = async (userId) => {
 }
 
 const savefavorite = async (data) => {
+  console.log(data)
   let binding = Object.values(data)
   binding = [binding, binding].flat()
   const queryString = `
@@ -43,6 +45,7 @@ const savefavorite = async (data) => {
   WHERE NOT EXISTS 
   (SELECT * FROM favorite WHERE user_id = ? AND history_id = ?)
   `
+  console.log(pool.format(queryString, binding))
   const [result] = await pool.query(queryString, binding)
   return result
 }
@@ -111,20 +114,18 @@ const exchangeStart = async (exchange, status) => {
     SELECT ?,?,?
     WHERE NOT EXISTS 
     (SELECT * FROM \`exchange\` WHERE id = ? AND history_id IS NOT NULL)`
-    let [result] = await conn.query(queryString, binding)
+    const [result] = await conn.query(queryString, binding)
     const historyId = result.insertId
 
-    if (historyId) {
-      const exchangeId = exchange.id
-      binding = [status, historyId, exchangeId]
-      queryString = 'UPDATE exchange SET status = ? , history_id = ? WHERE id = ?'
-      await conn.query(queryString, binding)
-      queryString = 'SELECT * FROM history WHERE id = ?'
-      [result] = await conn.query(queryString, historyId)
-    }
+    const exchangeId = exchange.id
+    binding = [status, historyId, exchangeId]
+    queryString = 'UPDATE exchange SET status = ? , history_id = ? WHERE id = ?'
+    await conn.query(queryString, binding)
+    queryString = 'SELECT * FROM history WHERE id = ?'
+    const [[history]] = await conn.query(queryString, historyId)
 
     await conn.query('COMMIT')
-    return result
+    return history
   } catch (error) {
     console.log(error)
     await conn.query('ROLLBACK')

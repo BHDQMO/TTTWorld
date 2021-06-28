@@ -152,6 +152,7 @@ main {
   top: -25px;
   left: calc(50% - 50px);
   font-weight: 500;
+  z-index: 1;
 }
 
 #chat-box-head[part='I'] {
