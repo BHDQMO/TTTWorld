@@ -1,4 +1,5 @@
 'user strict'
+
 const HOST_NAME = 'talktotheworld.online'
 let socket
 let user
@@ -1431,6 +1432,7 @@ async function translateAudio(element) {
 
   const audio = element.parentNode.parentNode.querySelector('#originMsg audio').src
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
+  console.log(history_id)
   fetch(audio)
     .then((res) => res.blob())
     .then((blob) => {
