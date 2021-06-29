@@ -329,6 +329,8 @@ function cancelReply() {
   replyTo.style = 'display:none'
   const messages = document.querySelector('#messages')
   messages.style = 'max-height: 89vh'
+  const userInputBox = document.querySelector('#input')
+  userInputBox.value = null
 }
 
 function correct(element) {
@@ -1432,7 +1434,7 @@ async function translateAudio(element) {
 
   const audio = element.parentNode.parentNode.querySelector('#originMsg audio').src
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
-  console.log(history_id) //check
+  console.log(history_id) // check
   fetch(audio)
     .then((res) => res.blob())
     .then((blob) => {
@@ -1463,6 +1465,7 @@ async function translateAudio(element) {
 }
 
 let voices // once the window loaded, once grab new voice, assign to voices
+const { speechSynthesis } = window
 speechSynthesis.onvoiceschanged = () => {
   voices = speechSynthesis.getVoices()
 }
