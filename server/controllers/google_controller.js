@@ -16,6 +16,9 @@ const storageConfig = {
   projectId: GOOGLE_PROJECT_ID
 }
 
+console.log(NODE_ENV)
+console.log(NODE_ENV === 'production')
+
 if (NODE_ENV === 'production') {
   storageConfig.keyFilename = GOOGLE_KEY_FILE_PRODUCT
 } else {
@@ -29,6 +32,8 @@ if (NODE_ENV === 'production') {
 // helper, see https://github.com/GoogleCloudPlatform/google-cloud-node/blob/master/docs/authentication.md
 // const projectId = 'project-id'
 // const keyFilename = '/path/to/keyfile.json'
+
+console.log(storageConfig)
 const storage = new Storage(storageConfig)
 
 // Makes an authenticated API request.
