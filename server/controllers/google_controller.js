@@ -1,8 +1,50 @@
 const fs = require('fs')
 
+const { Storage } = require('@google-cloud/storage')
 const Google = require('../../util/google')
 const Chat = require('../models/chat_model')
 const { removeFile } = require('../../util/util')
+
+const {
+  GOOGLE_PROJECT_ID,
+  GOOGLE_KEY_FILE_DEVELOP,
+  GOOGLE_KEY_FILE_PRODUCT,
+  NODE_ENV
+} = process.env
+
+const storageConfig = {
+  projectId: GOOGLE_PROJECT_ID
+}
+
+if (NODE_ENV === 'production') {
+  storageConfig.keyFilename = GOOGLE_KEY_FILE_PRODUCT
+} else {
+  storageConfig.keyFilename = GOOGLE_KEY_FILE_DEVELOP
+}
+
+// Imports the Google Cloud client library.
+
+// Instantiates a client. Explicitly use service account credentials by
+// specifying the private key file. All clients in google-cloud-node have this
+// helper, see https://github.com/GoogleCloudPlatform/google-cloud-node/blob/master/docs/authentication.md
+// const projectId = 'project-id'
+// const keyFilename = '/path/to/keyfile.json'
+const storage = new Storage(storageConfig)
+
+// Makes an authenticated API request.
+async function listBuckets() {
+  try {
+    const [buckets] = await storage.getBuckets()
+
+    console.log('Buckets:')
+    buckets.forEach((bucket) => {
+      console.log(bucket.name)
+    })
+  } catch (err) {
+    console.error('ERROR:', err)
+  }
+}
+listBuckets()
 
 const getTranslate = async (req, res) => {
   const { historyId, text } = req.body
@@ -41,7 +83,7 @@ const getTranscript = async (req, res) => {
       } catch (error) {
         console.log(error)
         removeFile(pathname)
-        res.send({ error: 'Only support "WEBM_OPUS" encoded file' })
+        res.send({ error: 'Please use Windows 10 environment as the input device' })
       }
     }
   })

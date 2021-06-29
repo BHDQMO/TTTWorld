@@ -1042,6 +1042,7 @@ async function calling() {
       text: error.message
     })
     closing()
+    initExchangeEnvironment()
     return error
   }
   return null
@@ -1448,7 +1449,7 @@ async function translateAudio(element) {
             translateMsg.style.display = 'none'
             Swal.fire({
               icon: 'error',
-              title: 'Oops...',
+              title: 'Not supported recording format',
               text: res.error
             })
           } else {
