@@ -1443,8 +1443,7 @@ async function translateAudio(element) {
         body: blob,
         headers: {
           Authorization: window.localStorage.getItem('JWT'),
-          targetLang: audioTranlateLang,
-          history_id
+          targetLang: audioTranlateLang + ',' + history_id,
         }
       })
         .then((res) => res.json())
