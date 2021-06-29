@@ -1432,7 +1432,7 @@ async function translateAudio(element) {
 
   const audio = element.parentNode.parentNode.querySelector('#originMsg audio').src
   const history_id = parseInt(element.parentNode.querySelector('#reply').getAttribute('historyid'))
-  console.log(history_id)
+  console.log(history_id) //check
   fetch(audio)
     .then((res) => res.blob())
     .then((blob) => {
