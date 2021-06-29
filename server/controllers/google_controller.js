@@ -68,7 +68,7 @@ const getTranscript = async (req, res) => {
   req.on('end', async () => {
     const languageCode = req.get('targetLang')
     const historyId = req.get('history_Id')
-
+    console.log(historyId)
     let transcript = await Chat.getTranslate(historyId)
     if (transcript) {
       res.send({ transcript })
