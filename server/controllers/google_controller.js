@@ -69,7 +69,8 @@ const getTranscript = async (req, res) => {
     const languageCode = req.get('targetLang')
     const historyId = req.get('history_Id')
 
-    let transcript = await Chat.getTranslate(historyId)
+    let transcript = await Chat.getTranslate(parseInt(historyId))
+    console.log(transcript)
     if (transcript) {
       res.send({ transcript })
     } else {
@@ -78,6 +79,7 @@ const getTranscript = async (req, res) => {
       try {
         transcript = await Google.transcriptAudio(pathname, languageCode)
         res.send({ transcript })
+        console.log({ historyId, transcript })
         Chat.updateTranslate(historyId, transcript)
         removeFile(pathname)
       } catch (error) {

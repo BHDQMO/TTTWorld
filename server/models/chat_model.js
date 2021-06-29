@@ -166,7 +166,7 @@ const updateTranslate = async (historyId, translateResult) => {
 
 const getTranslate = async (historyId) => {
   const queryString = 'SELECT translate FROM history WHERE id = ?'
-  const [result] = await pool.query(queryString, [historyId])
+  const [[result]] = await pool.query(queryString, [historyId])
   return result.translate
 }
 
