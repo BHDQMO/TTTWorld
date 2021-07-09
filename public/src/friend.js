@@ -483,6 +483,7 @@ fetch('/chat/friend', {
   headers: { Authorization: `Bearer ${window.localStorage.getItem('JWT')}` }
 }).then((res) => res.json())
   .then((res) => {
+    isResponseHasError(res)
     user = res.user
     user_id = res.user.user_id
     textTranslatelang = user.native

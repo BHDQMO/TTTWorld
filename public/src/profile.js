@@ -345,6 +345,7 @@ fetch('/explore/user_list', {
   headers: { 'Authorization': 'Bearer ' + window.localStorage.getItem('JWT') }
 }).then(res => res.json())
   .then(res => {
+    isResponseHasError(res)
     user_id = res.user_id
     userArr = res.data
     userData = {}

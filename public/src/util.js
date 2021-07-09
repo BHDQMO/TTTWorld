@@ -431,3 +431,11 @@ function finishExchange() {
     window.location = `/friend.html?room=${room}`
   }
 }
+
+function isResponseHasError(res) {
+  if (res.error) {
+    if (res.error === 'Unauthorized') {
+      window.location = '/signin.html'
+    }
+  }
+}

@@ -21,6 +21,10 @@ app.use(express.static('public'))
 // for server noticing
 setInterval(() => Util.serverNotice(io), 1000)
 
+app.get('/', (req, res) => {
+  res.status(200).sendFile(path.join(__dirname, '/public/profile.html'))
+})
+
 // Api Main Route
 app.use('/',
   [

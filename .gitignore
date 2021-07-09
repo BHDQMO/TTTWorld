@@ -77,6 +77,5 @@ typings/
 
 # custom 
 public/images/
-.eslintrc.json
 done/
 *.ogg
